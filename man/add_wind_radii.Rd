@@ -2,11 +2,25 @@
 % Please edit documentation in R/my_wind_code.R
 \name{add_wind_radii}
 \alias{add_wind_radii}
+\title{Calculate Willoughby parameters for the storm}
 \usage{
 add_wind_radii(full_track = create_full_track())
 }
 \arguments{
 \item{full_track}{An interpolated version of the hurricane track data, as
 created by \code{create_full_track}}
+}
+\value{
+The input dataset, but with columns added for the Willoughby
+   parameters for every observations.
+}
+\description{
+There are a number of parameters needed for the Willoughby model for each
+observation time for a storm. This function intakes the storm track for
+the storm, interpolated first if you want, and calculates these parameters
+for each observation in the storm tracks, based on the latitude and longitude
+of the storm at that observation, its forward speed and direction, and
+its maximum windspeed.These parameters are later used to model wind speed
+at each grid point for every observation.
 }
 

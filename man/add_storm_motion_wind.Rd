@@ -4,7 +4,7 @@
 \alias{add_storm_motion_wind}
 \title{Add back in wind component due to storm motion}
 \usage{
-add_storm_motion_wind(windspd, swd, mda, cspeed)
+add_storm_motion_wind(windspd, swd, mda, forward_speed)
 }
 \value{
 Numeric vector with wind speed at grid location, with wind

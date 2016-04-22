@@ -2,6 +2,7 @@
 % Please edit documentation in R/my_wind_code.R
 \name{calc_grid_wind}
 \alias{calc_grid_wind}
+\title{Calculate wind speed at grid points}
 \usage{
 calc_grid_wind(grid_point = tracts[1, ], with_wind_radii = add_wind_radii())
 }
@@ -11,5 +12,8 @@ and population for a single grid point of the projection grid.}
 
 \item{with_wind_radii}{A dataframe with interpolated tracks for a storm,
 including wind radii, as created by \code{add_wind_radii}.}
+}
+\description{
+Calculate wind speed at grid points
 }
 
