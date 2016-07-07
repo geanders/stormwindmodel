@@ -166,6 +166,19 @@ coef(lm(forward_speed ~ cspeed, data = with_wind_radii))
 
 You can see that the two are almost perfectly correlated. However, the new way of calculating forward storm motion gives a value that's about half of the original way of calculating it (assuming I brought the old code through correctly).
 
+However, it seems the old code uses distance, instead of velocity, to calculate `cspeed`. Below, `cspeed` is calculated using the old code, simply changing the last line to use the calculated velocities:
+
+```{r}
+# Old code:
+lon2km = 111.32*cos(rcv*(lat[i]))
+lat2km = 110.54
+dx = lon2km*(lon[i+1]-lon[i-1])
+dy = lat2km*(lat[i+1]-lat[i-1])
+c_x = (1000.*dx)/(2.0*tint*3600.)
+c_y = (1000.*dy)/(2.0*tint*3600.)
+cspeed = sqrt(c_x*c_x+c_y*c_y)
+```
+
 ### Calculate direction of storm movement
 
 Next, we need to calculate the direction of the motion of the storm. Later, we'll use this to figure out where each grid point is in relation to the angle of the storm motion. This lets us figure out whether we should add or subtact, etc., the forward motion of the storm to the rotational wind speed calculated for the grid point.
