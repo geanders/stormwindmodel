@@ -3,7 +3,7 @@ Type: Package
 Title: Model Hurricane Wind Speeds
 Version: 0.0.0.9000
 Date: 2016-03-01
-Author: G. Brooke Anderson, Seth Guikema, Steven Quiring
+Author: G. Brooke Anderson, Seth Guikema, Joshua M. Ferreri, Steven Quiring
 Maintainer: G. Brooke Anderson <brooke.anderson@colostate.edu>
 Description: This package allows you to input tracking data for a hurricane
     or other tropical storm, along with a dataframe of grid points at which

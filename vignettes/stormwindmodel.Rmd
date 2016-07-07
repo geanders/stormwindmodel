@@ -1,6 +1,6 @@
 ---
 title: "Vignette for `stormwindmodel`"
-author: "G. Brooke Anderson, Seth Guikema, ..., Steven Quiring"
+author: "G. Brooke Anderson, Seth Guikema, Joshua M. Ferreri, ..., Steven Quiring"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
