@@ -12,6 +12,7 @@ vignette: >
 ```{r echo = FALSE, message = FALSE}
 library(stormwindmodel)
 library(hurricaneexposure)
+library(hurricaneexposuredata)
 library(ggplot2)
 library(dplyr)
 library(tidyr)
@@ -58,7 +59,7 @@ vmax[kk+1] = vmaxr[nlines]
 Here is an example of using this function with the storm tracks from Hurricane Floyd:
 
 ```{r}
-data("hurr_tracks", package = "hurricaneexposure")
+data("hurr_tracks", package = "hurricaneexposuredata")
 example_track <- subset(hurr_tracks, storm_id == "Floyd-1999")
 head(example_track, 3)
 ggplot(example_track, aes(x = longitude, y = latitude)) + geom_point()
@@ -146,7 +147,7 @@ dx = lon2km*(lon[i+1]-lon[i-1])
 dy = lat2km*(lat[i+1]-lat[i-1])
 c_x = (1000.*dx)/(2.0*tint*3600.)
 c_y = (1000.*dy)/(2.0*tint*3600.)
-cspeed = sqrt(dx*dx+dy*dy)
+cspeed = sqrt(dx*dx+dy*dy) #in original code, speed is being calculated using the distance parameters
 #Reduce VMAX by forward speed (will be added back in after calculating wind profile)
 r_vmax[i] = r_vmax[i] - cspeed
 if (r_vmax[i] < 0.0){
@@ -624,7 +625,7 @@ stormwindmodel::calc_grid_wind
 Again, I've written this function so it uses a lot of smaller "helper" functions for each step. I have specific questions about those below. As an input, this function requires both the output dataframe from `add_wind_radii` and also a grid point location where you want to model winds. That `grid_point` input might look something like this (this is an example using county centers from Virginia and North Carolina):
 
 ```{r echo = FALSE}
-library(hurricaneexposure)
+library(hurricaneexposuredata)
 data(hurr_tracks)
 data(county_centers)
 
