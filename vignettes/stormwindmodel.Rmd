@@ -147,7 +147,8 @@ dx = lon2km*(lon[i+1]-lon[i-1])
 dy = lat2km*(lat[i+1]-lat[i-1])
 c_x = (1000.*dx)/(2.0*tint*3600.)
 c_y = (1000.*dy)/(2.0*tint*3600.)
-cspeed = sqrt(dx*dx+dy*dy) #in original code, speed is being calculated using the distance parameters
+cspeed = sqrt(dx*dx+dy*dy) #in original code, speed is being calculated using the 
+                           #distance parameters, not velocity
 #Reduce VMAX by forward speed (will be added back in after calculating wind profile)
 r_vmax[i] = r_vmax[i] - cspeed
 if (r_vmax[i] < 0.0){
@@ -166,11 +167,19 @@ coef(lm(forward_speed ~ cspeed, data = with_wind_radii))
 
 You can see that the two are almost perfectly correlated. However, the new way of calculating forward storm motion gives a value that's about half of the original way of calculating it (assuming I brought the old code through correctly).
 
-However, it seems the old code uses distance, instead of velocity, to calculate `cspeed`. Below, `cspeed` is calculated using the old code, simply changing the last line to use the calculated velocities:
+It seems the old code uses distance, instead of velocity, to calculate `cspeed`, generating a value for forward speed nearly double what the new calculation generates. This is exemplified using the following relationships:
 
 ```{r}
+1000 / (2 * .25 * 3600)
+```
+
+suggesting certain constants are missing when using the distance instead of velocity for this calculation.
+
+Below, I have edited the old code for the `cspeed` calculation, simply changing the last line to use the calculated velocities instead of distances:
+
+```{r eval = FALSE}
 # Old code:
-lon2km = 111.32*cos(rcv*(lat[i]))
+lon2km = 111.32*cos((pi/180)*(lat[i]))
 lat2km = 110.54
 dx = lon2km*(lon[i+1]-lon[i-1])
 dy = lat2km*(lat[i+1]-lat[i-1])
@@ -178,6 +187,58 @@ c_x = (1000.*dx)/(2.0*tint*3600.)
 c_y = (1000.*dy)/(2.0*tint*3600.)
 cspeed = sqrt(c_x*c_x+c_y*c_y)
 ```
+
+Now, we again compare the storm's forward motion using the new (`forward_speed`) versus old (`cspeed`)--with the final step using velocity instead of distance-- methods (for the Hurricane Floyd example):
+
+```{r warning = FALSE}
+#Create new function to create data frame with new calculation using velocity 
+#for `cspeed`
+add_wind_radii_2 <- function(full_track = create_full_track()){
+
+        with_wind_radii <- dplyr::mutate(full_track,
+                                  lon2km = 111.32*cos(3.14/180.0*(phi)),
+                                  lat2km = 110.54,
+                                  dx = lon2km*(lead(-lon)-lag(-lon)),
+                                  dy = lat2km*(lead(phi)-lag(phi)),
+                                  tint = 0.25,
+                                  c_x = (1000*dx)/(2.0*tint*3600),
+                                  c_y = (1000*dy)/(2.0*tint*3600),
+                                  cspeed = sqrt(c_x*c_x+c_y*c_y),
+                                  forward_speed = stormwindmodel:::calc_forward_speed(lag(phi), lag(lon),
+                                                                     lag(date), lead(phi),
+                                                                     lead(lon), lead(date)),
+                                  mda = stormwindmodel:::calc_bearing(phi, lon,
+                                                     lead(phi), lead(lon)),
+                                  mda2 = stormwindmodel:::calcangle(dx, dy),
+                              Vmax = stormwindmodel:::calc_gradient_speed(sustained_Vmax),
+                              Vmax = stormwindmodel:::remove_forward_speed(Vmax,
+                                                          lag(phi), lag(lon),
+                                                          lag(date),
+                                                          lead(phi), lead(lon),
+                                                          lead(date)),
+                              Rmax = stormwindmodel:::will7a(Vmax, phi),
+                              X1 = stormwindmodel:::will10a(Vmax, phi),
+                              n = stormwindmodel:::will10b(Vmax, phi),
+                              A = stormwindmodel:::will10c(Vmax, phi),
+                              eq3_right = stormwindmodel:::will3_right(n, A, X1, Rmax),
+                              xi = mapply(stormwindmodel:::solve_for_xi, eq3_right = eq3_right),
+                              R1 = stormwindmodel:::calc_R1(Rmax, xi),
+                              R2 = ifelse(Rmax > 20, R1 + 25, R1 + 15)
+                              )
+        return(with_wind_radii)
+}
+#Create new data frame with corrected `cspeed` values for Floyd Example
+with_wind_radii_2 <- add_wind_radii_2(full_track = full_track)
+```
+
+```{r}
+ggplot(with_wind_radii_2, aes(x = cspeed, y = forward_speed)) + geom_point() + 
+  geom_abline(intercept = 0, slope = 1)
+cor(with_wind_radii_2$cspeed, with_wind_radii_2$forward_speed, use = "complete.obs")
+coef(lm(forward_speed ~ cspeed, data = with_wind_radii_2))
+```
+
+As you can see, the two are almost perfectly correlated. Further, with the changes made to the `cspeed` function, the values generated when calculating forward speed using the new `forward_speed`) versus old (`cspeed`) methods are nearly identical.
 
 ### Calculate direction of storm movement
 
