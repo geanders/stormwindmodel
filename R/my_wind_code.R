@@ -106,14 +106,57 @@ add_storm_motion_wind <- function(windspd, swd, mda, forward_speed){
 
 #' Calculate wind speed at grid points
 #'
+#' This function uses the Willoughby wind model to calculate wind speed at
+#' a grid point location. This function calculates wind characteristics at
+#' just one location, and then it is applied to all grid locations in a higher-
+#' level function (\code{get_grid_winds}).
+#'
 #' @param with_wind_radii A dataframe with interpolated tracks for a storm,
 #'    including wind radii, as created by \code{add_wind_radii}.
 #' @param grid_point A one-row dataframe with the grid id, latitude, longitude,
 #'    and population for a single grid point of the projection grid.
+#' @param gust_duration_cut The wind speed, in meters per second, to use as a
+#'    cutoff point for determining the duration of gust winds. The function
+#'    will calculate the minutes during the storm when surface-level gust winds
+#'    were above this speed at the location.
+#' @param sust_duration_cut The wind speed, in meters per second, to use as a
+#'    cutoff point for determining the duration of gust winds. The function
+#'    will calculate the minutes during the storm when surface-level gust winds
+#'    were above this speed at the location.
+#' @inheritParams create_full_track
+#'
+#' @return Returns a one-row matrix with wind characteristics for a single
+#'    location. The wind characteristics given are:
+#'    \itemize{
+#'      \item{\code{max_gust}: Maximum value of surface-level (10 meters)
+#'        sustained winds, in meters per second, over the length of the
+#'        storm at the given location}
+#'      \item{\code{max_sust}: Maximum value of surface-level (10 meters)
+#'        gust winds, in meters per second, over the length of the
+#'        storm at the given location}
+#'      \item{\code{gust_duration}: Length of time, in minutes, that
+#'        surface-level sustained winds were above 20 meters per second}
+#'      \item{\code{sust_duration}: Length of time, in minutes, that
+#'        surface-level gust winds were above 20 meters per second}
+#'    }
+#'
+#' @examples \dontrun{
+#' data("hurr_tracks", package = "hurricaneexposuredata")
+#' data("county_points")
+#' example_track <- subset(hurr_tracks, storm_id == "Floyd-1999")
+#' full_track <- create_full_track(hurr_track = example_track,
+#'                                 tint = 0.25)
+#' with_wind_radii <- add_wind_radii(full_track = full_track)
+#' wind_grid <- calc_grid_wind(grid_point = county_points[1, ],
+#'                             with_wind_radii = with_wind_radii)
+#' }
 #'
 #' @export
-calc_grid_wind <- function(grid_point = tracts[1, ],
-                           with_wind_radii = add_wind_radii()){
+calc_grid_wind <- function(grid_point = stormwindmodel::county_points[1, ],
+                           with_wind_radii = add_wind_radii(),
+                           tint = 0.25,
+                           gust_duration_cut = 20,
+                           sust_duration_cut = 20){
 
         grid_wind <- mutate(with_wind_radii,
                             lon2km = 111.32 * cos(pi * phi / 180),
@@ -147,21 +190,69 @@ calc_grid_wind <- function(grid_point = tracts[1, ],
                       sust_windspd = windspd,
                       windspd = windspd * 1.3) %>%
                 # Determine max of windspeed and duration of wind over 20
-                summarize(maxwindspd = max(windspd, na.rm = TRUE),
-                          maxsustained = max(sust_windspd, na.rm = TRUE),
-                          duration = 15 * sum(windspd > 20, na.rm = TRUE),
-                          duration_sustained = 15 *  sum(sust_windspd > 20,
-                                                         na.rm = TRUE))
+                summarize(max_gust = max(windspd, na.rm = TRUE),
+                          max_sust = max(sust_windspd, na.rm = TRUE),
+                          gust_duration = tint * 60 *
+                            sum(windspd > gust_duration_cut,
+                                na.rm = TRUE),
+                          sust_duration = tint * 60 *
+                            sum(sust_windspd > sust_duration_cut,
+                                na.rm = TRUE))
         grid_wind <- as.matrix(grid_wind)
         return(grid_wind)
 }
 
+#' Determine hurricane winds at locations
+#'
+#' This function inputs a storm track and a dataset of locations and calculates
+#' highest wind speeds (sustained and maximum) and duration of winds above a
+#' certain speed at each location. The dataset of locations can
+#' either be a regularly-spaced grid or can be the central points of locations,
+#' like counties or cities. For counties in the eastern half of the United
+#' States, the \code{county_points} dataset that comes with the package can
+#' be used as the \code{grid_point} input.
+#'
 #' @inheritParams create_full_track
+#' @inheritParams calc_grid_wind
+#' @param grid_df A dataframe of locations at which to calculate wind characteristics.
+#'    This dataframe must include columns for latitude and longitude for each
+#'    point, and these columns must be named "glat" and "glon". The latitudes
+#'    and longitudes should be in decimal degrees, with longitudes in the
+#'    Western hemisphere (so, almost all those for Atlantic basin storms)
+#'    expressed as negative values.
+#'
+#' @return The dataframe of locations input, with the following columns of wind
+#' characteristics added for each location:
+#'    \itemize{
+#'      \item{\code{max_gust}: Maximum value of surface-level (10 meters)
+#'        sustained winds, in meters per second, over the length of the
+#'        storm at the given location}
+#'      \item{\code{max_sust}: Maximum value of surface-level (10 meters)
+#'        gust winds, in meters per second, over the length of the
+#'        storm at the given location}
+#'      \item{\code{gust_duration}: Length of time, in minutes, that
+#'        surface-level sustained winds were above 20 meters per second}
+#'      \item{\code{sust_duration}: Length of time, in minutes, that
+#'        surface-level gust winds were above 20 meters per second}
+#'    }
+#'
+#' @examples
+#' \dontrun{
+#' data("hurr_tracks", package = "hurricaneexposuredata")
+#' data("county_points")
+#' example_track <- subset(hurr_tracks, storm_id == "Floyd-1999")
+#' grid_winds <- get_grid_winds(hurr_track = example_track,
+#'                              grid_df = county_points,
+#'                              tint = 0.25)
+#' }
 #'
 #' @export
 get_grid_winds <- function(hurr_track = subset(hurr_tracks,
                                                storm_id == "Floyd-1999"),
-                           grid_df = tracts, tint = 0.25){
+                           grid_df = stormwindmodel::county_points,
+                           tint = 0.25,
+                           gust_duration_cut = 20,
+                           sust_duration_cut = 20){
         full_track <- create_full_track(hurr_track = hurr_track, tint = tint)
         with_wind_radii <- add_wind_radii(full_track = full_track)
 
