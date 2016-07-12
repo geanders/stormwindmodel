@@ -156,8 +156,25 @@ solve_for_xi <- function(xi0 = 0.5, eq3_right, eps = 10e-4, itmax = 100){
 #'    \code{\link{solve_for_xi}}
 #' @inheritParams will1a
 #'
-#' @return A numeric vector with the estimated value of \eqn{R_1} for the
-#'    storm track observation.
+#' @return A numeric vector with the estimated value of \eqn{R_1}, a parameter
+#'    required for the Willoughby wind model.
+#'
+#' @details This function is calculating the equation:
+#'
+#'    \deqn{R_1 = R_{max} - \xi(R_2 - R_1)}{
+#'    R1 = Rmax - \xi(R2 - R1)}
+#'
+#'    where:
+#'    \itemize{
+#'      \item{\eqn{R_1}{R1}: A parameter for the Willoughby wind model (radius to
+#'        start of transition region)}
+#'      \item{\eqn{R_{max}}{Rmax}: Radius (in kilometers) to highest winds}
+#'      \item{\eqn{R_2 - R_1}{R2 - R1}: Width of the transition region. This is
+#'        assumed to be 25 kilometers if \eqn{R_{max}}{Rmax} is greater than
+#'        20 kilometers and 15 kilometers otherwise.}
+#'    }
+#'
+#' @export
 calc_R1 <- function(Rmax, xi){
   R2_minus_R1 <- ifelse(Rmax > 20, 25, 15)
   R1 <- Rmax - xi * R2_minus_R1
