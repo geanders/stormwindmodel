@@ -22,4 +22,15 @@ This function calculates the radius at which the maximum wind occurs
 speed (\eqn{Vmax}) and latitude (\eqn{\phi}). This function implements
 Willoughby et al. (2006), Equation 7a.
 }
+\details{
+This function fits the following equation:
+\deqn{R_{max} = 46.4 e^{- 0.0155 V_{max} + 0.0169\phi}}{
+Rmax = 46.4 e^(- 0.0155 Vmax) + 0.0169\phi}
+where:
+\itemize{
+  \item{\eqn{R_{max}}{Rmax}: Radius from the storm center to the point at which the maximum wind occurs (km)}
+  \item{\eqn{V_{max}}{Vmax}: Tangential wind component of the gradient-level maximum wind speed (m / s)}
+  \item{\eqn{\phi}: Latitude (degrees)}
+}
+}
 

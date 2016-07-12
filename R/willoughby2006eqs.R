@@ -174,8 +174,20 @@ calc_R1 <- function(Rmax, xi){
 #' @param phi Numeric vector of the absolute value of latitude, in degrees.
 #' @inheritParams will1a
 #'
+#' @details This function fits the following equation:
+#' \deqn{R_{max} = 46.4 e^{- 0.0155 V_{max} + 0.0169\phi}}{
+#' Rmax = 46.4 e^(- 0.0155 Vmax) + 0.0169\phi}
+#' where:
+#' \itemize{
+#'   \item{\eqn{R_{max}}{Rmax}: Radius from the storm center to the point at which the maximum wind occurs (km)}
+#'   \item{\eqn{V_{max}}{Vmax}: Tangential wind component of the gradient-level maximum wind speed (m / s)}
+#'   \item{\eqn{\phi}: Latitude (degrees)}
+#' }
+#'
 #' @return A numeric vector with the radius at which the maximum wind occurs,
 #'    in kilometers.
+#'
+#' @export
 will7a <- function(Vmax, phi){
     Rmax <- 46.4 * exp(-0.0155 * Vmax + 0.0169 * phi)
     return(Rmax)
