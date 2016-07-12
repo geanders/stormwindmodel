@@ -19,6 +19,18 @@ library(tidyr)
 library(gridExtra)
 ```
 
+## Overview of wind modeling process
+
+Here is an overview of the wind modeling process implemented by this package: 
+
+1. Impute location and maximum wind speed to 15-minute intervals
+2. For each storm track location, calculate all the inputs needed for the Willoughby windspeed model (forward speed, direction of forward motion to the storm, gradient-level wind speed, radius of maximum wind speed, parameters for decay of winds away from the storm's center). 
+3. For each county center (or other grid point), estimate wind at all county centers. This step includes: measuring distance to county from storm center; calculating tangential wind components at county; calculating gradient wind direction at each county; determining direction at each county; calculating surface wind direction and backward wind direction.
+
+Note:
+
+- From talking with John and Andrea, we might want to bias correct this model based on extended tracks wind radii from 2004 on (when we have pretty complete wind radii values in the extended best tracks). Good storms to check would be Katrina, Ike, Charley, and Ivan. Make sure you compare before adding the wind gust factor, so you're comparing similar values.
+
 ## Impute storm tracks
 
 The storm tracks come in with observations every six hours (plus, for some, an observation at landfall). We linearly impute both locations and maximum wind speed from the hurricane tracks data to a finer time resolution (default is 15 minutes). The option `tint` in this function gives the time interval you want to use, where `1` equals one hour. This function also converts the wind speed from knots (what's given in the hurricane tracks) to meters per second, using the following conversion:
@@ -53,6 +65,8 @@ lat[kk+1] = latr[nlines]
 lon[kk+1] = lonr[nlines]
 vmax[kk+1] = vmaxr[nlines]
 ```
+
+(Based on talking with John and Andrea, it probably makes more sense for us to interpolate between 6-hourly observation points by using *splines* rather than lines.)
 
 ### Example of imputing tracks
 
@@ -240,7 +254,7 @@ coef(lm(forward_speed ~ cspeed, data = with_wind_radii_2))
 
 As you can see, the two are almost perfectly correlated. Further, with the changes made to the `cspeed` function, the values generated when calculating forward speed using the new `forward_speed`) versus old (`cspeed`) methods are nearly identical.
 
-### Calculate direction of storm movement
+### Calculate direction of storm movement ("heading")
 
 Next, we need to calculate the direction of the motion of the storm. Later, we'll use this to figure out where each grid point is in relation to the angle of the storm motion. This lets us figure out whether we should add or subtact, etc., the forward motion of the storm to the rotational wind speed calculated for the grid point.
 
@@ -336,6 +350,8 @@ This seems to be doing okay, with an `mda` of 0 indicating the storm is moving d
 
 ### Convert 1-min sustained wind at 10 m to gradient level wind speed 
 
+The extended tracks database gives maximum winds as one minute sustained wind speeds 10 meters above the ground.
+
 Next, we convert the 1-minute sustained wind speeds at 10 meters (`sustained_Vmax` in the created dataframe), which is evidently what is given in the hurricane tracking data, to gradient level wind speed (`Vmax` in the created dataframe), using the following equation:
 
 $$
@@ -368,6 +384,10 @@ for(i in 1:ntime){
 }
 ```
 
+Notes: 
+
+- Don't change this yet (because it might be that we should change this the same way now when we go from surface to gradient and later when we transfer back down to surface). However, we might want a different value here depending on whether the storm is over land or over water. One was to do this would be to see how close the storm is to its closest county. If it's not very, very close, it's probably over water. If we want to do this over land, it should be about 20% lower than over water (so, if the value for over water is 0.9, over land it should be 0.9*0.9 = ~0.7). 
+
 ### Calculate radius of maximum wind speed (Willoughby et al. 2006, Eqn 7a)
 
 Here is the equation from the Willoughby et al. 2006 paper:
@@ -396,6 +416,10 @@ Rmax = 46.4*exp(-0.0155*r_vmax[i]+0.0169*lat[i])   # Willoughby et al. 2006, Eqn
 Questions: 
 
 - No questions. This part is straightforward.
+
+Notes: 
+
+- From talking with John and Andrea, this could be the place where we could most-improve out models. There are a lot of equations for calculating the radius of maximum windspeed, and there are also estimates based more on radius data from the extended tracks database (and this is probably based more on observations for the real storm). We could potentially try out different equations for this part to optimize our model.
 
 ### Willoughby et al. 2006, Eqn 10a
 
@@ -647,6 +671,10 @@ Questions:
 
 - No questions. This part is straightforward.
 
+Note: 
+
+- From talking with John and Andrea, we want to make sure that the minimum radius estimated by the model is never lower than about 7.5 km because, if so, we would be estimating an R1 that is zero or negative. If it ever gets this low, it would be during Charley or Ivan. For these, we might expect a max radius as low as 10 km (although the data estimates max radius based on wind speed, so it likely gives larger radii than were observed for small storms). 
+
 ### Determine R2 once you've found R1
 
 Here is how I'm figuring out $R_2$ once I have $R_1$ and $R_{max}$:
@@ -769,6 +797,8 @@ Questions:
 - The two methods for determining distance to the grid point (something that looks like Euclidean distance and the haversine method) seem to give pretty similar answers. I think the second method appeals more to me. Any votes otherwise, to keep the old way of determining this?
 
 ### Determine gradient wind speed (without forward motion) at each grid point
+
+This can also be called the "tangential wind".
 
 Then calculate $V(r)$, the tangential wind component at radius $r$. Note there are different equations for this for (1) the eye to the start of the transition region; (2) outside the transition region; and (3) within the transition region.
 
@@ -978,6 +1008,11 @@ Questions:
 - In terms of terminology, is it appropriate to refer to this 20 degrees as the "inflow angle" or the "inflow angle correction"?
 - Do we want to do something more complex with this than always adding 20 degrees? I found an equation based on the relationship between the distance from the storm center and the storm's $R_{max}$ at that observation point (Phadke et al., 2003). Do we want to use that instead?
 
+Notes: 
+
+- From talking with John and Andrea, first we probably want to use 40 for the inflow angle, rather than 20, since all our grid points (or county centers) are over land, and 40 is a better inflow angles over land.
+- Also, we probably want to put this behind the part where we bring gradient values back down to surface estimates.
+
 Phadke et al., 2003, equation: 
 
 $$
@@ -1060,6 +1095,10 @@ Questions:
 
 - Why are we multiplying by 0.9? Is this to convert back to sustained wind speed from gradient wind speed? Or is this the onshore-to-overland wind ratio? It seems about right for that (see the table of wind ratios below).
 
+Notes:
+
+- From John and Andrea: This looks like it's just reversing what we did before, when we went from surface to gradient, so we could remove friction when calculating our estimates. However, it looks like we did not do any adjustment for the added friction over land. It sounds like at this point we probably want to do some adjustment for wind speed that accounts for all the grid points being land-based ones. 
+
 Onshore-to-overwater wind ratios (from NOAA 23, p. 31, for 10-meter, 10-minute wind speed): 
 
 location | wind ratio
@@ -1067,6 +1106,10 @@ location | wind ratio
 water to land | 0.89
 water to awash | 0.95
 water to rough terrain | 0.83
+
+Note: 
+
+- After meeting with John and Andrea, I'm pretty sure we're not making any of the corrections in this table. 
 
 ### Calculate total wind speed
 
@@ -1156,6 +1199,11 @@ windspd = windspd * 1.3
 # Convert 1-min winds at 10-m to 3-sec gust at surface
 windspd[i,j] = windspd[i,j]*(1.3)
 ```
+
+Note: 
+
+- Based on talking with John and Andrea, we probably want to check the output up to this point against the hurricane tracks data. After this point, we are converting to gusts, not sustained winds (what the extended hurricane tracks give).
+- Also based on that conversation, we probably want to update the 1.3. It sounds like this gust factor is likely larger over land.
 
 ## Putting everything together
 
