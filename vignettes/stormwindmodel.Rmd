@@ -17,27 +17,25 @@ library(ggplot2)
 library(dplyr)
 library(tidyr)
 library(gridExtra)
+library(ggthemes)
 ```
 
 ## Overview of wind modeling process
 
 Here is an overview of the wind modeling process implemented by this package: 
 
-1. Impute location and maximum wind speed to 15-minute intervals
-2. For each storm track location, calculate all the inputs needed for the Willoughby windspeed model (forward speed, direction of forward motion to the storm, gradient-level wind speed, radius of maximum wind speed, parameters for decay of winds away from the storm's center). 
-3. For each county center (or other grid point), estimate wind at all county centers. This step includes: measuring distance to county from storm center; calculating tangential wind components at county; calculating gradient wind direction at each county; determining direction at each county; calculating surface wind direction and backward wind direction.
+1. Impute location and maximum wind speed from hurricane track data (every 6 hours) to 15-minute intervals
+2. For each storm track location, calculate all the inputs needed for the Willoughby windspeed model (forward (aka translational) speed, direction of forward motion of the storm, heading of the storm, gradient-level wind speed, radius of maximum winds, parameters for decay of winds away from the storm's center for Willoughby model). 
+3. For each county center (or other grid point), estimate wind at all storm observation points. This step includes: measuring distance to county from storm center; calculating tangential wind components at county; calculating gradient wind direction at each county; determining direction at each county; calculating surface wind direction and backward wind direction.
+4. Determine for each county: the maximum sustained winds and wind gust speeds at any point on the storm's track; the duration of sustained and gust winds over a certain speed (i.e., how many minutes winds were above a cutoff).
 
 Note:
 
-- From talking with John and Andrea, we might want to bias correct this model based on extended tracks wind radii from 2004 on (when we have pretty complete wind radii values in the extended best tracks). Good storms to check would be Katrina, Ike, Charley, and Ivan. Make sure you compare before adding the wind gust factor, so you're comparing similar values.
+- From talking with John and Andrea, we might want to bias-correct this model based on extended tracks wind radii from 2004 on (when we have pretty complete wind radii values in the extended best tracks). Good storms to check would be Katrina, Ike, Charley, and Ivan. We should make sure to compare results from our model to extended tracks wind radii *before* adjusting by the wind gust factor, so we're comparing measures of sustained surface wind speed from both sources.
 
-## Impute storm tracks
+# Impute storm tracks
 
-The storm tracks come in with observations every six hours (plus, for some, an observation at landfall). We linearly impute both locations and maximum wind speed from the hurricane tracks data to a finer time resolution (default is 15 minutes). The option `tint` in this function gives the time interval you want to use, where `1` equals one hour. This function also converts the wind speed from knots (what's given in the hurricane tracks) to meters per second, using the following conversion:
-
-$$
-V_{max,sustained}[m / s] = 0.51444 * V_{max,sustained}[knots]
-$$
+The storm tracks come in with observations every six hours (plus, for some, an observation at landfall). Our package has a function called `create_full_track` to linearly impute both locations (latitude and longitude) and maximum wind speed from the hurricane tracks data to a finer time resolution (default is 15 minutes, but you can also select other values using the `tint` argument). The option `tint` in this function gives the time interval you want to use, where `1` equals one hour. 
 
 ```{r}
 stormwindmodel::create_full_track
@@ -66,31 +64,55 @@ lon[kk+1] = lonr[nlines]
 vmax[kk+1] = vmaxr[nlines]
 ```
 
-(Based on talking with John and Andrea, it probably makes more sense for us to interpolate between 6-hourly observation points by using *splines* rather than lines.)
+As a note, while interpolating the tracks, this function also converts the wind speed from knots (what's typically given in the hurricane tracks) to meters per second, using the following conversion:
 
-### Example of imputing tracks
+$$
+\mbox{meters per second} = 0.51444 * \mbox{knots}
+$$
 
-Here is an example of using this function with the storm tracks from Hurricane Floyd:
+Also, after imputing the tracks, we're expressing longitude as a positive number, to work correctly in the models. This means that we will need to graph the negative of longitude when mapping tracks from this point of the code forward.
 
-```{r}
+Here is an example of running this function like this, where `example_track` is a dataframe with the hurricane track information, and `tint` is the desired time interval to which to impute: 
+
+```{r echo = FALSE}
 data("hurr_tracks", package = "hurricaneexposuredata")
 example_track <- subset(hurr_tracks, storm_id == "Floyd-1999")
-head(example_track, 3)
-ggplot(example_track, aes(x = longitude, y = latitude)) + geom_point()
+```
 
+```{r}
 full_track <- create_full_track(hurr_track = example_track,
                                  tint = 0.25)
-head(full_track, 3)
-ggplot(full_track, aes(x = -lon, y = phi)) + geom_point()
+full_track[1:3, ]
+```
+
+During this imputation, the function changes the column names to `phi` for latitude, `lon` for longitude, and `sustained_Vmax` for wind speed. This is to get these names aligned with the equations we use within the Willoughby model.
+
+Here is an example of using this function with the storm tracks from Hurricane Floyd. The figure on the left shows before imputing, and the one on the right shows after imputing:
+
+```{r echo = FALSE, fig.width = 6}
+a <- ggplot(example_track, aes(x = longitude, y = latitude)) + 
+  geom_point(size = 0.3, alpha = 0.3) +
+  ggtitle("Before imputing \n(every 6 hours)") + 
+  theme_tufte()
+b <- ggplot(full_track, aes(x = -lon, y = phi)) + 
+  geom_point(size = 0.3, alpha = 0.3) + 
+  ggtitle("After imputing \n(every 15 minutes)") + 
+  theme_tufte()
+grid.arrange(a, b, ncol = 2)
 ```
 
 Questions: 
 
-- I think this part is all going okay. No questions.
+- No questions on this. I think the transfer from old code to the new function was straightforward.
 
-## Equations to add wind radii
+Notes: 
 
-The next step is to process this imputed tracks and add in, for each observation point, the model parameters required for the Willoughby model. This process is done using the `add_wind_radii` function. As an impute, it takes the imputed dataframe that is output from the `create_full_track` function. It outputs the same dataframe, but with columns added for the parameters required for the Willoughby wind model. 
+- Based on talking with John and Andrea, it probably makes more sense for us to interpolate between 6-hourly observation points by using splines rather than doing a linear interpolation like we are here. I'm going to see what I can do to figure out how to do that appropriately.
+- This is one spot where the code runs a bit slow. It might be worthwhile to come back and tweak this to run in parallel (although, not sure if that would be do-able if we change to spline interpolation) or re-code in C++.
+
+# Adding Willoughby inputs
+
+The next step is to process this imputed tracks and add in, for each observation point, the inputs and model parameters required for the Willoughby model. This process is done using the `add_wind_radii` function. As an input, it takes the imputed dataframe create by the `create_full_track` function. It outputs the same dataframe, but with columns added for the inputs and parameters required for the Willoughby wind model. 
 
 For the Hurricane Floyd example: 
 
@@ -99,7 +121,9 @@ with_wind_radii <- stormwindmodel::add_wind_radii(full_track = full_track)
 head(with_wind_radii, 3)
 ```
 
-You can see that this now adds lots of measurements and parameters for each observation. Currently, there are some parameters where I've included results using the old code versus newer methods of doing things, so we can see differences. I will point out specific questions about different things in the sections for subfunctions below.
+You can see that this now adds lots of measurements and parameters for each observation. Currently, there are some parameters where I've included results using the old code (e.g., `lon2km`, `lat2km`, `dx`, `dy`, `tint`, `c_x`, `c_y`, `cspeed`, `mda2`) versus newer methods of doing things, so we can see differences. Once we're happy with everything, I'll take out those older parameters to clean this function up a bit. 
+
+The first line has a lot of missing values, and although you can't see it here, the last line does, too. This is because you need points before and after the current point to calculate forward speed and bearing of the storm. In the old code, there were some tweaks to still get full values for the very first and very last observed points, but these required using different algorithms for those points compared to other points along the track. Since we now have points every 15 minutes, I was thinking that it is probably okay for us to miss the very first point and very last point in the track (we would have a point within 15 minutes of the dropped observation). 
 
 Here is the full code for this function:
 
@@ -107,7 +131,7 @@ Here is the full code for this function:
 stormwindmodel::add_wind_radii
 ```
 
-You can see that it is mostly wrapping helper functions, which do each step of the process. I describe these helpers (and questions I have about them) below.
+You can see that it is mostly wrapping helper functions, which do each step of the process. I describe these helpers (and questions I have about them) below. I point out specific questions about different things in the sections for subfunctions below. 
 
 ### Calculate the storm's forward speed
 
