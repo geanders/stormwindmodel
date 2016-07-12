@@ -18,4 +18,16 @@ A numeric vector of the exponential for the power law inside the eye
 \description{
 This function implements Willoughby et al. (2006), Equation 10b.
 }
+\details{
+This function is calculating the equation:
+   \deqn{n = 0.4067 + 0.0144 V_{max} - 0.0038 \phi}{
+   n = 0.4067 + 0.0144 Vmax - 0.0038 \phi}
+   where:
+   \itemize{
+     \item{\eqn{n}: Parameter for the Willoughby wind model}
+     \item{\eqn{V_{max}}{Vmax}: Tangential component of the maximum
+           gradient-level sustained wind speed (in m / s)}
+     \item{\eqn{\phi}: Latitude, in decimal degrees}
+   }
+}
 

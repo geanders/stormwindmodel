@@ -484,7 +484,7 @@ Questions:
 
 ### Willoughby et al. 2006, Eqn 10b
 
-Here is the equation from the Willoughby et al. 2006 paper:
+Next, we need to calculate another Willoughby parameter. Here is the equation from the Willoughby et al. 2006 paper:
 
 $$
 n = 0.4067 + 0.0144 V_{max} - 0.0038 \phi
