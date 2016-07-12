@@ -11,10 +11,20 @@ calc_gradient_speed(sustained_vmax)
 10 meters, in meters / second.}
 }
 \value{
-A numeric vector with gradient level wind speed, in meters / second.
+A numeric vector with gradient-level wind speed, in meters / second.
 }
 \description{
 This function converts 1-minute sustained wind speed at 10 meters to gradient
 level wind speed.
+}
+\details{
+This function uses the following conversion:
+ \deqn{V_{max} = \frac{V_{max,sustained}}{0.9}}{
+ Vmax = Vmax_sustained / 0.9}
+ where:
+ \itemize{
+   \item{\eqn{V_{max}}{Vmax}: Mean wind speed at gradient level (m / s) }
+   \item{\eqn{V_{max,sustained}}{Vmax_sustained}: Surface wind speed (10 meters above the water or ground) (m / s)}
+ }
 }
 
