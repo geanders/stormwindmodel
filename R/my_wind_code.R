@@ -9,10 +9,39 @@
 #' at each grid point for every observation.
 #'
 #' @param full_track An interpolated version of the hurricane track data, as
-#'    created by \code{create_full_track}
+#'    created by \code{create_full_track}. This dataframe must have the
+#'    following columns:
+#'    \itemize{
+#'      \item{date: Date-time, in POSIXct format and UTC time zone}
+#'      \item{phi: Latitude, in decimal degrees}
+#'      \item{lon: Longitude, in decimal degrees and expresses as positive
+#'            values (this model assumes all longitudes will be in the
+#'            Western hemisphere)}
+#'      \item{sustained_Vmax: Sustained maximum wind speed, in meters per
+#'           second}
+#'    }
 #'
 #' @return The input dataset, but with columns added for the Willoughby
-#'    parameters for every observations.
+#'    parameters for every observations. Columns added include:
+#'    \itemize{
+#'      \item{forward_speed: The forward (translational) speed of the storm,
+#'        in meters per second}
+#'      \item{mda: The bearing of the storm, in degrees, with 0 degrees
+#'        indicating the storm is moving due east, 90 degrees indicating the
+#'        storm is moving due north, etc.}
+#'      \item{Vmax: The gradient wind speed, based on the best track's
+#'        sustained surface wind speed}
+#'      \item{Rmax: The radius to maximum winds, in kilometers}
+#'      \item{X1, n, A, eq3_right, xi, R1, R2: Different parameters needed for
+#'        the Willoughby model}
+#'    }
+#'
+#' @examples
+#' data("hurr_tracks", package = "hurricaneexposuredata")
+#' example_track <- subset(hurr_tracks, storm_id == "Floyd-1999")
+#' full_track <- create_full_track(hurr_track = example_track,
+#'                                 tint = 0.25)
+#' with_wind_radii <- add_wind_radii(full_track = full_track)
 #'
 #' @export
 add_wind_radii <- function(full_track = create_full_track()){
@@ -26,9 +55,11 @@ add_wind_radii <- function(full_track = create_full_track()){
                                   c_x = (1000*dx)/(2.0*tint*3600),
                                   c_y = (1000*dy)/(2.0*tint*3600),
                                   cspeed = sqrt(dx*dx+dy*dy),
-                                  forward_speed = calc_forward_speed(lag(phi), lag(lon),
-                                                                     lag(date), lead(phi),
-                                                                     lead(lon), lead(date)),
+                                  forward_speed = calc_forward_speed(phi, lon,
+                                                                     date,
+                                                                     lead(phi),
+                                                                     lead(lon),
+                                                                     lead(date)),
                                   mda = calc_bearing(phi, lon,
                                                      lead(phi), lead(lon)),
                                   mda2 = calcangle(dx, dy),
@@ -112,11 +143,15 @@ calc_grid_wind <- function(grid_point = tracts[1, ],
                       windspd = sqrt(uwind^2 + vwind^2),
                       windspd = mapply(add_storm_motion_wind,
                                        windspd, swd, mda, forward_speed),
-                      # Convert 1-min winds at 10-m to 3-sec gust at surface
+                      # Convert 1-min winds at 10-m to 3-sec gust at surface,
+                      sust_windspd = windspd,
                       windspd = windspd * 1.3) %>%
                 # Determine max of windspeed and duration of wind over 20
                 summarize(maxwindspd = max(windspd, na.rm = TRUE),
-                          duration = 15 * sum(windspd > 20, na.rm = TRUE))
+                          maxsustained = max(sust_windspd, na.rm = TRUE),
+                          duration = 15 * sum(windspd > 20, na.rm = TRUE),
+                          duration_sustained = 15 *  sum(sust_windspd > 20,
+                                                         na.rm = TRUE))
         grid_wind <- as.matrix(grid_wind)
         return(grid_wind)
 }
