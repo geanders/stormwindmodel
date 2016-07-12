@@ -420,7 +420,7 @@ for(i in 1:ntime){
 
 Notes: 
 
-- Don't change this yet (because it might be that we should change this the same way now when we go from surface to gradient and later when we transfer back down to surface). However, we might want a different value here depending on whether the storm is over land or over water. One was to do this would be to see how close the storm is to its closest county. If it's not very, very close, it's probably over water. If we want to do this over land, it should be about 20% lower than over water (so, if the value for over water is 0.9, over land it should be 0.9*0.9 = ~0.7). 
+- John and Andrea noted that, while this seemed high for any observations over land, we shouldn't change this until we're clear about how we're getting back down to surface level winds later (because it might be that we should change this the same way now when we go from surface to gradient and later when we transfer back down to surface). However, we might want a different value here depending on whether the storm is over land or over water, as long as we ensure that doesn't break anything further down the line in the code.  
 
 ### Calculate radius of maximum wind speed (Willoughby et al. 2006, Eqn 7a)
 
