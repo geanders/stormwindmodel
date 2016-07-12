@@ -7,6 +7,8 @@
 #' @param Rmax Numeric vector of the radius at which the maximum wind occurs,
 #'    in kilometers
 #' @param n Numeric vector of ...
+#'
+#' @export
 will1a <- function(Vmax, r, Rmax, n){
   Vi <- Vmax * (r / Rmax)^n
   return(Vi)
@@ -15,8 +17,9 @@ will1a <- function(Vmax, r, Rmax, n){
 #' Model wind speed at each grid point for each storm track observation
 #'
 #' @inheritParams will1a
-#' @inheritParams create_fnc_will3
+#' @inheritParams will3_right
 #'
+#' @export
 will1 <- function(r, Rmax, R1, R2, Vmax, n, A, X1, X2 = 25){
 
   if(is.na(Rmax) || is.na(Vmax) ||
@@ -52,6 +55,8 @@ will1 <- function(r, Rmax, R1, R2, Vmax, n, A, X1, X2 = 25){
 #'
 #' @return w Numeric vector of the weighting parameter for Willoughby's wind
 #'    profile equations.
+#'
+#' @export
 will2 <- function(r, R1){
   xi = (r - R1) / 25
 
@@ -79,6 +84,8 @@ will2 <- function(r, R1){
 #' @return A numeric vector with the value for the right-hand side of Eqn. 3 in
 #'    Willoughby et al. 2006, using the dual exponential version of that
 #'    equation.
+#'
+#' @export
 will3_right <- function(n, A, X1, Rmax){
   eq3_right <- (n * ((1 - A) * X1 + 25 * A)) /
       (n * ((1 - A) * X1 + 25 * A) + Rmax)
@@ -103,6 +110,8 @@ will3_right <- function(n, A, X1, Rmax){
 #'    calculated value of \eqn{f(x)} for \eqn{x = \xi}. These two values
 #'    are used in iterating through the Newton-Raphson method to determine
 #'    \eqn{\xi}.
+#'
+#' @export
 will3_deriv_func <- function(xi, eq3_right){
   deriv <- 70 * 9 * xi ^ 8 - 315 * 8 * xi ^ 7 + 540 * 7 * xi ^ 6 -
     420 * 6 * xi ^ 5 + 126 * 5 * xi ^ 4
@@ -127,6 +136,8 @@ will3_deriv_func <- function(xi, eq3_right){
 #'
 #' @note If this algorithm does not converge, it returns a missing value for
 #'    \eqn{xi}.
+#'
+#' @export
 solve_for_xi <- function(xi0 = 0.5, eq3_right, eps = 10e-4, itmax = 100){
   if(is.na(eq3_right)){
     return(NA)

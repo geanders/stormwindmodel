@@ -17,6 +17,10 @@ in kilometers}
 gradient wind speed, in meters per second}
 
 \item{n}{Numeric vector of ...}
+
+\item{A}{A numeric vector ...}
+
+\item{X1}{A numeric vector ...}
 }
 \description{
 Model wind speed at each grid point for each storm track observation
