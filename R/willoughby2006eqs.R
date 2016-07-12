@@ -247,14 +247,31 @@ will10b <- function(Vmax, phi){
   return(n)
 }
 
-#' Calculate ... from \eqn{Vmax} and \eqn{\phi}
+#' Calculate a parameter for the Willoughby model from \eqn{Vmax} and \eqn{\phi}
 #'
-#' This function implements Willoughby et al. (2006), Equation 10c.
+#' This function implements Willoughby et al. (2006), Equation 10c to generate
+#' a parameter needed for the Willoughby wind model.
 #'
 #' @inheritParams will1a
 #' @inheritParams will7a
 #'
-#' @return A numeric vector ...
+#' @return A numeric vector that is a parameter required for the Willoughby
+#'    model.
+#'
+#' @details This function is calculating the equation:
+#'
+#'    \deqn{A = 0.0696 + 0.0049 Vmax - 0.0064 \phi}
+#'
+#'    where:
+#'    \itemize{
+#'      \item{\eqn{A}: Parameter for the Willoughby wind model (any value
+#'          of A calculated as negative is re-set to 0)}
+#'      \item{\eqn{V_{max}}{Vmax}: Tangential component of the maximum
+#'            gradient-level sustained wind speed (in m / s)}
+#'      \item{\eqn{\phi}: Latitude, in decimal degrees}
+#'    }
+#'
+#' @export
 will10c <- function(Vmax, phi){
   A <- 0.0696 + 0.0049 * Vmax - 0.0064 * phi
   A[A < 0 & !is.na(A)] <- 0

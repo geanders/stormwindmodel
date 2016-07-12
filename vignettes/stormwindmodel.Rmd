@@ -432,9 +432,9 @@ $$
 
 where: 
 
-- $R_{max}$: radius from the storm center to the point at which the maximum wind occurs (km)
-- $V_{max}$: the tangential wind component of the maximum wind speed (m / s)
-- $\phi$: latitude (degrees)
+- $R_{max}$: Radius from the storm center to the point at which the maximum wind occurs (km)
+- $V_{max}$: the tangential wind component of the gradient-level maximum wind speed (m / s)
+- $\phi$: Latitude, in decimal degrees
 
 ```{r}
 stormwindmodel:::will7a
@@ -466,8 +466,8 @@ $$
 where: 
 
 - $X_1$: Parameter for Willoughby wind model
-- $V_{max}$: maximum wind (in m / s)
-- $\phi$: absolute value of latitude (degrees)
+- $V_{max}$: the tangential wind component of the gradient-level maximum wind speed (m / s)
+- $\phi$: Latitude, in decimal degrees
 
 ```{r}
 stormwindmodel:::will10a
@@ -493,8 +493,8 @@ $$
 where: 
 
 - $n$: the exponential for the power law inside the eye
-- $V_{max}$: maximum wind (in m / s)
-- $\phi$: absolute value of latitude (degrees)
+- $V_{max}$: the tangential wind component of the gradient-level maximum wind speed (m / s)
+- $\phi$: Latitude, in decimal degrees
 
 ```{r}
 stormwindmodel:::will10b
@@ -511,7 +511,7 @@ Questions:
 
 ### Willoughby et al. 2006, Eqn 10c
 
-Here is the equation from the Willoughby et al. 2006 paper:
+Next, we need to calculate another Willoughby parameter. Here is the equation from the Willoughby et al. 2006 paper:
 
 $$
 A = 0.0696 + 0.0049 V_{max} - 0.0064 \phi
