@@ -119,11 +119,12 @@ For the Hurricane Floyd example:
 ```{r}
 with_wind_radii <- stormwindmodel::add_wind_radii(full_track = full_track)
 head(with_wind_radii, 3)
+tail(with_wind_radii, 3)
 ```
 
 You can see that this now adds lots of measurements and parameters for each observation. Currently, there are some parameters where I've included results using the old code (e.g., `lon2km`, `lat2km`, `dx`, `dy`, `tint`, `c_x`, `c_y`, `cspeed`, `mda2`) versus newer methods of doing things, so we can see differences. Once we're happy with everything, I'll take out those older parameters to clean this function up a bit. 
 
-The first line has a lot of missing values, and although you can't see it here, the last line does, too. This is because you need points before and after the current point to calculate forward speed and bearing of the storm. In the old code, there were some tweaks to still get full values for the very first and very last observed points, but these required using different algorithms for those points compared to other points along the track. Since we now have points every 15 minutes, I was thinking that it is probably okay for us to miss the very first point and very last point in the track (we would have a point within 15 minutes of the dropped observation). 
+The first line has some missing values, and the last line does, too. This is because you need points before and after the current point to calculate forward speed and bearing of the storm. In the old code, there were some tweaks to still get full values for the very first and very last observed points, but these required using different algorithms for those points compared to other points along the track. Since we now have points every 15 minutes, I was thinking that it is probably okay for us to miss the very first point and very last point in the track (we would have a point within 15 minutes of the dropped observation). 
 
 Here is the full code for this function:
 
@@ -135,9 +136,9 @@ You can see that it is mostly wrapping helper functions, which do each step of t
 
 ### Calculate the storm's forward speed
 
-The first step is to determine the speed that the storm is moving forward, in meters per second. We want to subtract this from the observed maximum wind speed to get an estimate of the maximum wind speed associated just with the rotational movement of the storm, which is what needs to go into the Willoughby model, it looks like. When we go in later and calculate wind speed for each grid point (or county center, for looking at counties), we will add this back in to get a total wind speed.
+The first step is to determine the speed that the storm is moving forward (translational speed), in meters per second. We want to subtract this from the observed maximum wind speed to get an estimate of the maximum wind speed associated just with the rotational movement of the storm, which is what needs to go into the Willoughby model, it looks like. When we go in later and calculate wind speed for each grid point (or county center, for looking at counties), we will put this back in to get a total wind speed.
 
-In the new code, I'm useing the Haversine method with great circle distance to calculate the distance, in kilometers, between the storm's latitude and longitude coordinates for the previous observation and the following observation. I then use the `lag` and `lead` functions from `dplyr` to get the time difference between those two points. From these, I estimate the storm's forward (translational) velocity. I convert to get this speed in meters per second, so it's in the same units as $V_{max}$ from the imputed storm tracks.
+In the new code, I'm useing the Haversine method with great circle distance to calculate the distance, in kilometers, between the storm's latitude and longitude coordinates for the previous observation and the following observation. I then use the `lag` and `lead` functions from `dplyr` to get the time difference between those two points. From these, I estimate the storm's forward (translational) velocity. I convert to get this speed to meters per second (from kilometers per hour), so it's in the same units as $V_{max}$ from the imputed storm tracks.
 
 Here is the equation I use for the Haversine method with great circle distance to calculate the distance (in kilometers) between the two locations based on their latitudes and longitudes. 
 
@@ -158,10 +159,14 @@ where:
 - $R$: Radius of the earth, here assumed to be 6378.14 kilometers
 - $D$: Distance between the two locations, in kilometers
 
+To do this in the package, first we've got a helper function to convert between degrees and radians (`degrees_to_radians`), and then a function called `latlon_to_meters` that uses the haversine approach to calculate the distance between two latitude-longitude pairs (`phi_1` and `phi_2` are the two latitudes; `L_1` and `L_2` are the two longitudes):
+
 ```{r}
 stormwindmodel:::degrees_to_radians
 stormwindmodel:::latlon_to_meters
 ```
+
+As a note, these are helper functions that other functions in our package use, but that users would not directly access.
 
 When calculating the forward speed of the storm, we can calculate this distance between points before and after the point of interest, convert to meters, and then calculate speed based on this distance divided by the distance in time between those two measurements. If $V_{max}$ after removing the forward storm motion is ever negative, the `remove_forward_speed` function resets the value to 0 m / s.
 
