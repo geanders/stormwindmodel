@@ -134,6 +134,10 @@ stormwindmodel::add_wind_radii
 
 You can see that it is mostly wrapping helper functions, which do each step of the process. I describe these helpers (and questions I have about them) below. I point out specific questions about different things in the sections for subfunctions below. 
 
+Note: 
+
+- Because I've made this modular, it would be pretty easy to get a CS student to go back and re-code any of the helper functions in C++ to increase speed. However, other than the function that uses the Newton-Raphson method, I would imagine that this step is not nearly as slow as the step that calculates wind speed at each grid point, so this might be lower priority for shifting to C++.
+
 ### Calculate the storm's forward speed
 
 The first step is to determine the speed that the storm is moving forward (translational speed), in meters per second. We want to subtract this from the observed maximum wind speed to get an estimate of the maximum wind speed associated just with the rotational movement of the storm, which is what needs to go into the Willoughby model, it looks like. When we go in later and calculate wind speed for each grid point (or county center, for looking at counties), we will put this back in to get a total wind speed.
@@ -680,7 +684,7 @@ Questions:
 Here is the equation from the Willoughby et al. 2006 paper:
 
 $$
-R_1 = R_{max} - \xi(R_2 - R1)
+R_1 = R_{max} - \xi(R_2 - R_1)
 $$
 
 For this function, we're assuming that $R_2 - R_1$ (the width of the transition region) is 25 kilometers when $R_{max}$ is larger than 20 kilometers and 15 kilometers otherwise.
@@ -707,11 +711,11 @@ Questions:
 
 Note: 
 
-- From talking with John and Andrea, we want to make sure that the minimum radius estimated by the model is never lower than about 7.5 km because, if so, we would be estimating an R1 that is zero or negative. If it ever gets this low, it would be during Charley or Ivan. For these, we might expect a max radius as low as 10 km (although the data estimates max radius based on wind speed, so it likely gives larger radii than were observed for small storms). 
+- From talking with John and Andrea, we want to make sure that the minimum radius estimated by the model is never lower than about 7.5 km because, if so, we could be estimating an $R_1$ that is zero or negative. If it ever gets this low, it would be during Charley or Ivan. For these, we might expect a max radius as low as 10 km (although the data estimates max radius based on wind speed, so it likely gives larger radii than were observed for small storms). 
 
 ### Determine R2 once you've found R1
 
-Here is how I'm figuring out $R_2$ once I have $R_1$ and $R_{max}$:
+Here is our equation for determining $R_2$ once we have $R_1$ and $R_{max}$:
 
 $$
 R_2 = \begin{cases}
@@ -754,7 +758,7 @@ We can check these against the Willoughby paper to make sure that we're getting 
 
 # Calculate wind speed at each grid point 
 
-The next task is to calculate the wind speed at each grid point (or county center location) for every storm observation. I've created the following function to do that:
+Next, we calculate the wind speed at each grid point (or county center location) for every storm observation. I've created the following function to do that:
 
 ```{r}
 stormwindmodel::calc_grid_wind
