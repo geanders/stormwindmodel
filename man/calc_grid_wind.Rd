@@ -4,7 +4,9 @@
 \alias{calc_grid_wind}
 \title{Calculate wind speed at grid points}
 \usage{
-calc_grid_wind(grid_point = tracts[1, ], with_wind_radii = add_wind_radii())
+calc_grid_wind(grid_point = stormwindmodel::county_points[1, ],
+  with_wind_radii = add_wind_radii(), tint = 0.25, gust_duration_cut = 20,
+  sust_duration_cut = 20)
 }
 \arguments{
 \item{grid_point}{A one-row dataframe with the grid id, latitude, longitude,
@@ -12,8 +14,53 @@ and population for a single grid point of the projection grid.}
 
 \item{with_wind_radii}{A dataframe with interpolated tracks for a storm,
 including wind radii, as created by \code{add_wind_radii}.}
+
+\item{tint}{Interval (in hours) for the estimates. Default is 0.25 (i.e., 15
+minutes)}
+
+\item{gust_duration_cut}{The wind speed, in meters per second, to use as a
+cutoff point for determining the duration of gust winds. The function
+will calculate the minutes during the storm when surface-level gust winds
+were above this speed at the location.}
+
+\item{sust_duration_cut}{The wind speed, in meters per second, to use as a
+cutoff point for determining the duration of gust winds. The function
+will calculate the minutes during the storm when surface-level gust winds
+were above this speed at the location.}
+}
+\value{
+Returns a one-row matrix with wind characteristics for a single
+   location. The wind characteristics given are:
+   \itemize{
+     \item{\code{max_gust}: Maximum value of surface-level (10 meters)
+       sustained winds, in meters per second, over the length of the
+       storm at the given location}
+     \item{\code{max_sust}: Maximum value of surface-level (10 meters)
+       gust winds, in meters per second, over the length of the
+       storm at the given location}
+     \item{\code{gust_duration}: Length of time, in minutes, that
+       surface-level sustained winds were above 20 meters per second}
+     \item{\code{sust_duration}: Length of time, in minutes, that
+       surface-level gust winds were above 20 meters per second}
+   }
 }
 \description{
-Calculate wind speed at grid points
+This function uses the Willoughby wind model to calculate wind speed at
+a grid point location. This function calculates wind characteristics at
+just one location, and then it is applied to all grid locations in a higher-
+level function (\code{get_grid_winds}).
+}
+\examples{
+\dontrun{
+data("hurr_tracks", package = "hurricaneexposuredata")
+data("county_points")
+example_track <- subset(hurr_tracks, storm_id == "Floyd-1999")
+full_track <- create_full_track(hurr_track = example_track,
+                                tint = 0.25)
+with_wind_radii <- add_wind_radii(full_track = full_track)
+wind_grid <- calc_grid_wind(grid_point = county_points[1, ],
+                            with_wind_radii = with_wind_radii)
+}
+
 }
 

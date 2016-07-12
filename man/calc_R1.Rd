@@ -14,12 +14,28 @@ in kilometers}
 \code{\link{solve_for_xi}}}
 }
 \value{
-A numeric vector with the estimated value of \eqn{R_1} for the
-   storm track observation.
+A numeric vector with the estimated value of \eqn{R_1}, a parameter
+   required for the Willoughby wind model.
 }
 \description{
 Once you've solved for \eqn{xi}, use this value and the estimated
 \eqn{R_{max}} to determine the radius from the storm center to the start of
 the transition region.
+}
+\details{
+This function is calculating the equation:
+
+   \deqn{R_1 = R_{max} - \xi(R_2 - R_1)}{
+   R1 = Rmax - \xi(R2 - R1)}
+
+   where:
+   \itemize{
+     \item{\eqn{R_1}{R1}: A parameter for the Willoughby wind model (radius to
+       start of transition region)}
+     \item{\eqn{R_{max}}{Rmax}: Radius (in kilometers) to highest winds}
+     \item{\eqn{R_2 - R_1}{R2 - R1}: Width of the transition region. This is
+       assumed to be 25 kilometers if \eqn{R_{max}}{Rmax} is greater than
+       20 kilometers and 15 kilometers otherwise.}
+   }
 }
 
