@@ -279,7 +279,7 @@ add_wind_radii_2 <- function(full_track = create_full_track()){
 with_wind_radii_2 <- add_wind_radii_2(full_track = full_track)
 ```
 
-```{r}
+```{r echo = FALSE, warning = FALSE}
 ggplot(with_wind_radii_2, aes(x = cspeed, y = forward_speed)) + geom_point() + 
   geom_abline(intercept = 0, slope = 1)
 coef(lm(forward_speed ~ cspeed, data = with_wind_radii_2))
@@ -325,8 +325,7 @@ stormwindmodel:::calc_bearing
 Questions: 
 
 1. The previous code seems to have used the direction from the previous observation to the following one. I instead used the angle from the *current* observation to the next one. It seemed to me like what you really want here is the *current* bearing of the storm, or what direction it needs to move toward as of right now to get to the next observed point. Are we okay with this change? (See code below for old code).
-2. To get the old (`mda2`) angle and the new (`mda`) angle to be similar, I need to add 90 degrees from the angle calculated by the bearing equation (this is the "+ 90" in the equation above. I think this might be because we currently are using longitudes that are expresses as positive values, even though we're in the Western hemisphere.
-3. Any reason to use the old method versus the new one? They give very similar results (see below)
+2. Any reason to use the old method versus the new one? They give very similar results (see below)
 
 ```{r eval = FALSE}
 # Old code:
@@ -369,9 +368,9 @@ calcangle <- function(dx, dy){
 mda <- calcangle(dx,dy)
 ```
 
-Based on the current code, these two now agree pretty well, although they're not identical.
+Based on the current code, these two now agree pretty well, although they're not identical (`mda` is calculated using the current code, `mda2` is calculated using the old code).
 
-```{r}
+```{r echo = FALSE, warning = FALSE}
 ggplot(with_wind_radii, aes(x = mda2, y = mda)) + geom_point()
 coef(lm(mda ~ mda2, data = with_wind_radii))
 ```
@@ -388,9 +387,7 @@ This seems to be doing okay, with an `mda` of 0 indicating the storm is moving d
 
 ### Convert 1-min sustained wind at 10 m to gradient level wind speed 
 
-The extended tracks database gives maximum winds as one minute sustained wind speeds 10 meters above the ground.
-
-Next, we convert the 1-minute sustained wind speeds at 10 meters (`sustained_Vmax` in the created dataframe), which is evidently what is given in the hurricane tracking data, to gradient level wind speed (`Vmax` in the created dataframe), using the following equation:
+The extended tracks database gives maximum winds as one minute sustained wind speeds 10 meters above the ground. To make calculations easier (by not having to deal with friction), we convert the 1-minute sustained wind speeds at 10 meters (`sustained_Vmax` in the created dataframe), which is what is given in the hurricane tracking data, to gradient level wind speed (`Vmax` in the created dataframe), using the following equation:
 
 $$
 V_{max} = \frac{V_{max,sustained}}{0.9}
@@ -401,7 +398,7 @@ where:
 - $V_{max}$: Mean wind speed at gradient level (m / s) 
 - $V_{max,sustained}$: Surface wind speed (10 meters above the water or ground) (m / s)
 
-This conversion seems to come from Vickery et al. 2009 (and maybe from Schwerdt et al., 1979, before that). I think they called this the wind speed reduction factor. 
+This conversion seems to come from Vickery et al. 2009 (and maybe from Schwerdt et al., 1979, before that). I think they called this the "wind speed reduction factor". 
 
 ```{r}
 stormwindmodel:::calc_gradient_speed
@@ -409,9 +406,8 @@ stormwindmodel:::calc_gradient_speed
 
 Questions: 
 
-1. Is this really converting from 10-minute sustained winds to gradient-level wind speed, rather than from 1-minute?
-2. Is the 0.9 value too high? It seems like it might be on the higher end for some of the range of values given in different papers, although I'm not positive that they are all referring to the same thing.
-3. Should we try to use a different value for points over land? It sounded like 0.9 might be a more reasonable value over open water, but we're trying to model wind speeds over land, right?
+- Is the 0.9 value too high? It seems like it might be on the higher end for some of the range of values given in different papers, although I'm not positive that they are all referring to the same thing. We do use this same value later to bring winds back down from gradient back to surface, so maybe it doesn't matter much as long as we're consistent?
+- Should we try to use a different value for points over land? It sounded like 0.9 might be a more reasonable value over open water, but we're trying to model wind speeds over land, right? From talking with John and Andrea, it sounds like it might be appropriate to use a value about 20% lower for over-land (so, .9 * .8 = `r round(.9 * .8, 1)`). Do we want to change this? Some of the storm observations are over water, but if we needed to, we could calculate how close a storm observation is to its closest county, and it that is not very, very small, assume that the storm is over water (there are probably plenty of other ways we could do that, too, but that would be the simplest with the tools we have already in the package or easily available through other R packages). 
 
 ```{r eval = FALSE}
 # Old code: 
