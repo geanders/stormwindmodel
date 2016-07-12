@@ -3,3 +3,5 @@
 .RData
 writing/*
 inst/doc
+vignettes/stormwindmodel_cache
+vignettes/stormwindmodel_cache/*
