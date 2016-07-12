@@ -79,8 +79,36 @@ calc_forward_speed <- function(phi_1, L_1, time_1, phi_2, L_2, time_2){
 #' @inheritParams latlon_to_meters
 #'
 #' @return The direction of the second location as seen from the first location,
-#'    in [units]. For example, 0 degrees if the second location is due west of the
-#'    first, and 90 degrees if the second location is due north of the first.
+#'    in degrees. A direction of 0 degrees indicates the second location is
+#'    due east of the first, and 90 degrees if the second location is due north
+#'    of the first.
+#'
+#' @details This function uses the following equations to calculate the bearing
+#'    from one latitude-longitude pair to another:
+#'
+#'    \deqn{S = cos(\phi_2) * sin(L_1 - L_2)}{
+#'    S = cos(\phi2) * sin(L1 - L1)}
+#'
+#'    \deqn{C = cos(\phi_1) * sin(\phi_2) - sin(\phi_1) * cos(\phi_2) * cos(L_1 - L_2)}{
+#'    C = cos(\phi1) * sin(\phi2) - sin(\phi1) * cos(\phi2) * cos(L1 - L2)}
+#'
+#'    \deqn{\beta = atan2(S, C) * \frac{180}{\pi} + 90}
+#'
+#'    where:
+#'    \itemize{
+#'      \item{\eqn{\phi_1}{\phi1}: Latitude of first location, in radians}
+#'      \item{\eqn{L_1}{L1}: Longitude of first location, in radians}
+#'      \item{\eqn{\phi_2}{\phi2}: Latitude of second location, in radians}
+#'      \item{\eqn{L_2}{L2}: Longitude of second location, in radians}
+#'      \item{\eqn{S, C}: Intermediary results}
+#'      \item{\eqn{\beta}: Direction of the storm movement, in degrees}
+#'    }
+#'
+#'    In cases where this equation results in values below 0 degrees or above
+#'    360 degrees, the function applies modular arithmetic to bring the value
+#'    back within the 0-360 degree range.
+#'
+#' @export
 calc_bearing <- function(phi_1, L_1, phi_2, L_2){
   phi_1 <- degrees_to_radians(phi_1)
   L_1 <- degrees_to_radians(-L_1)
