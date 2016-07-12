@@ -21,7 +21,7 @@
 #' @importFrom dplyr %>%
 #'
 #' @export
-map_wind <- function(grid_winds, value = "maxwindspd", break_point = NULL){
+map_wind <- function(grid_winds, value = "max_gust", break_point = NULL){
   if(!is.null(break_point)){
     cut_values <- cut(grid_winds[ , value],
                       breaks = c(0, break_point, max(grid_winds[ , value])),
