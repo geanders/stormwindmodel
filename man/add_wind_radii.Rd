@@ -8,11 +8,33 @@ add_wind_radii(full_track = create_full_track())
 }
 \arguments{
 \item{full_track}{An interpolated version of the hurricane track data, as
-created by \code{create_full_track}}
+created by \code{create_full_track}. This dataframe must have the
+following columns:
+\itemize{
+  \item{date: Date-time, in POSIXct format and UTC time zone}
+  \item{phi: Latitude, in decimal degrees}
+  \item{lon: Longitude, in decimal degrees and expresses as positive
+        values (this model assumes all longitudes will be in the
+        Western hemisphere)}
+  \item{sustained_Vmax: Sustained maximum wind speed, in meters per
+       second}
+}}
 }
 \value{
 The input dataset, but with columns added for the Willoughby
-   parameters for every observations.
+   parameters for every observations. Columns added include:
+   \itemize{
+     \item{forward_speed: The forward (translational) speed of the storm,
+       in meters per second}
+     \item{mda: The bearing of the storm, in degrees, with 0 degrees
+       indicating the storm is moving due east, 90 degrees indicating the
+       storm is moving due north, etc.}
+     \item{Vmax: The gradient wind speed, based on the best track's
+       sustained surface wind speed}
+     \item{Rmax: The radius to maximum winds, in kilometers}
+     \item{X1, n, A, eq3_right, xi, R1, R2: Different parameters needed for
+       the Willoughby model}
+   }
 }
 \description{
 There are a number of parameters needed for the Willoughby model for each
@@ -22,5 +44,13 @@ for each observation in the storm tracks, based on the latitude and longitude
 of the storm at that observation, its forward speed and direction, and
 its maximum windspeed.These parameters are later used to model wind speed
 at each grid point for every observation.
+}
+\examples{
+data("hurr_tracks", package = "hurricaneexposuredata")
+example_track <- subset(hurr_tracks, storm_id == "Floyd-1999")
+full_track <- create_full_track(hurr_track = example_track,
+                                tint = 0.25)
+with_wind_radii <- add_wind_radii(full_track = full_track)
+
 }
 

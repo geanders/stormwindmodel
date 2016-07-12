@@ -10,16 +10,22 @@ create_full_track(hurr_track = subset(hurr_tracks, storm_id == "Floyd-1999"),
 \arguments{
 \item{hurr_track}{Dataframe with columns the hurricane track for a single
 storm. This must include columns for date-time (year, month, day, hour,
-minute), latitude, longitude, and wind speed (in knots)}
+minute; e.g., "198808051800" for August 5, 1988, 18:00 UTC),
+latitude, longitude, and wind speed (in knots). The column
+names for each of these must be "date", "latitude", "longitude",
+and "wind".}
 
-\item{tint}{Interval (in hours) for the estimates}
+\item{tint}{Interval (in hours) for the estimates. Default is 0.25 (i.e., 15
+minutes)}
 }
 \value{
 The function returns an extended version of the track data, with
    latitude, longitude, and wind speed linearly interpolated between
    observed values. Also, wind speed is converted in this function to m / s
    and the absolute value of the latitude is taken (necessary for further
-   wind speed calculations).
+   wind speed calculations). Finally, the names of some columns are
+   changed ("phi" for latitude, "lon" for longitude, and "sustained_Vmax"
+   for wind speed.)
 }
 \description{
 This function takes data on a hurricane's track and imputes to fill in
@@ -31,9 +37,16 @@ and windspeeds at 15-minute intervals.
 The function does a simple linear interpolation, both for location
 and for wind speed, between the measured observations in the inputted
 hurricane track data.
+
+This function imputes between each original data point, and it starts
+   by determing the difference in time between each pair of data points.
+   Because of this, the function can handle data that includes a point
+   that is not at one of the four daily synoptic times (00:00, 06:00, 12:00,
+   and 18:00). Typically, the only time hurricane observations are given
+   outside of synoptic times for best tracks data is at landfall.
 }
 \examples{
-data("hurr_tracks", package = "hurricaneexposure")
+data("hurr_tracks", package = "hurricaneexposuredata")
 example_track <- subset(hurr_tracks, storm_id == "Floyd-1999")
 full_track <- create_full_track(hurr_track = example_track,
                                 tint = 0.25)
