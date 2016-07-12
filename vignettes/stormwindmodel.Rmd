@@ -453,11 +453,11 @@ Questions:
 
 Notes: 
 
-- From talking with John and Andrea, this could be the place where we could most-improve out models. There are a lot of equations for calculating the radius of maximum windspeed, and there are also estimates based more on radius data from the extended tracks database (and this is probably based more on observations for the real storm). We could potentially try out different equations for this part to optimize our model.
+- From talking with John and Andrea, this could be the place where we could most improve our models. There are a lot of equations for calculating the radius of maximum windspeed, and there are also estimates based on radius data from the extended tracks database (and this is probably based more on observations for the real storm). We could potentially try out different equations for this part to optimize our model if we ever want to try that in the future.
 
 ### Willoughby et al. 2006, Eqn 10a
 
-Here is the equation from the Willoughby et al. 2006 paper:
+Next, we calculate $X_1$, which is a parameter that we need for the Willoughby model. Here is the equation from the Willoughby et al. 2006 paper:
 
 $$
 X_1 = 317.1 - 2.026V_{max} + 1.915 \phi
@@ -465,7 +465,7 @@ $$
 
 where: 
 
-- $X_1$: Fitted slower decay length (km, I think)
+- $X_1$: Parameter for Willoughby wind model
 - $V_{max}$: maximum wind (in m / s)
 - $\phi$: absolute value of latitude (degrees)
 

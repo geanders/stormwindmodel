@@ -13,10 +13,23 @@ gradient wind speed, in meters per second}
 \item{phi}{Numeric vector of the absolute value of latitude, in degrees.}
 }
 \value{
-A numeric vector of the fitted slower decay length for the dual
-   exponential windspeed model (km, I think).
+A numeric vector giving one of the parameters (\eqn{X_1}{X1})
+   required for the Willoughby wind model.
 }
 \description{
 This function implements Willoughby et al. (2006), Equation 10a.
+}
+\details{
+This function uses the following equation to calculate the
+   \eqn{X_1}{X1} parameter:
+   \deqn{X_1 = 317.1 - 2.026V_{max} + 1.915 \phi}{
+   X1 = 317.1 - 2.026Vmax + 1.915 \phi}
+   where:
+   \itemize{
+     \item{\eqn{X_1}{X1}: Parameter for the Willoughby wind model}
+     \item{\eqn{V_{max}}{Vmax}: Tangential component of the maximum
+           gradient-level sustained wind speed (in m / s)}
+     \item{\eqn{\phi}: Latitude, in decimal degrees}
+   }
 }
 
