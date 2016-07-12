@@ -319,7 +319,7 @@ where:
 This is implemented in our package through the `calc_bearing` function:
 
 ```{r}
-stormwindmodel:::calc_bearing
+stormwindmodel::calc_bearing
 ```
 
 Questions: 
@@ -401,7 +401,7 @@ where:
 This conversion seems to come from Vickery et al. 2009 (and maybe from Schwerdt et al., 1979, before that). I think they called this the "wind speed reduction factor". 
 
 ```{r}
-stormwindmodel:::calc_gradient_speed
+stormwindmodel::calc_gradient_speed
 ```
 
 Questions: 
@@ -437,7 +437,7 @@ where:
 - $\phi$: Latitude, in decimal degrees
 
 ```{r}
-stormwindmodel:::will7a
+stormwindmodel::will7a
 ```
 
 ```{r eval = FALSE}
@@ -470,7 +470,7 @@ where:
 - $\phi$: Latitude, in decimal degrees
 
 ```{r}
-stormwindmodel:::will10a
+stormwindmodel::will10a
 ```
 
 ```{r eval = FALSE}
@@ -497,7 +497,7 @@ where:
 - $\phi$: Latitude, in decimal degrees
 
 ```{r}
-stormwindmodel:::will10b
+stormwindmodel::will10b
 ```
 
 ```{r eval = FALSE}
@@ -530,7 +530,7 @@ where:
 - $\phi$: absolute value of latitude (degrees)
 
 ```{r}
-stormwindmodel:::will10c
+stormwindmodel::will10c
 ```
 
 ```{r eval = FALSE}
@@ -607,9 +607,9 @@ f'(\xi) = 5 * 126 \xi^4 - 6 * 420 \xi^5 + 7 * 540 \xi^6 - 8 * 315 \xi^7 + 9 * 70
 $$
 
 ```{r}
-stormwindmodel:::will3_right
-stormwindmodel:::will3_deriv_func
-stormwindmodel:::solve_for_xi
+stormwindmodel::will3_right
+stormwindmodel::will3_deriv_func
+stormwindmodel::solve_for_xi
 ```
 
 ```{r eval = FALSE}
@@ -671,9 +671,9 @@ if(Rmax>20){
 
 Questions: 
 
-1. It looks like the old code has more to its numerical method that the function I wrote to implement the Newton-Raphson method. Am I missing something? Should there be some more to the function I wrote?
-2. It sounds like Newton-Rapson can be sensitive to the starting guess ($x_0$), so it's important to have a good starting guess. Are we sure that $x_0 = 0.5$ is good for this?
-3. Should I have the function print a warning if the algorithm doesn't converge for that observation? Currently, it sets $\xi$ to be missing (`NA`) if the algorithm doesn't converge, but maybe we also need to print a message or warning every time that happens?
+1. It looks like the old code has more to its numerical method than the function I wrote to implement the Newton-Raphson method. Am I missing something? Should there be some more to the function I wrote?
+2. It sounds like Newton-Raphson can be sensitive to the starting guess ($x_0$), so it's important to have a good starting guess. Are we sure that $x_0 = 0.5$ is good for this?
+3. Should I have the function print a warning if the algorithm doesn't converge for that observation? Currently, it sets $\xi$ to be missing (`NA`) if the algorithm doesn't converge, but maybe we also need to print a message or warning every time that happens? I don't have a great idea of how often we would expect it to not converge.
 
 ### Determine R1 once you've found xi
 
@@ -686,7 +686,7 @@ $$
 For this function, we're assuming that $R_2 - R_1$ (the width of the transition region) is 25 kilometers when $R_{max}$ is larger than 20 kilometers and 15 kilometers otherwise.
 
 ```{r}
-stormwindmodel:::calc_R1
+stormwindmodel::calc_R1
 ```
 
 ```{r eval = FALSE}
@@ -731,26 +731,28 @@ Questions:
 
 Here are histograms of the values we have for the radius values: 
 
-```{r message = FALSE, warning = FALSE, fig.width = 4, fig.height = 5}
+```{r message = FALSE, warning = FALSE, fig.width = 4, fig.height = 5, echo = FALSE}
 to_plot <- select(with_wind_radii, Rmax, R1, R2) %>%
   gather(key = key, value = value) %>%
   mutate(key = factor(key, levels = c("R1", "Rmax", "R2")))
 ggplot(to_plot, aes(x = value)) + geom_histogram() + 
-  facet_wrap(~ key, ncol = 1) + xlab("Radius (km)")
+  facet_wrap(~ key, ncol = 1) + xlab("Radius (km)") + 
+  theme_tufte()
 ```
 
 Here are histograms for some of the other Willoughby parameters we get for Floyd:
 
-```{r message = FALSE, warning = FALSE, fig.width = 5, fig.height = 4}
+```{r message = FALSE, warning = FALSE, fig.width = 5, fig.height = 4, echo = FALSE}
 to_plot <- select(with_wind_radii, Vmax, Rmax, X1, n, A, xi) %>%
   gather(key, value)
 ggplot(to_plot, aes(x = value)) + geom_histogram() + 
-  facet_wrap(~ key, ncol = 2, scales = "free")
+  facet_wrap(~ key, ncol = 2, scales = "free") + 
+  theme_tufte()
 ```
 
 We can check these against the Willoughby paper to make sure that we're getting reasonable values for all of the parameters.
 
-## Calculate wind speed at each grid point for each storm track observation point
+# Calculate wind speed at each grid point 
 
 The next task is to calculate the wind speed at each grid point (or county center location) for every storm observation. I've created the following function to do that:
 
