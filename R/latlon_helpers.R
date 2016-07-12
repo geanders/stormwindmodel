@@ -4,10 +4,12 @@
 #' calculates the distance (in meters) between the locations using the
 #' haversine method.
 #'
-#' @param phi_1 Latitude of the first location, in degrees
-#' @param L_1 Longitude of the first location, in degrees
-#' @param phi_2 Latitude of the second location, in degrees
-#' @param L_2 Longitude of the second location, in degrees
+#' @param phi_1 Latitude of the first location, in degrees.
+#' @param L_1 Longitude of the first location, in degrees. This value should
+#'    be expressed as a positive value for Western hemisphere longitudes.
+#' @param phi_2 Latitude of the second location, in degrees.
+#' @param L_2 Longitude of the second location, in degrees. This value should
+#'    be expressed as a positive value for Western hemisphere longitudes.
 #'
 #' @return Distance between the two locations, in kilometers.
 #'

@@ -10,15 +10,17 @@ remove_forward_speed(Vmax, phi_1, L_1, time_1, phi_2, L_2, time_2)
 \item{Vmax}{Numeric vector of the tangential wind component of the maximum
 gradient wind speed, in meters per second}
 
-\item{phi_1}{Latitude of the first location, in degrees}
+\item{phi_1}{Latitude of the first location, in degrees.}
 
-\item{L_1}{Longitude of the first location, in degrees}
+\item{L_1}{Longitude of the first location, in degrees. This value should
+be expressed as a positive value for Western hemisphere longitudes.}
 
 \item{time_1}{Time of the first observation.}
 
-\item{phi_2}{Latitude of the second location, in degrees}
+\item{phi_2}{Latitude of the second location, in degrees.}
 
-\item{L_2}{Longitude of the second location, in degrees}
+\item{L_2}{Longitude of the second location, in degrees. This value should
+be expressed as a positive value for Western hemisphere longitudes.}
 
 \item{time_2}{Time of the second observation.}
 }

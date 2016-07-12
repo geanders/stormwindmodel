@@ -7,13 +7,15 @@
 latlon_to_meters(phi_1, L_1, phi_2, L_2)
 }
 \arguments{
-\item{phi_1}{Latitude of the first location, in degrees}
+\item{phi_1}{Latitude of the first location, in degrees.}
 
-\item{L_1}{Longitude of the first location, in degrees}
+\item{L_1}{Longitude of the first location, in degrees. This value should
+be expressed as a positive value for Western hemisphere longitudes.}
 
-\item{phi_2}{Latitude of the second location, in degrees}
+\item{phi_2}{Latitude of the second location, in degrees.}
 
-\item{L_2}{Longitude of the second location, in degrees}
+\item{L_2}{Longitude of the second location, in degrees. This value should
+be expressed as a positive value for Western hemisphere longitudes.}
 }
 \value{
 Distance between the two locations, in kilometers.
