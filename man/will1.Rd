@@ -24,7 +24,7 @@ gradient wind speed, in meters per second}
 }
 \value{
 Returns a numeric vector with gradient wind speed at a radius of
-   \eqn{r} from the storm's center, in meters per second
+   \eqn{r} from the storm's center, in meters per second.
 }
 \description{
 This function estimates the gradient wind speed at a certain radius from
