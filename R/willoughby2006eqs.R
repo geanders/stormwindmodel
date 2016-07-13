@@ -16,9 +16,73 @@ will1a <- function(Vmax, r, Rmax, n){
 
 #' Model wind speed at each grid point for each storm track observation
 #'
+#' This function estimates the gradient wind speed at a certain radius from
+#' a storm's center. To do this, it uses different equations and subfunctions
+#' depending on how large the radius is (see details). This function requires,
+#' as inputs, all the Willoughby wind model parameters calculated using the
+#' \code{\link{add_wind_radii}} function.
+#'
 #' @inheritParams will1a
 #' @inheritParams will3_right
 #'
+#' @return Returns a numeric vector with gradient wind speed at a radius of
+#'    \eqn{r} from the storm's center, in meters per second.
+#'
+#' @details If \eqn{r \le R_1}{r \le R1}, this function is calculating the equation:
+#'
+#'    \deqn{V(r) = V_i = V_{max} \left( \frac{r}{R_{max}} \right)^n}{
+#'    V(r) = Vi = Vmax (r / Rmax)^n}
+#'
+#'    where:
+#'    \itemize{
+#'      \item{\eqn{V(r)}: Maximum sustained gradient wind speed at a radius of
+#'        \eqn{r} from the storm's center}
+#'      \item{\eqn{R_1}{R1}: A parameter for the Willoughby wind model (radius to
+#'        start of transition region)}
+#'      \item{\eqn{R_{max}}{Rmax}: Radius (in kilometers) to highest winds}
+#'      \item{\eqn{n}: A parameter for the Willoughby wind model}
+#'    }
+#'
+#'    If \eqn{R_2 < r}{R2 \le r}, this function is calculating
+#'      the equation:
+#'
+#'      \deqn{V(r) = V_o = V_{max}\left[(1 - A) e^\frac{R_{max} - r}{X_1} + A e^\frac{R_{max} - r}{X_2}\right]}{
+#'      V(r) = Vo = Vmax[(1 - A) e^((Rmax - r) / X1) + A e^((Rmax - r) / X_2)]}
+#'
+#'    where:
+#'    \itemize{
+#'      \item{\eqn{V(r)}: Maximum sustained gradient wind speed at a radius of
+#'        \eqn{r} kilometers from the storm's center}
+#'      \item{\eqn{r}: Radius from the storm center, in kilometers}
+#'      \item{\eqn{V_{max}}{Vmax}: Maximum sustained gradient wind speed of the
+#'        storm, in meters per second}
+#'      \item{\eqn{R_{max}}{Rmax}: Radius (in kilometers) to highest winds}
+#'      \item{\eqn{A}, \eqn{X_2}{X2}: Parameters for the Willoughby wind model}
+#'    }
+#'
+#'    If \eqn{R_1 < r \le R_2}{R1 < r \le R2}, this function is calculating
+#'      the equations:
+#'
+#'      \deqn{\xi = \frac{r - R_1}{R_2 - R_1}}{
+#'      \xi = (r - R1) / (R2 - R1)}
+#'
+#'      and, if \eqn{0 \le \xi < \le 1} (otherwise, \eqn{w = 0}):
+#'
+#'      \deqn{w = 126 \xi^5 - 420 \xi^6 + 540 \xi^7- 315 \xi^8 + 70 \xi^9}
+#'
+#'      and then:
+#'
+#'      \deqn{V(r) = V_i (1 - w) + V_o w, (R_1 \le r \le R_2)}{
+#'      V(r) = Vi (1 - w) + Vo w}
+#'
+#'    where, for this series of equations:
+#'    \itemize{
+#'      \item{\eqn{V(r)}: Maximum sustained gradient wind speed at a radius of
+#'        \eqn{r} kilometers from the storm's center}
+#'      \item{\eqn{r}: Radius from the storm center, in kilometers}
+#'      \item{\eqn{w}: Weighting variable}
+#'      \item{\eqn{R_1}{R1}, \eqn{R_2}{R2}: Parameters for the Willoughby wind model}
+#'    }
 #' @export
 will1 <- function(r, Rmax, R1, R2, Vmax, n, A, X1, X2 = 25){
 
