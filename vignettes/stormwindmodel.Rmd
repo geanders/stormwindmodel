@@ -758,38 +758,45 @@ We can check these against the Willoughby paper to make sure that we're getting 
 
 # Calculate wind speed at each grid point 
 
-Next, we calculate the wind speed at each grid point (or county center location) for every storm observation. I've created the following function to do that:
+Next, we calculate wind characteristics at each grid point (or county center location) for every storm observation. These characteristics are: 
+
+- `max_gust`: Maximum value of surface-level (10 meters) sustained winds, in meters per second, over the length of the storm at the given location
+- `max_sust`: Maximum value of surface-level (10 meters) gust winds, in meters per second, over the length of the storm at the given location
+- `gust_duration`: Length of time, in minutes, that surface-level sustained winds were above a certain wind speed cutoff (e.g., 20 meters per second)
+- `sust_duration`: Length of time, in minutes, that surface-level gust winds were above a certain wind speed cutoff (e.g., 20 meters per second)
+
+I've created the following function to calculate these characteristics at a location (note: this function calculates wind characteristics at a single location; I have a later function that applies this to all of our grid points):
 
 ```{r}
 stormwindmodel::calc_grid_wind
 ```
 
-Again, I've written this function so it uses a lot of smaller "helper" functions for each step. I have specific questions about those below. As an input, this function requires both the output dataframe from `add_wind_radii` and also a grid point location where you want to model winds. That `grid_point` input might look something like this (this is an example using county centers from Virginia and North Carolina):
+Again, I've written this function so it uses a lot of smaller "helper" functions for each step. I have specific questions about some of those below. As an input, this function requires both the output dataframe from `add_wind_radii` (which gives all of the parameters for the Willoughby model at each point on the storm's track) and also a location (latitude and longitude) where you want to model winds. To work well with later functions, this location information should be input as a one-row dataframe rather than a vector. That `grid_point` input might look something like this:
 
 ```{r echo = FALSE}
-library(hurricaneexposuredata)
-data(hurr_tracks)
-data(county_centers)
-
-tracts <- filter(county_centers,
-                 tolower(state_name) %in% c("north carolina", "virginia")) %>%
-  rename(gridid = fips,
-         glat = latitude,
-         glon = longitude) %>%
-  select(gridid, glat, glon) %>%
-  filter(gridid %in% c(37055, 37095, 37053, 51810, 51800))
-grid_point <- tracts[1, ]
-head(tracts, 1)
+data(county_points)
+county_points[1, ]
 ```
 
-The output of the function is, for that grid point, the maximum windspeed during the storm and the duration (i.e., number of 15 minute intervals, when using the default value of `tint`) of winds over 20 meters / second. 
+(As a note, I've included in the package a dataset called `county_points` that has the population mean centers of each county in the states mapped in the later maps, so this dataset can be used directly from the package to determine county-level exposures.)
+
+The column names for latitude and longitude must be `glat` and `glon`, both should be in decimal degrees, and the longitude should be expressed using negative numbers for the Western hemisphere (so, almost all of the points we'll have for Atlantic basin storms).
+
+Here is an example of running that functions, and the output you get (notice that it only outputs a one-row matrix, because it only works with one location at a time):
 
 ```{r}
-grid_wind <- calc_grid_wind(grid_point = tracts[1, ],
-                            with_wind_radii = with_wind_radii)
-grid_wind
+calc_grid_wind(grid_point = county_points[1, ],
+               with_wind_radii = with_wind_radii)
 ```
 
+If you want, you can change the cutoffs you're using for the duration measurements (in this example, I'm using a very low value of 5 m / s just so the example will pick up something-- this location was pretty far from the storm track, I think): 
+
+```{r}
+calc_grid_wind(grid_point = county_points[1, ],
+               with_wind_radii = with_wind_radii,
+               gust_duration_cut = 5, 
+               sust_duration_cut = 5)
+```
 
 ### Get r for the grid point
 
@@ -808,39 +815,28 @@ Here is the relationship between $r$ determined using the old (`r2`) and the new
                                             grid_point$glon))
 ggplot(grid_wind, aes(x = r2, y = r)) + 
   geom_point(alpha = 0.2, size = 0.2, color = "blue") + 
-  geom_abline(intercept = 0, slope = 1)
+  geom_abline(intercept = 0, slope = 1) + 
+  theme_tufte()
 ```
 
-These are the distances between the storm center and that grid point across all of the storm track observations. 
+To me, it looks like the two sets of code are pretty similar on this, certainly for points close to the storm track. 
 
-```{r fig.width = 5, fig.height = 3}
+Here are the distances between the storm center and the example grid point across all of the storm track observations. 
+
+```{r fig.width = 5, fig.height = 3, echo = FALSE}
 ggplot(grid_wind, aes(x = -lon, y = phi, color = r)) + geom_point() + 
-  geom_point(data = grid_point, aes(x = glon, y = glat), color = "red")
-```
-
-As a check, here is a plot of the storm track for Floyd. The red point shows the grid point location I'm using for this example. The color of the track corresponds to the distance at that observation between the storm's center and the grid point (in kilometers).
-
-Here is a histogram of $r$ over the course of the storm for Floyd and this example grid point location along the North Carolina coast:
-
-```{r warning = FALSE, message = FALSE, fig.width = 5, fig.height = 3}
-ggplot(grid_wind, aes(x = r)) + geom_histogram()
-```
-
-And here's a plot by time of the distance between the county center and the storm center: 
-
-```{r fig.width = 5, fig.height = 3}
-ggplot(grid_wind, aes(x = date, y = r)) + geom_line()
+  geom_point(data = grid_point, aes(x = glon, y = glat), color = "red") + 
+  theme_tufte() + 
+    scale_colour_gradientn(colours=rainbow(4))
 ```
 
 Questions: 
 
 - The two methods for determining distance to the grid point (something that looks like Euclidean distance and the haversine method) seem to give pretty similar answers. I think the second method appeals more to me. Any votes otherwise, to keep the old way of determining this?
 
-### Determine gradient wind speed (without forward motion) at each grid point
+### Determine gradient wind speed (tangential wind) at each location
 
-This can also be called the "tangential wind".
-
-Then calculate $V(r)$, the tangential wind component at radius $r$. Note there are different equations for this for (1) the eye to the start of the transition region; (2) outside the transition region; and (3) within the transition region.
+Next, the package calculates $V(r)$, the tangential wind component at radius $r$. Note there are different equations for this for (1) the eye to the start of the transition region; (2) outside the transition region; and (3) within the transition region.
 
 First, if $r \le R_1$, you are supposed to use this equation to calculate $V(r)$ (Willoughby et al. 2006, Eqn 1 (a)):
 
@@ -851,7 +847,7 @@ $$
 Next, if $r \ge R_2$, you are suppose to use this equation to calculate $V(r)$ using this equation (Willoughby et al. 2006, Eqn 4; dual-exponential replacement of Eqn 1 (b)):
 
 $$
-V(r) = V_o = V_{max}\left[(1 - A) e^\frac{R_{max} - r}{X_1} + A e^\frac{R_{max} - r}{X_2}\right], R_1 \le r
+V(r) = V_o = V_{max}\left[(1 - A) e^\frac{R_{max} - r}{X_1} + A e^\frac{R_{max} - r}{X_2}\right], R_2 < r
 $$
 
 Finally, if $r$ for the grid point is between $R_1$ and $R_2$, we need to calculate $\xi$ using the value we calculated for $r$ for the grid point: 
@@ -872,7 +868,7 @@ $$
 
 where: 
 
-- $w$: The weighting function
+- $w$: Weighting variable
 - $\xi$: A nondimensional argument
 - $r$: radius from the storm center to the grid point (in km)
 - $R_{max}$: radius at which the maximum wind occurs (km)
@@ -1247,59 +1243,35 @@ Note:
 
 ## Putting everything together
 
-There's a wrapper function called `get_grid_winds` that puts everything together. As inputs, it takes the storm tracks and the grid point locations. It outputs a dataframe like this (this is for some North Carolina and Virginia counties during Floyd): 
+There's a wrapper function called `get_grid_winds` that puts everything together. As inputs, it takes the storm tracks and the grid point locations. It outputs a dataframe like this: 
 
-```{r}
-df <- get_grid_winds(hurr_track = example_track, grid_df = tracts)
-df
+```{r cache = TRUE}
+grid_winds_katrina <- get_grid_winds(hurr_track = subset(hurr_tracks,
+                                                  storm_id == "Katrina-2005"),
+                                     grid_df = county_points)
 ```
 
-with the maxmium wind speed (in meters per second) and duration of winds over 20 meters per second added for each grid point.
+with the maxmium sustained and gust wind speeds (in meters per second) and duration of winds over 20 meters per second for each wind type (this cutoff point can be customized with the `gust_duration` and `sust_duration` arguments) added for each grid point.
 
 I also have a function to map county-level estimates. Here's an example of calculating and mapping county winds for Katrina:
 
-```{r fig.width = 7, fig.height = 4, warning = FALSE, message = FALSE, cache = TRUE}
-data(county_centers)
+```{r fig.width = 7, fig.height = 4, warning = FALSE, message = FALSE}
+map_wind(grid_winds_katrina, value = "max_gust")
+map_wind(grid_winds_katrina, value = "max_sust")
 
-tracts <- filter(county_centers,
-                 tolower(state_name) %in% c("alabama", "arkansas",
-                                            "connecticut", "delaware",
-                                            "district of columbia", "florida",
-                                            "georgia", "illinois", "indiana",
-                                            "iowa", "kansas", "kentucky", "louisiana",
-                                            "maine", "maryland", "massachusetts",
-                                            "michigan", "mississippi",
-                                            "missouri", "new hampshire", "new jersey",
-                                            "new york", "north carolina", "ohio",
-                                            "oklahoma", "pennsylvania", "rhode island",
-                                            "south carolina", "tennessee", "texas",
-                                            "vermont", "virginia", "west virginia",
-                                            "wisconsin")) %>%
-  rename(gridid = fips,
-         glat = latitude,
-         glon = longitude,
-         gpop = population) %>%
-  select(gridid, glat, glon, gpop)
-
-grid_winds_katrina <- get_grid_winds(hurr_track = subset(hurr_tracks,
-                                                  storm_id == "Katrina-2005"),
-                                     grid_df = tracts)
-map_wind(grid_winds_katrina)
-map_wind(grid_winds_katrina, break_point = 20)
+map_wind(grid_winds_katrina, value = "max_gust", break_point = 20)
 ```
 
 I am also saving a file of the county winds from Katrina, that we can use to validate against the earlier Fortran code if we want.
 
 ```{r}
 write.csv(grid_winds_katrina, file = "../writing/katrina_county_winds.csv")
-write.csv(tracts, file = "../writing/county_centers.csv")
+write.csv(tracts, file = "../writing/county_points.csv")
 ```
 
 ### Additional questions
 
 I had some more questions about the model: 
 
-1. Does it ever account for being over land versus water? It looks like some models have two components for this: first, the storm itself weakens once the main part is over land and second the wind speed is lower over land for the same strength of storm because of the added friction. As far as I can tell, this doesn't seem to be part of the model yet? (It looks like "filling rate models" are sometimes used by others to model hurrican decay after landfall?)
+1. Does it ever account for being over land versus water? It looks like some models have two components for this: first, the storm itself weakens once the main part is over land and second the wind speed is lower over land for the same strength of storm because of the added friction. As far as I can tell, this doesn't seem to be part of the model yet? (It looks like "filling rate models" are sometimes used by others to model hurricane decay after landfall?)
 2. The old code comments mention the Holland model some, but it looks like the actual code now justs uses the Willoughby model. Is that right? Are those comments just left over, as the code was evolving?
-
-
