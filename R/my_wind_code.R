@@ -190,14 +190,16 @@ calc_grid_wind <- function(grid_point = stormwindmodel::county_points[1, ],
                       sust_windspd = windspd,
                       windspd = windspd * 1.3) %>%
                 # Determine max of windspeed and duration of wind over 20
-                summarize(max_gust = max(windspd, na.rm = TRUE),
+                dplyr::summarize(max_gust = max(windspd, na.rm = TRUE),
                           max_sust = max(sust_windspd, na.rm = TRUE),
-                          gust_duration = tint * 60 *
+                          gust_duration = 60 *
                             sum(windspd > gust_duration_cut,
                                 na.rm = TRUE),
-                          sust_duration = tint * 60 *
+                          sust_duration = 60 *
                             sum(sust_windspd > sust_duration_cut,
-                                na.rm = TRUE))
+                                na.rm = TRUE)) %>%
+          dplyr::mutate(gust_duration = gust_duration * tint,
+                        sust_duration = sust_duration * tint)
         grid_wind <- as.matrix(grid_wind)
         return(grid_wind)
 }
