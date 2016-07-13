@@ -160,25 +160,25 @@ calc_grid_wind <- function(grid_point = stormwindmodel::county_points[1, ],
 
         grid_wind <- mutate(with_wind_radii,
                             lon2km = 111.32 * cos(pi * phi / 180),
-                      dx = lon2km * (-lon - grid_point$glon),
+                      dx = lon2km * (lon - (-grid_point$glon)),
                       dy = 110.54 * (grid_point$glat - phi),
                       r2 = sqrt(dx^2 + dy^2),
-                      r = latlon_to_meters(phi, -lon,
+                      r = latlon_to_meters(phi, lon,
                                             grid_point$glat,
-                                            grid_point$glon),
+                                            -grid_point$glon),
+                      # Calculate tangential windspeed at the point
                       track = mapply(will1, r = r, Rmax = Rmax,
                                      R1 = R1, R2 = R2,
                                      Vmax = Vmax, n = n, A = A, X1 = X1),
                       # calculate the gradient wind direction (gwd) at this
                       # grid point
-                      bearing_from_storm = (180 - (calc_bearing(phi, -lon,
-                                                              grid_point$glat,
-                                                              grid_point$glon))),
-                      gwd2 = (180 - calcangle(dx, dy))  %% 360,
-                      gwd = (bearing_from_storm) %% 360,
-                      # Begin Willoughby model to calculate gradient windspeed
-                      # distribution
-                      swd = (gwd + 20) %% 360,
+                      bearing_from_storm = calc_bearing(phi, lon,
+                                                        grid_point$glat,
+                                                        - grid_point$glon),
+                      gwd = (90 + bearing_from_storm) %% 360,
+                      oldangle = stormwindmodel:::calcangle(dx, dy),
+                      gwd2 = (90 + oldangle)  %% 360,
+                      swd = (gwd + 40) %% 360,
                       # Calculate the u and v components of surface wind
                       uwind = 0.9 * cos(swd * pi / 180) * track,
                       vwind = 0.9 * sin(swd * pi / 180) * track,
