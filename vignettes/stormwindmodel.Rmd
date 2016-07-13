@@ -941,7 +941,7 @@ The graph on the right shows the wind speed in Dare County, NC, for each time on
 
 To me, this seems to be doing okay. It would probably be worthwhile to compare with any reported values of rotational wind speeds at the Outer Banks during this storm to verify that these values are in the right neighborhood.
 
-### Calculate the angle between the storm center and each grid point
+### Calculate the angle between the storm center and each location
 
 So far, the model has just calculated the the rotational component of the wind speed at each grid location (tangential wind). Now it needs to add back in the forward motion component of the wind speed (translational wind) at each location. This requires, for each grid point, adding the separate vectors of tangential and translational winds. When these vectors point in the same direction, the total storm winds will be increased by the forward motion (the right side of the storm). Conversely, on the left side of the storm, the forward motion of the storm will offset some of the storm-related wind. 
 
@@ -1042,6 +1042,8 @@ ggplot(grid_wind, aes(x = -lon, y = phi, color = bearing_from_storm)) +
     scale_colour_gradientn(colours=rainbow(4)) 
 ```
  
+### Calculate the direction of gradient winds at each location 
+ 
 The direction seems to change from positive to negative right when the storm passes, which seems right since the bearing is changing from northeast to southeast, and due east is 0 degrees. I think that could also be a good sign that this model is working reasonably well for getting bearing from the storm. 
 Next, we calculate the gradient wind direction based on the bearing of a location from the storm. This should be the bearing from the storm plus 90 degrees. Here is a map of that for the same county: 
 
@@ -1059,7 +1061,7 @@ This also looks right. Winds are due east (0 degrees) when the county is directl
 
 The next step is to change from the gradient wind direction to the surface wind direction. To do this, we need to add an inflow angle by adding a certain number of degrees to the gradient wind direction (and then making sure the final answer is between 0 and 360 degrees). This step is necessary because surface friction changes the wind direction a bit near the surface compared to higher.
 
-The old code adds 20 degrees for this inflow angle. However, in talking with John and Andrea, it sounds like an inflow angle of 40 degrees might be more reasonable over land, so I've changed the code to use a 40 degree inflow angle.
+The old code adds 20 degrees for this inflow angle. However, in talking with John and Andrea, it sounds like an inflow angle of 40 degrees might be more reasonable over land (which is where all the locations we care about are), so I've changed the code to use a 40 degree inflow angle.
 
 $$
 swd = gwd + 40
@@ -1067,7 +1069,7 @@ $$
 
 Questions: 
 
-- Do we want to do something more complex with this than always adding 20 degrees? I found an equation based on the relationship between the distance from the storm center and the storm's $R_{max}$ at that observation point (Phadke et al., 2003). Do we want to use that instead?
+- Do we want to do something more complex with this than always adding 40 degrees? I found an equation based on the relationship between the distance from the storm center and the storm's $R_{max}$ at that observation point (Phadke et al., 2003). Do we want to use that instead?
 
 Phadke et al., 2003, equation: 
 
@@ -1081,7 +1083,7 @@ $$
 
 Notes: 
 
-- From talking with John and Andrea, we probably also want to put this behind the part where we bring gradient values back down to surface estimates.
+- From talking with John and Andrea, we probably also want to put this calculation after the part where we bring gradient values back down to surface estimates (although, now that I think about it more, I'm thinking since that just changes wind speed and this just calculates angle, maybe the order doesn't matter).
 
 ```{r eval = FALSE}
 # New code
@@ -1089,12 +1091,12 @@ swd = (gwd + 40) %% 360
 
 # Old code
 swd = gwd + 20
-    mult = 0.9
-    if (swd < 0.0){
+mult = 0.9
+if (swd < 0.0){
       swd = 360.0 + swd
-    } else if (swd > 360.0){
+} else if (swd > 360.0){
       swd = swd - 360.0
-    }
+}
 ```
 
 ### Calculate the u and v components of surface wind
@@ -1158,7 +1160,7 @@ Notes:
 
 - From John and Andrea: This looks like it's just reversing what we did before, when we went from surface to gradient, so we could remove friction when calculating our estimates. However, it looks like we did not do any adjustment for the added friction over land. It sounds like at this point we probably want to do some adjustment for wind speed that accounts for all the grid points being land-based ones. 
 
-Onshore-to-overwater wind ratios (from NOAA 23, p. 31, for 10-meter, 10-minute wind speed): 
+From one source, here are onshore-to-overwater wind ratios that we might want to consider for adjusting from an over-weater estimate to an over-land estimate (from NOAA 23, p. 31, for 10-meter, 10-minute wind speed): 
 
 location | wind ratio
 ---------|-----------
@@ -1168,7 +1170,7 @@ water to rough terrain | 0.83
 
 Note: 
 
-- After meeting with John and Andrea, I'm pretty sure we're not making any of the corrections in this table. 
+- After meeting with John and Andrea, I'm pretty sure we're not making any of the corrections in this table. I think that the 0.9 that we apply in this step is to get from gradient to surface winds (the reverse of what we applied at the start of the code to get from surface to gradient).
 
 ### Calculate total wind speed
 
@@ -1232,16 +1234,15 @@ if (windspd[i,j] > 0.0){
 }
 ```
 
+### Calculate 3-second gust wind speed from sustained wind speed
 
-### Convert 1-min winds at 10-m to 3-sec gust at surface
-
-The last step in the code does this:
+The last step in the code calculates gust wind speed from sustained wind speed by applying a gust factor of 1.3:
 
 $$
 windspd = 1.3*windspd 
 $$
 
-I think the 1.3 is some kind of gust factor. Is that right? In one of the sources I was looking at, there's this table for this gust factor: 
+In one of the sources I was looking at, there's this table for this gust factor: 
 
 Location | Gust factor
 ---------|-------------
@@ -1262,7 +1263,7 @@ windspd[i,j] = windspd[i,j]*(1.3)
 Note: 
 
 - Based on talking with John and Andrea, we probably want to check the output up to this point against the hurricane tracks data. After this point, we are converting to gusts, not sustained winds (what the extended hurricane tracks give).
-- Also based on that conversation, we probably want to update the 1.3. It sounds like this gust factor is likely larger over land.
+- Also based on that conversation, we probably want to update the 1.3. It sounds like this gust factor is likely larger over land (the table I put in from one of the sources suggests a value of near 1.5 for inland locations).
 
 ## Putting everything together
 
