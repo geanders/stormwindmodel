@@ -4,14 +4,16 @@
 \alias{map_wind}
 \title{Map wind exposure at the county level}
 \usage{
-map_wind(grid_winds, value = "max_gust", break_point = NULL)
+map_wind(grid_winds, value = "max_gust", break_point = NULL,
+  wind_metric = "mps")
 }
 \arguments{
 \item{grid_winds}{A dataframe that is the output of
 \code{\link{get_grid_winds}}.}
 
 \item{value}{A character string giving the value to plot. Possible options
-are "maxwindspd" and "duration".}
+are "max_gust" (maximum gust wind speeds) and "max_sust" (maximum
+sustained wind speeds).}
 
 \item{break_point}{An numeric value giving the value of the "value"
 parameter to break at for a binary map showing exposure versus no exposure.}

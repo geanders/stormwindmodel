@@ -63,4 +63,7 @@ wind_grid <- calc_grid_wind(grid_point = county_points[1, ],
 }
 
 }
+\references{
+NOAA Technical Report NWS 23, Schwerdt and Watkins, 1979.
+}
 

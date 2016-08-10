@@ -140,9 +140,10 @@ will2 <- function(r, R1){
 #' Create the right hand side of the version of Eqn. 3 in Willoughby et al. 2006
 #' with the dual exponential profile.
 #'
-#' @param n A numeric vector ...
-#' @param A A numeric vector ...
-#' @param X1 A numeric vector ...
+#' @param n A numeric vector of one of the parameters of the Willoughby model.
+#' @param A A numeric vector of one of the parameters of the Willoughby model.
+#' @param X1 A numeric vector of one of the parameters of the Willoughby model.
+#' @param Rmax A numeric vector giving the radius to maximum winds (in kilometers)
 #' @inheritParams will1a
 #'
 #' @return A numeric vector with the value for the right-hand side of Eqn. 3 in

@@ -46,46 +46,33 @@ create_full_track <- function(hurr_track = subset(hurr_tracks,
                                                   storm_id == "Floyd-1999"),
                               tint = 0.25){
   hurr_track <- dplyr::select(hurr_track, date, latitude, longitude, wind) %>%
-    dplyr::rename(lonr = longitude,
-                  phir = latitude,
-                  sustained_Vmax = wind) %>%
     dplyr::mutate(date = lubridate::ymd_hm(date),
-                  phir = abs(as.numeric(phir)),
-                  lonr = as.numeric(lonr),
-                  lonr = ifelse(lonr > -180, lonr, lonr + 360),
-                  lonr = -1 * lonr,
-                  sustained_Vmax = 0.51444 * as.numeric(sustained_Vmax), # Convert from ks to m / s
-                  dhr = as.numeric(difftime(dplyr::lead(date),
-                                            date, units = "hours")),
-                  interval = floor(dhr / tint),
-                  delphi = (dplyr::lead(phir) - phir) / interval,
-                  dellon = (dplyr::lead(lonr) - lonr) / interval,
-                  delvmax = (dplyr::lead(sustained_Vmax) - sustained_Vmax) /
-                    interval)
+                  latitude = abs(as.numeric(latitude)),
+                  longitude = as.numeric(longitude),
+                  longitude = ifelse(longitude > -180, longitude, longitude + 360),
+                  longitude = -1 * longitude,
+                  wind = 0.51444 * as.numeric(wind)) # Convert from ks to m / s
 
-  for(i in 1:(nrow(hurr_track) - 1)){
-    start_obs <- hurr_track[i, ]
-    for(k in 1:hurr_track[i, "interval"]){
-      new_date <- start_obs$date + (k - 1) * lubridate::dhours(tint)
-      new_phi <- start_obs$phir + (k - 1) * start_obs$delphi
-      new_lon <- start_obs$lonr + (k - 1) * start_obs$dellon
-      new_vmax <- start_obs$sustained_Vmax + (k - 1) * start_obs$delvmax
-      if(i == 1 && k == 1){
-        track_date <- new_date
-        phi <- new_phi
-        lon <- new_lon
-        sustained_Vmax <- new_vmax
-      } else {
-        track_date <- c(track_date, new_date)
-        phi <- c(phi, new_phi)
-        lon <- c(lon, new_lon)
-        sustained_Vmax <- c(sustained_Vmax, new_vmax)
-      }
-    }
-  }
-  full_track <- data.frame(date = track_date,
-                           phi = phi,
-                           lon = lon,
-                           sustained_Vmax = sustained_Vmax)
+  interp_df <- floor(nrow(hurr_track) / 2)
+  interp_date <- seq(from = min(hurr_track$date),
+                     to = max(hurr_track$date),
+                     by = tint * 3600)
+  interp_date <- data.frame(date = interp_date)
+
+  lat_spline <- stats::glm(latitude ~ splines::ns(date, df = interp_df),
+                           data = hurr_track)
+  interp_lat <- stats::predict.glm(lat_spline,
+                                   newdata = as.data.frame(interp_date))
+  lon_spline <- stats::glm(longitude ~ splines::ns(date, df = interp_df),
+                           data = hurr_track)
+  interp_lon <- stats::predict.glm(lon_spline, newdata = interp_date)
+  wind_spline <- stats::glm(wind ~ splines::ns(date, df = interp_df),
+                            data = hurr_track)
+  interp_wind <- stats::predict.glm(wind_spline, newdata = interp_date)
+
+  full_track <- data.frame(date = interp_date,
+                           phi = interp_lat,
+                           lon = interp_lon,
+                           sustained_Vmax = interp_wind)
   return(full_track)
 }

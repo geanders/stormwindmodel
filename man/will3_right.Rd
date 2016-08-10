@@ -7,14 +7,13 @@
 will3_right(n, A, X1, Rmax)
 }
 \arguments{
-\item{n}{A numeric vector ...}
+\item{n}{A numeric vector of one of the parameters of the Willoughby model.}
 
-\item{A}{A numeric vector ...}
+\item{A}{A numeric vector of one of the parameters of the Willoughby model.}
 
-\item{X1}{A numeric vector ...}
+\item{X1}{A numeric vector of one of the parameters of the Willoughby model.}
 
-\item{Rmax}{Numeric vector of the radius at which the maximum wind occurs,
-in kilometers}
+\item{Rmax}{A numeric vector giving the radius to maximum winds (in kilometers)}
 }
 \value{
 A numeric vector with the value for the right-hand side of Eqn. 3 in

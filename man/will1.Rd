@@ -18,9 +18,9 @@ gradient wind speed, in meters per second}
 
 \item{n}{Numeric vector of ...}
 
-\item{A}{A numeric vector ...}
+\item{A}{A numeric vector of one of the parameters of the Willoughby model.}
 
-\item{X1}{A numeric vector ...}
+\item{X1}{A numeric vector of one of the parameters of the Willoughby model.}
 }
 \value{
 Returns a numeric vector with gradient wind speed at a radius of

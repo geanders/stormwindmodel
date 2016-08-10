@@ -15,7 +15,9 @@ Includes: choroplethr,
     dplyr,
     ggplot2,
     hurricaneexposure,
-    lubridate
+    lubridate,
+    splines,
+    stats
 LazyData: TRUE
 RoxygenNote: 5.0.1
 Suggests:

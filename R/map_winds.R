@@ -3,7 +3,8 @@
 #' @param grid_winds A dataframe that is the output of
 #'    \code{\link{get_grid_winds}}.
 #' @param value A character string giving the value to plot. Possible options
-#'    are "maxwindspd" and "duration".
+#'    are "max_gust" (maximum gust wind speeds) and "max_sust" (maximum
+#'    sustained wind speeds).
 #' @param break_point An numeric value giving the value of the "value"
 #'    parameter to break at for a binary map showing exposure versus no exposure.
 #'
@@ -21,43 +22,82 @@
 #' @importFrom dplyr %>%
 #'
 #' @export
-map_wind <- function(grid_winds, value = "max_gust", break_point = NULL){
+map_wind <- function(grid_winds, value = "max_gust", break_point = NULL,
+                     wind_metric = "mps"){
+  if(!(value %in% c("max_gust", "max_sust"))){
+    stop("`value` must be either `max_gust` or `sust_gust`.")
+  }
+
+  grid_winds$value <- grid_winds[ , value]
+  if(wind_metric != "mps"){
+    grid_winds$value <- weathermetrics::convert_wind_speed(grid_winds$value,
+                                                           old_metric = "mps",
+                                                           new_metric = wind_metric)
+  }
+
   if(!is.null(break_point)){
-    cut_values <- cut(grid_winds[ , value],
-                      breaks = c(0, break_point, max(grid_winds[ , value])),
+    cut_values <- cut(grid_winds$value,
+                      breaks = c(0, break_point, max(grid_winds$value)),
                       include.lowest = TRUE)
     grid_winds$value <- as.numeric(cut_values)
     num_colors <- 2
   } else {
-    grid_winds$value <- grid_winds[ , value]
-    num_colors <- 1
+    if(wind_metric == "mps"){
+      breaks <- c(0, seq(15, 45, 5))
+      exposure_palette <- c("#FEE5D9", "#FCBBA1", "#FC9272", "#FB6A4A",
+                            "#DE2D26", "#A50F15")
+    } else if(wind_metric == "knots"){
+      breaks <- c(0, 34, 50, 64, 100)
+      exposure_palette <- c("#FEE0D2", "#FC9272", "#DE2D26")
+    }
+    palette_name <- "Reds"
+
+    # Adjust for right outliers
+    if(max(grid_winds$value) > max(breaks)){
+      breaks <- c(breaks, max(grid_winds$value))
+    }
+
+    exposure_palette <- c("#f7f7f7", exposure_palette, "#1a1a1a")
+
+    grid_winds <- grid_winds %>%
+      dplyr::mutate_(value = ~ cut(value, breaks = breaks,
+                                   include.lowest = TRUE))
   }
 
   map_data <- dplyr::mutate(grid_winds,
                             region = as.numeric(gridid)) %>%
     dplyr::select(region, value)
-  out <- choroplethr::county_choropleth(map_data,
-                                        num_colors = num_colors,
-                                        state_zoom = c("alabama", "arkansas",
-                                                       "connecticut", "delaware",
-                                                       "district of columbia", "florida",
-                                                       "georgia", "illinois", "indiana",
-                                                       "iowa", "kansas", "kentucky", "louisiana",
-                                                       "maine", "maryland", "massachusetts",
-                                                       "michigan", "mississippi",
-                                                       "missouri", "new hampshire", "new jersey",
-                                                       "new york", "north carolina", "ohio",
-                                                       "oklahoma", "pennsylvania", "rhode island",
-                                                       "south carolina", "tennessee", "texas",
-                                                       "vermont", "virginia", "west virginia",
-                                                       "wisconsin"))
+
+  eastern_states <- c("alabama", "arkansas",
+                      "connecticut", "delaware",
+                      "district of columbia", "florida",
+                      "georgia", "illinois", "indiana",
+                      "iowa", "kansas", "kentucky", "louisiana",
+                      "maine", "maryland", "massachusetts",
+                      "michigan", "mississippi",
+                      "missouri", "new hampshire", "new jersey",
+                      "new york", "north carolina", "ohio",
+                      "oklahoma", "pennsylvania", "rhode island",
+                      "south carolina", "tennessee", "texas",
+                      "vermont", "virginia", "west virginia",
+                      "wisconsin")
+
+  out <- choroplethr::CountyChoropleth$new(map_data)
+  out$set_zoom(eastern_states)
+
+  exposure_legend <- paste0("Wind speed (",
+                            ifelse(wind_metric == "mps", "m / s",
+                                   wind_metric),
+                            ")")
+
   if(!is.null(break_point)){
-    out <- out + ggplot2::scale_fill_manual(values = c("white", "blue"),
-                                            labels = levels(cut_values))
+    out$set_num_colors(num_colors = num_colors)
+    out$ggplot_scale <- ggplot2::scale_fill_manual(name = exposure_legend,
+                                                   values = c("white", "blue"),
+                                                   labels = levels(cut_values))
   } else{
-    out <- out +
-      ggplot2::scale_fill_gradient(low = "white", high = "red") +
-      ggplot2::scale_color_gradient(low = "white", high = "red")
+    out$ggplot_scale <- ggplot2::scale_fill_manual(name = exposure_legend,
+                                                   values = exposure_palette)
   }
-  return(out)
+  return(out$render())
 }

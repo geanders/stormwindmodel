@@ -81,29 +81,6 @@ add_wind_radii <- function(full_track = create_full_track()){
         return(with_wind_radii)
 }
 
-#' Add back in wind component due to storm motion
-#'
-#' @note Only do this where windspd > 0 m/s. From NOAA Technical Report 23,
-#'    Schwerdt et al., pg. 25
-#'
-#' @return Numeric vector with wind speed at grid location, with wind
-#'    component due to storm motion added back in
-add_storm_motion_wind <- function(windspd, swd, mda, forward_speed){
-        if(is.na(windspd) || is.na(swd) || is.na(mda) || is.na(forward_speed)){
-                return(NA)
-        } else {
-                if(windspd >= 0){
-                  beta <- swd - mda
-                  A <- 1.5 * (forward_speed ^ 0.63) * (0.514751 ^ 0.37) *
-                    cos(beta * pi / 180)
-                  windspd <- windspd + A
-                  } else{
-                    windspd <- 0
-                    }
-          return(windspd)
-        }
-}
-
 #' Calculate wind speed at grid points
 #'
 #' This function uses the Willoughby wind model to calculate wind speed at
@@ -151,6 +128,10 @@ add_storm_motion_wind <- function(windspd, swd, mda, forward_speed){
 #'                             with_wind_radii = with_wind_radii)
 #' }
 #'
+#' @references
+#'
+#' NOAA Technical Report NWS 23, Schwerdt and Watkins, 1979.
+#'
 #' @export
 calc_grid_wind <- function(grid_point = stormwindmodel::county_points[1, ],
                            with_wind_radii = add_wind_radii(),
@@ -159,10 +140,11 @@ calc_grid_wind <- function(grid_point = stormwindmodel::county_points[1, ],
                            sust_duration_cut = 20){
 
         grid_wind <- mutate(with_wind_radii,
-                            lon2km = 111.32 * cos(pi * phi / 180),
-                      dx = lon2km * (lon - (-grid_point$glon)),
-                      dy = 110.54 * (grid_point$glat - phi),
-                      r2 = sqrt(dx^2 + dy^2),
+                      # lon2km = 111.32 * cos(pi * phi / 180),
+                      # dx = lon2km * (lon - (-grid_point$glon)),
+                      # dy = 110.54 * (grid_point$glat - phi),
+                      # r2 = sqrt(dx^2 + dy^2),
+                      # Calculated distance from storm center to location
                       r = latlon_to_meters(phi, lon,
                                             grid_point$glat,
                                             -grid_point$glon),
@@ -176,24 +158,26 @@ calc_grid_wind <- function(grid_point = stormwindmodel::county_points[1, ],
                                                         grid_point$glat,
                                                         - grid_point$glon),
                       gwd = (90 + bearing_from_storm) %% 360,
-                      oldangle = stormwindmodel:::calcangle(dx, dy),
-                      gwd2 = (90 + oldangle)  %% 360,
-                      swd = (gwd + 40) %% 360,
-                      # Calculate the u and v components of surface wind
-                      uwind = 0.9 * cos(swd * pi / 180) * track,
-                      vwind = 0.9 * sin(swd * pi / 180) * track,
-                      # Calculate total wind speed
-                      windspd = sqrt(uwind^2 + vwind^2),
-                      windspd = mapply(add_storm_motion_wind,
-                                       windspd, swd, mda, forward_speed),
+                      # oldangle = stormwindmodel:::calcangle(dx, dy),
+                      # gwd2 = (90 + oldangle)  %% 360,
+                      swd = mapply(add_inflow, gwd = gwd, r = r, Rmax = Rmax),
+                      # Bring back to surface level (surface wind reduction factor)
+                      windspd = 0.9 * track,
+                      windspd = mapply(add_asymmetry, windspd = windspd,
+                                       swd = swd, mda = mda,
+                                       forward_speed = forward_speed),
+                      # Add  a water-to-land wind ratio correction
+                      windspd = 0.89 * windspd,
+                      # Reset any negative values to 0
+                      windspd = ifelse(windspd > 0, windspd, 0),
                       # Convert 1-min winds at 10-m to 3-sec gust at surface,
                       sust_windspd = windspd,
-                      windspd = windspd * 1.3) %>%
+                      gust_windspd = windspd * 1.49) %>%
                 # Determine max of windspeed and duration of wind over 20
-                dplyr::summarize(max_gust = max(windspd, na.rm = TRUE),
+                dplyr::summarize(max_gust = max(gust_windspd, na.rm = TRUE),
                           max_sust = max(sust_windspd, na.rm = TRUE),
                           gust_duration = 60 *
-                            sum(windspd > gust_duration_cut,
+                            sum(gust_windspd > gust_duration_cut,
                                 na.rm = TRUE),
                           sust_duration = 60 *
                             sum(sust_windspd > sust_duration_cut,

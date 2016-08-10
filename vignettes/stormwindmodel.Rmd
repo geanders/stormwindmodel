@@ -26,12 +26,12 @@ Here is an overview of the wind modeling process implemented by this package:
 
 1. Impute location and maximum wind speed from hurricane track data (every 6 hours) to 15-minute intervals
 2. For each storm track location, calculate all the inputs needed for the Willoughby windspeed model (forward (aka translational) speed, direction of forward motion of the storm, heading of the storm, gradient-level wind speed, radius of maximum winds, parameters for decay of winds away from the storm's center for Willoughby model). 
-3. For each county center (or other grid point), estimate wind at all storm observation points. This step includes: measuring distance to county from storm center; calculating tangential wind components at county; calculating gradient wind direction at each county; determining direction at each county; calculating surface wind direction and backward wind direction.
+3. For each county center (or other grid point), estimate wind at all storm observation points. This step includes: measuring distance to county from storm center; calculating tangential wind components at county; calculating gradient wind direction at each county; determining direction at each county; calculating surface wind direction (incorporating inflow angle), surface sustained wind speed, and surface gust wind speed.
 4. Determine for each county: the maximum sustained winds and wind gust speeds at any point on the storm's track; the duration of sustained and gust winds over a certain speed (i.e., how many minutes winds were above a cutoff).
 
 Note:
 
-- From talking with John and Andrea, we might want to bias-correct this model based on extended tracks wind radii from 2004 on (when we have pretty complete wind radii values in the extended best tracks). Good storms to check would be Katrina, Ike, Charley, and Ivan. We should make sure to compare results from our model to extended tracks wind radii *before* adjusting by the wind gust factor, so we're comparing measures of sustained surface wind speed from both sources.
+- From talking with John and Andrea, we might want to bias-correct this model based on extended tracks wind radii from 2004 on (when we have pretty complete wind radii values in the extended best tracks). Although, from talking more with John, the extended tracks wind radii give the *maximum* wind radius in each quadrant, so this means that there will be a lot of false positives (many counties that are in a quadrant, but aren't at the angle where the maximum radius in that quadrant occurs). Good storms to check would be Katrina, Ike, Charley, and Ivan. We should make sure to compare results from our model to extended tracks wind radii *before* adjusting by the wind gust factor, so we're comparing measures of sustained surface wind speed from both sources (note: I now have the last function output both sustained and gust wind speeds, so we have the sustained wind speeds that we can compare to the extended hurricane tracks wind radii).
 
 # Impute storm tracks
 
@@ -1061,17 +1061,7 @@ This also looks right. Winds are due east (0 degrees) when the county is directl
 
 The next step is to change from the gradient wind direction to the surface wind direction. To do this, we need to add an inflow angle by adding a certain number of degrees to the gradient wind direction (and then making sure the final answer is between 0 and 360 degrees). This step is necessary because surface friction changes the wind direction a bit near the surface compared to higher.
 
-The old code adds 20 degrees for this inflow angle. However, in talking with John and Andrea, it sounds like an inflow angle of 40 degrees might be more reasonable over land (which is where all the locations we care about are), so I've changed the code to use a 40 degree inflow angle.
-
-$$
-swd = gwd + 40
-$$
-
-Questions: 
-
-- Do we want to do something more complex with this than always adding 40 degrees? I found an equation based on the relationship between the distance from the storm center and the storm's $R_{max}$ at that observation point (Phadke et al., 2003). Do we want to use that instead?
-
-Phadke et al., 2003, equation: 
+The old code adds 20 degrees for this inflow angle. However, I think there are two ways we can improve this. First, in looking over some papers, I found the following equation for inflow angle as a function of the distance from the storm center to the location and the storm's $R_{max}$ at that observation point (Phadke et al., 2003):
 
 $$
 \beta = \begin{cases}
@@ -1081,17 +1071,25 @@ $$
 \end{cases}
 $$
 
-Notes: 
+I have changed the code to use this equation rather than always using an inflow angle of 20 degress.
 
-- From talking with John and Andrea, we probably also want to put this calculation after the part where we bring gradient values back down to surface estimates (although, now that I think about it more, I'm thinking since that just changes wind speed and this just calculates angle, maybe the order doesn't matter).
+Second, in talking with John and Andrea, it sounds like overland the inflow angle should be about 20 degrees more than it is over water. Therefore, after calculating the inflow angle from the equation above, I then am adding 20 degrees to the value since all of our locations are over land. The final calculation, then, is:
+
+$$
+swd = gwd + \beta + 20
+$$
+
+Here is the new function for this step:
+
+```{r}
+add_inflow
+```
+
+Here is the old code for this step:
 
 ```{r eval = FALSE}
-# New code
-swd = (gwd + 40) %% 360
-
 # Old code
 swd = gwd + 20
-mult = 0.9
 if (swd < 0.0){
       swd = 360.0 + swd
 } else if (swd > 360.0){
@@ -1099,98 +1097,37 @@ if (swd < 0.0){
 }
 ```
 
-### Calculate the u and v components of surface wind
+Notes: 
 
-Now the model must add together the two vectors of wind speeds for the grid point, the vector of forward storm motion $\left(\vec{F}\right)$ and the vector of the storm wind $\left(\vec{S}\right)$. To add the two vectors together, we need to break them each into north-south component $\left(v(\vec{F})\right)$ and east-west component $\left(u(\vec{F})\right)$, where a positive value of $v$ indicates northward motion (or wind from the south) and a positive value of $u$ indicates eastward motion (or wind from the west).
+- From talking with John and Andrea, we need to check into whether this calculation should be moved after the part where we add the asymmetry. I think we might be able to figure out the right order by looking at the NOAA 23 document. 
 
-From an NCAR reference website (wind direction quick reference):
+### Go from gradient level to surface level winds
 
-$$
-u(\vec{F}) = -\left \| \vec{F} \right \| sin\left(\theta_F \frac{\pi}{180}\right)
-$$
+At this point in the old code, there was some code that did two things at one: 
+1. Broke the surface wind speed down into u- and v-components and;
+2. Applied the factor of 0.9 to bring wind speeds back from gradient level to surface level (very early in the code, we use 1 / 0.9 to change from surface level wind speed in best tracks to gradient level wind speed to generate the wind profile). 
 
-$$
-v(\vec{F}) = -\left \| \vec{F} \right \| cos\left(\theta_F \frac{\pi}{180}\right)
-$$
-
-Then, you should be able to get the u- and v-components of the total wind speed, $\left(\vec{T}\right)$, by adding the two u-components for the two wind speeds and the two v-components for the two wind speeds:
-
-$$
-u\left(\vec{T}\right) = u\left(\vec{F}\right) + u\left(\vec{S}\right)
-$$
-
-$$
-v\left(\vec{T}\right) = v\left(\vec{F}\right) + v\left(\vec{S}\right)
-$$
-
-Once you have the u- and v-components, you can calculate the total wind speed (which is the magnitude of this vector):
-
-$$
-\left \| \vec{T} \right \| = \sqrt{u\left(\vec{T}\right)^2 + v\left(\vec{T}\right)^2}
-$$
-
-Here is the equation of what we're doing in the code at this step:
-
-$$
-u_{wind} = 0.9*track*cos(\frac{swd \pi}{180}) 
-$$
-$$
-v_{wind} = 0.9*track*sin(\frac{swd \pi}{180}) 
-$$
-
-where `track` is the surface rotational wind speed of the storm at the grid point for the given observation time and `swd` is the surface wind direction.
+I don't think we need to break the surface wind into u- and v-components anymore. I imagine that sometime a while ago, there was a spot in the code where the u- and v-components of forward wind speed were being added in directly before the u- and v-components of total wind speed were added back together to get the total magnitude of the wind speed. However, now it seems we're using an asymmetry adjustment to add back in the forward wind speed, and the old code seemed to add the u- and v-components back together immediately without adding forward speed components to them, so I've taken this part of the code out of the new version. I do still, however, apply the 0.9 factor at this point to bring winds back down from gradient to surface level:
 
 ```{r eval = FALSE}
 # New code
-uwind = 0.9 * cos(swd * pi / 180) * track,
-vwind = 0.9 * sin(swd * pi / 180) * track,
+windspd = 0.9 * track
 
 # Old code
 mult = 0.9
 rcv = 3.14/180.0
 uwind[i,j] = mult*cos(rcv*swd)*track[j]
 vwind[i,j] = mult*sin(rcv*swd)*track[j]
-```
-
-Questions: 
-
-- Why are we multiplying by 0.9? Is this to convert back to sustained wind speed from gradient wind speed? Or is this the onshore-to-overland wind ratio? It seems about right for that (see the table of wind ratios below).
-
-Notes:
-
-- From John and Andrea: This looks like it's just reversing what we did before, when we went from surface to gradient, so we could remove friction when calculating our estimates. However, it looks like we did not do any adjustment for the added friction over land. It sounds like at this point we probably want to do some adjustment for wind speed that accounts for all the grid points being land-based ones. 
-
-From one source, here are onshore-to-overwater wind ratios that we might want to consider for adjusting from an over-weater estimate to an over-land estimate (from NOAA 23, p. 31, for 10-meter, 10-minute wind speed): 
-
-location | wind ratio
----------|-----------
-water to land | 0.89
-water to awash | 0.95
-water to rough terrain | 0.83
-
-Note: 
-
-- After meeting with John and Andrea, I'm pretty sure we're not making any of the corrections in this table. I think that the 0.9 that we apply in this step is to get from gradient to surface winds (the reverse of what we applied at the start of the code to get from surface to gradient).
-
-### Calculate total wind speed
-
-Next, we want to combine the translational and rotational components of wind speed at the grid point to get a total wind speed. 
-
-The code first has us calculating a wind speed, but it seems like we're just adding back together the u- and v-components of just the rotational wind speed, just after taking 0.9 of each? Why did we break these apart in the last step if we're putting them back together immediately?
-
-$$
-windspd = \sqrt{u_{wind}^2 + v_{wind}^2}
-$$
-
-```{r eval = FALSE}
-# New code
-windspd = sqrt(uwind^2 + vwind^2)
-
-# Old code
 windspd[i,j] = sqrt((uwind[i,j])^2+(vwind[i,j])^2)
 ```
 
-Next, to add back in the storm's forward motion at each grid point, it looks like we are adding, to any non-negative rotational wind speed, the forward wind speed of the storm's center, adjusted for direction of the grid point from the center using a cosine of the angle difference between the angle of the surface wind (`swd`) and the angle of storm forward movement (`mda`) plus a constant to adjust for the fact that our wind speeds are in meters per second rather than knots:
+Notes:
+
+- From John and Andrea: This looks like it's just reversing what we did before, when we went from surface to gradient, so we could remove friction when calculating our estimates. However, it looks like this step does *not* adjust for the added friction over land. It sounds like at this point we probably want to do some adjustment for wind speed that accounts for all the grid points being land-based ones. So, I've added that into the code after we apply the asymmetry factor. 
+
+### Apply an asymmetry factor
+
+Next, to add back in the storm's forward motion at each grid point, it looks like we are adding in an asymmetry factor that incorporates both the magnitude and the direction (relative to surface winds at a given location) of the storm's forward motion. This equation looks a little funny because there is a constant ($0.514791^{0.37}$) to adjust for the fact that our wind speeds are in meters per second rather than knots:
 
 $$
 \beta = swd - mda
@@ -1211,14 +1148,14 @@ From the NOAA 23 report:
 
 > "A is added to the winds on the right of a storm track and subtracted from those on the left."
 
-The same report describes $\beta$ as "the angle between the track direction ($\theta$) and the surface wind direction."
+The same report describes $\beta$ as "the angle between the track direction ($\theta$) and the surface wind direction." (Note: Since this specifies "surface wind direction" rather than "gradient wind direction", I think that we add the inflow angle before calculating this asymmetry factor.)
 
 Questions: 
 
 - I think that there's a bug in the old code here. It looks like someone put in exponential operations some places that should have been multiplications. This would probably have been an easy mistake to make in transferring the code from Fortran. The new version of calculating $A$ is the correct one, right?
 
 ```{r}
-stormwindmodel:::add_storm_motion_wind
+stormwindmodel::add_asymmetry
 ```
 
 ```{r eval = FALSE}
@@ -1234,15 +1171,35 @@ if (windspd[i,j] > 0.0){
 }
 ```
 
+### Apply a correction for overland versus overwater
+
+From one source, here are onshore-to-overwater wind ratios that we might want to consider for adjusting from an over-weater estimate to an over-land estimate (from NOAA 23, p. 31, for 10-meter, 10-minute wind speed, to be added after adjusting for asymmetry it looks like): 
+
+location | wind ratio
+---------|-----------
+water to land | 0.89
+water to awash | 0.95
+water to rough terrain | 0.83
+
+There was not anything to do this in the old code. In the new code, I have added in the following code to adjust for the fact that we're trying to estimate winds over land, rather than over water, using the "water-to-land" ratio given in the table above: 
+
+```{r eval = FALSE}
+windspd = 0.89 * windspd
+```
+
+Note: 
+
+- I wonder if we could improve the model by adding a county-specific frictional factor. Based on the NOAA 23 report, the 0.89 value is really best only fairly close to the coast, and would not work well for places, in particular, in the mountains.
+
 ### Calculate 3-second gust wind speed from sustained wind speed
 
-The last step in the code calculates gust wind speed from sustained wind speed by applying a gust factor of 1.3:
+The last step in the code calculates gust wind speed from sustained wind speed by applying a gust factor:
 
 $$
-windspd = 1.3*windspd 
+windspd = \mbox{gust factor}*windspd 
 $$
 
-In one of the sources I was looking at, there's this table for this gust factor: 
+The old code used a gust factor of 1.3. However, it sounds like we should be using a higher gust factor since our locations are over land. In one of the sources I was looking at, there's this table for this gust factor: 
 
 Location | Gust factor
 ---------|-------------
@@ -1251,19 +1208,16 @@ just offshore | 1.36
 just onshore | 1.23
 at sea | 1.11
 
+In the new code, I'm using the "in-land" value for the gust factor, which is a bit higher than the gust factor in the old code.
+
 ```{r eval = FALSE}
 # New code
-windspd = windspd * 1.3
+gust_windspd = windspd * 1.49
 
 # Old code
 # Convert 1-min winds at 10-m to 3-sec gust at surface
 windspd[i,j] = windspd[i,j]*(1.3)
 ```
-
-Note: 
-
-- Based on talking with John and Andrea, we probably want to check the output up to this point against the hurricane tracks data. After this point, we are converting to gusts, not sustained winds (what the extended hurricane tracks give).
-- Also based on that conversation, we probably want to update the 1.3. It sounds like this gust factor is likely larger over land (the table I put in from one of the sources suggests a value of near 1.5 for inland locations).
 
 ## Putting everything together
 
@@ -1275,27 +1229,55 @@ grid_winds_katrina <- get_grid_winds(hurr_track = subset(hurr_tracks,
                                      grid_df = county_points)
 ```
 
+Here is what the start of that dataset looks like: 
+
+```{r}
+head(grid_winds_katrina)
+```
+
 with the maxmium sustained and gust wind speeds (in meters per second) and duration of winds over 20 meters per second for each wind type (this cutoff point can be customized with the `gust_duration` and `sust_duration` arguments) added for each grid point.
 
 I also have a function to map county-level estimates. Here's an example of calculating and mapping county winds for Katrina:
 
 ```{r fig.width = 7, fig.height = 4, warning = FALSE, message = FALSE}
-map_wind(grid_winds_katrina, value = "max_gust")
-map_wind(grid_winds_katrina, value = "max_sust")
+a <- map_wind(grid_winds_katrina, value = "max_gust") + 
+  ggtitle("Maximum gust wind speeds")
+hurricaneexposure::map_tracks("Katrina-2005", plot_object = a)
 
-map_wind(grid_winds_katrina, value = "max_gust", break_point = 20)
+a <- map_wind(grid_winds_katrina, value = "max_sust") + 
+  ggtitle("Maximum sustained wind speeds")
+hurricaneexposure::map_tracks("Katrina-2005", plot_object = a)
+
+# Show in knots
+a <- map_wind(grid_winds_katrina, value = "max_gust",
+              wind_metric = "knots") + 
+  ggtitle("Maximum gust wind speeds")
+hurricaneexposure::map_tracks("Katrina-2005", plot_object = a)
+
+a <- map_wind(grid_winds_katrina, value = "max_sust",
+              wind_metric = "knots") + 
+  ggtitle("Maximum sustained wind speeds")
+hurricaneexposure::map_tracks("Katrina-2005", plot_object = a)
+
+# Sustained winds of 20 m / s or more
+a <- map_wind(grid_winds_katrina, value = "max_sust", 
+         break_point = 20)
+hurricaneexposure::map_tracks("Katrina-2005", plot_object = a)
+
+# Sustained winds of 34 knots or more
+a <- map_wind(grid_winds_katrina, value = "max_sust", wind_metric = "knots", 
+         break_point = 34)
+hurricaneexposure::map_tracks("Katrina-2005", plot_object = a)
+
+# Sustained winds of 50 knots or more
+a <- map_wind(grid_winds_katrina, value = "max_sust", wind_metric = "knots", 
+         break_point = 50)
+hurricaneexposure::map_tracks("Katrina-2005", plot_object = a)
+
+# Sustained winds of 64 knots or more
+a <- map_wind(grid_winds_katrina, value = "max_sust", wind_metric = "knots", 
+         break_point = 64)
+hurricaneexposure::map_tracks("Katrina-2005", plot_object = a)
 ```
 
-I am also saving a file of the county winds from Katrina, that we can use to validate against the earlier Fortran code if we want.
 
-```{r}
-write.csv(grid_winds_katrina, file = "../writing/katrina_county_winds.csv")
-write.csv(county_points, file = "../writing/county_points.csv")
-```
-
-### Additional questions
-
-I had some more questions about the model: 
-
-1. Does it ever account for being over land versus water? It looks like some models have two components for this: first, the storm itself weakens once the main part is over land and second the wind speed is lower over land for the same strength of storm because of the added friction. As far as I can tell, this doesn't seem to be part of the model yet? (It looks like "filling rate models" are sometimes used by others to model hurricane decay after landfall?)
-2. The old code comments mention the Holland model some, but it looks like the actual code now justs uses the Willoughby model. Is that right? Are those comments just left over, as the code was evolving?
