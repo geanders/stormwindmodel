@@ -35,7 +35,7 @@ Note:
 
 # Impute storm tracks
 
-The storm tracks come in with observations every six hours (plus, for some, an observation at landfall). Our package has a function called `create_full_track` to linearly impute both locations (latitude and longitude) and maximum wind speed from the hurricane tracks data to a finer time resolution (default is 15 minutes, but you can also select other values using the `tint` argument). The option `tint` in this function gives the time interval you want to use, where `1` equals one hour. 
+The storm tracks come in with observations every six hours (plus, for some, an observation at landfall). Our package has a function called `create_full_track` that imputes both locations (latitude and longitude) and intensity (maximum wind speed) from the hurricane tracks data to a finer time resolution (default is 15 minutes, but you can also select other values using the `tint` argument). This imputation uses a natural cubic spline, with the degrees of freedom set as the number of timed observations for the storm in the input data (typically best tracks data) divided by two. The option `tint` in this function gives the time interval you want to use, where `1` equals one hour. 
 
 ```{r}
 stormwindmodel::create_full_track
@@ -142,7 +142,7 @@ Note:
 
 The first step is to determine the speed that the storm is moving forward (translational speed), in meters per second. We want to subtract this from the observed maximum wind speed to get an estimate of the maximum wind speed associated just with the rotational movement of the storm, which is what needs to go into the Willoughby model, it looks like. When we go in later and calculate wind speed for each grid point (or county center, for looking at counties), we will put this back in to get a total wind speed.
 
-In the new code, I'm useing the Haversine method with great circle distance to calculate the distance, in kilometers, between the storm's latitude and longitude coordinates for the previous observation and the following observation. I then use the `lag` and `lead` functions from `dplyr` to get the time difference between those two points. From these, I estimate the storm's forward (translational) velocity. I convert to get this speed to meters per second (from kilometers per hour), so it's in the same units as $V_{max}$ from the imputed storm tracks.
+In the new code, I'm using the Haversine method with great circle distance to calculate the distance, in kilometers, between the storm's latitude and longitude coordinates for the previous observation and the following observation. I then use the `lag` and `lead` functions from `dplyr` to get the time difference between those two points. From these, I estimate the storm's forward (translational) velocity. I convert to get this speed to meters per second (from kilometers per hour), so it's in the same units as $V_{max}$ from the imputed storm tracks.
 
 Here is the equation I use for the Haversine method with great circle distance to calculate the distance (in kilometers) between the two locations based on their latitudes and longitudes. 
 
