@@ -4,11 +4,11 @@
 \alias{remove_forward_speed}
 \title{Remove forward speed estimate from maximum wind speed}
 \usage{
-remove_forward_speed(Vmax, phi_1, L_1, time_1, phi_2, L_2, time_2)
+remove_forward_speed(sustained_vmax, phi_1, L_1, time_1, phi_2, L_2, time_2)
 }
 \arguments{
-\item{Vmax}{Numeric vector of the tangential wind component of the maximum
-gradient wind speed, in meters per second}
+\item{sustained_vmax}{A numeric vector of 1-minute sustained wind speed at
+10 meters, in meters / second.}
 
 \item{phi_1}{Latitude of the first location, in degrees.}
 
@@ -31,5 +31,14 @@ storm motion speed removed, in m / s.
 \description{
 This function takes the forward speed of the storm and subtracts it from
 the maximum storm wind speed, \eqn{V_{max}}.
+}
+\details{
+This function is based on equation 12 (and accompanying)
+   text) in Phadke et al. 2003.
+}
+\references{
+Padke AC, Martino CD, Cheung KF, and Houston SH. 2003. Modeling of
+   tropical cyclone winds and waves for emergency management. Ocean
+   Engineering 30:553-578.
 }
 
