@@ -29,39 +29,12 @@ Here is an overview of the wind modeling process implemented by this package:
 3. For each county center (or other grid point), estimate wind at all storm observation points. This step includes: measuring distance to county from storm center; calculating tangential wind components at county; calculating gradient wind direction at each county; determining direction at each county; calculating surface wind direction (incorporating inflow angle), surface sustained wind speed, and surface gust wind speed.
 4. Determine for each county: the maximum sustained winds and wind gust speeds at any point on the storm's track; the duration of sustained and gust winds over a certain speed (i.e., how many minutes winds were above a cutoff).
 
-Note:
-
-- From talking with John and Andrea, we might want to bias-correct this model based on extended tracks wind radii from 2004 on (when we have pretty complete wind radii values in the extended best tracks). Although, from talking more with John, the extended tracks wind radii give the *maximum* wind radius in each quadrant, so this means that there will be a lot of false positives (many counties that are in a quadrant, but aren't at the angle where the maximum radius in that quadrant occurs). Good storms to check would be Katrina, Ike, Charley, and Ivan. We should make sure to compare results from our model to extended tracks wind radii *before* adjusting by the wind gust factor, so we're comparing measures of sustained surface wind speed from both sources (note: I now have the last function output both sustained and gust wind speeds, so we have the sustained wind speeds that we can compare to the extended hurricane tracks wind radii).
-
 # Impute storm tracks
 
 The storm tracks come in with observations every six hours (plus, for some, an observation at landfall). Our package has a function called `create_full_track` that imputes both locations (latitude and longitude) and intensity (maximum wind speed) from the hurricane tracks data to a finer time resolution (default is 15 minutes, but you can also select other values using the `tint` argument). This imputation uses a natural cubic spline, with the degrees of freedom set as the number of timed observations for the storm in the input data (typically best tracks data) divided by two. The option `tint` in this function gives the time interval you want to use, where `1` equals one hour. 
 
 ```{r}
 stormwindmodel::create_full_track
-```
-
-```{r eval = FALSE}
-# Old code
-
-#Linearly intepolate to predefined time intervals (based on parameter "tint" in hours)
-kk = 0
-for(i in 1:nlines){
-  dhr <- tdiff(yr[i+1],mon[i+1],day[i+1],hr[i+1],yr[i+1],mon[i],day[i],hr[i])
-  interval = floor(dhr/tint)
-  dellat = (latr[i+1]-latr[i])/interval
-  dellon = (lonr[i+1]-lonr[i])/interval
-  delvmx = (vmaxr[i+1]-vmaxr[i])/interval
-  for(k in 1:interval){
-    kk = kk + 1
-    lat[kk] = latr[i] + (k-1)*dellat
-    lon[kk] = lonr[i] + (k-1)*dellon
-    vmax[kk] = vmaxr[i] + (k-1)*delvmx
-  }
-}
-lat[kk+1] = latr[nlines]
-lon[kk+1] = lonr[nlines]
-vmax[kk+1] = vmaxr[nlines]
 ```
 
 As a note, while interpolating the tracks, this function also converts the wind speed from knots (what's typically given in the hurricane tracks) to meters per second, using the following conversion:
@@ -101,18 +74,9 @@ b <- ggplot(full_track, aes(x = -lon, y = phi)) +
 grid.arrange(a, b, ncol = 2)
 ```
 
-Questions: 
-
-- No questions on this. I think the transfer from old code to the new function was straightforward.
-
-Notes: 
-
-- Based on talking with John and Andrea, it probably makes more sense for us to interpolate between 6-hourly observation points by using splines rather than doing a linear interpolation like we are here. I'm going to see what I can do to figure out how to do that appropriately.
-- This is one spot where the code runs a bit slow. It might be worthwhile to come back and tweak this to run in parallel (although, not sure if that would be do-able if we change to spline interpolation) or re-code in C++.
-
 # Adding Willoughby inputs
 
-The next step is to process this imputed tracks and add in, for each observation point, the inputs and model parameters required for the Willoughby model. This process is done using the `add_wind_radii` function. As an input, it takes the imputed dataframe create by the `create_full_track` function. It outputs the same dataframe, but with columns added for the inputs and parameters required for the Willoughby wind model. 
+The next step is to process this imputed track and add in, for each observation point, the inputs and model parameters required for the Willoughby model. This process is done using the `add_wind_radii` function. As an input, it takes the imputed dataframe create by the `create_full_track` function. It outputs the same dataframe, but with columns added for the inputs and parameters required for the Willoughby wind model. 
 
 For the Hurricane Floyd example: 
 
@@ -122,9 +86,7 @@ head(with_wind_radii, 3)
 tail(with_wind_radii, 3)
 ```
 
-You can see that this now adds lots of measurements and parameters for each observation. Currently, there are some parameters where I've included results using the old code (e.g., `lon2km`, `lat2km`, `dx`, `dy`, `tint`, `c_x`, `c_y`, `cspeed`, `mda2`) versus newer methods of doing things, so we can see differences. Once we're happy with everything, I'll take out those older parameters to clean this function up a bit. 
-
-The first line has some missing values, and the last line does, too. This is because you need points before and after the current point to calculate forward speed and bearing of the storm. In the old code, there were some tweaks to still get full values for the very first and very last observed points, but these required using different algorithms for those points compared to other points along the track. Since we now have points every 15 minutes, I was thinking that it is probably okay for us to miss the very first point and very last point in the track (we would have a point within 15 minutes of the dropped observation). 
+You can see that this now adds lots of measurements and parameters for each observation. The first line has some missing values, and the last line does, too. This is because you need points before and after the current point to calculate forward speed and bearing of the storm. In the old code, there were some tweaks to still get full values for the very first and very last observed points, but these required using different algorithms for those points compared to other points along the track. Since we now have points every 15 minutes, it's is probably okay for us to miss the very first point and very last point in the track (we would have a point within 15 minutes of the dropped observation). 
 
 Here is the full code for this function:
 
@@ -132,7 +94,7 @@ Here is the full code for this function:
 stormwindmodel::add_wind_radii
 ```
 
-You can see that it is mostly wrapping helper functions, which do each step of the process. I describe these helpers (and questions I have about them) below. I point out specific questions about different things in the sections for subfunctions below. 
+You can see that this function is mostly wrapping helper functions, which do each step of the process. I describe these helpers (and questions I have about them) below. I point out specific questions about different things in the sections for subfunctions below. 
 
 Note: 
 
@@ -184,114 +146,10 @@ Next, there's a function called `remove_forward_speed` that uses `calc_forward_s
 stormwindmodel:::remove_forward_speed
 ```
 
-Questions:
+Notes:
 
-1. There were originally discrepancies here between the values for forward speed generated by the old code and our code. We're pretty sure we found a bug in the old code that explains this, but let us know if we didn't get this right.
-2. This I have coded differently from the original code. In the original code, this was calculated by calculating the u- and v-components of speed (forward progress per time) based on the distance traveled from the observation before the current one to the observation after the current one, measuring this distance with something that looks like it was simpler than the Haversine method for determing distance (something closer to Euclidean distance, perhaps, but determining the exact degrees-to-kilometers conversion factor for degrees longitude based on latitude). See the code below for more details. I think that the Haversine method to calculate the distance traveled using the great circle method, as I've done in the new function, would be preferable to the old code. Please let me know if you agree, or if there was some reason for doing it the way it was in the old code. I've also included a plot a bit below showing the difference between storm forward speed measured the two ways.
-3. The current method of calculating distance assumes the earth has a radius of 6378.14. Are we okay with that, or do we want a different value?
-4. In the current code, I'm letting the very last observation in the imputed track observations go to `NA`, since they don't have non-missing lead values (because we don't have the point after). In the old code, forward speed for these was calculated differently, but was not left as missing. How important is it to try to get some estimated value for the very last observation?
-
-```{r eval = FALSE}
-# Old code:
-lon2km = 111.32*cos(rcv*(lat[i]))
-lat2km = 110.54
-dx = lon2km*(lon[i+1]-lon[i-1])
-dy = lat2km*(lat[i+1]-lat[i-1])
-c_x = (1000.*dx)/(2.0*tint*3600.)
-c_y = (1000.*dy)/(2.0*tint*3600.)
-cspeed = sqrt(dx*dx+dy*dy) #in original code, speed is being calculated using the 
-                           #distance parameters, not velocity
-#Reduce VMAX by forward speed (will be added back in after calculating wind profile)
-r_vmax[i] = r_vmax[i] - cspeed
-if (r_vmax[i] < 0.0){
-  r_vmax[i] = 0.0
-}
-```
-
-Comparing the storm's forward motion using the new (`forward_speed`) versus old (`cspeed`) methods (for the Hurricane Floyd example):
-
-```{r warning = FALSE}
-ggplot(with_wind_radii, aes(x = cspeed, y = forward_speed)) + geom_point() + 
-  geom_abline(intercept = 0, slope = 1)
-cor(with_wind_radii$cspeed, with_wind_radii$forward_speed, use = "complete.obs")
-coef(lm(forward_speed ~ cspeed, data = with_wind_radii))
-```
-
-You can see that the two are almost perfectly correlated. However, the new way of calculating forward storm motion gives a value that's about half of the original way of calculating it.
-
-It seems the old code uses distance, instead of velocity, to calculate `cspeed`, generating a value for forward speed nearly double what the new calculation generates. This is exemplified using the following relationships:
-
-```{r}
-1000 / (2 * .25 * 3600)
-```
-
-suggesting certain constants are missing when using the distance instead of velocity for this calculation.
-
-Below, I have edited the old code for the `cspeed` calculation, simply changing the last line to use the calculated velocities instead of distances:
-
-```{r eval = FALSE}
-# Old code:
-lon2km = 111.32*cos((pi/180)*(lat[i]))
-lat2km = 110.54
-dx = lon2km*(lon[i+1]-lon[i-1])
-dy = lat2km*(lat[i+1]-lat[i-1])
-c_x = (1000.*dx)/(2.0*tint*3600.)
-c_y = (1000.*dy)/(2.0*tint*3600.)
-cspeed = sqrt(c_x*c_x+c_y*c_y)
-```
-
-Now, we again compare the storm's forward motion using the new (`forward_speed`) versus old (`cspeed`)--with the final step using velocity instead of distance-- methods (for the Hurricane Floyd example):
-
-```{r warning = FALSE}
-#Create new function to create data frame with new calculation using velocity 
-#for `cspeed`
-add_wind_radii_2 <- function(full_track = create_full_track()){
-
-        with_wind_radii <- dplyr::mutate(full_track,
-                                  lon2km = 111.32*cos(3.14/180.0*(phi)),
-                                  lat2km = 110.54,
-                                  dx = lon2km*(lead(-lon)-lag(-lon)),
-                                  dy = lat2km*(lead(phi)-lag(phi)),
-                                  tint = 0.25,
-                                  c_x = (1000*dx)/(2.0*tint*3600),
-                                  c_y = (1000*dy)/(2.0*tint*3600),
-                                  cspeed = sqrt(c_x*c_x+c_y*c_y),
-                                  forward_speed = stormwindmodel:::calc_forward_speed(lag(phi), lag(lon),
-                                                                     lag(date), lead(phi),
-                                                                     lead(lon), lead(date)),
-                                  mda = stormwindmodel:::calc_bearing(phi, lon,
-                                                     lead(phi), lead(lon)),
-                                  mda2 = stormwindmodel:::calcangle(dx, dy),
-                              Vmax = stormwindmodel:::calc_gradient_speed(sustained_Vmax),
-                              Vmax = stormwindmodel:::remove_forward_speed(Vmax,
-                                                          lag(phi), lag(lon),
-                                                          lag(date),
-                                                          lead(phi), lead(lon),
-                                                          lead(date)),
-                              Rmax = stormwindmodel:::will7a(Vmax, phi),
-                              X1 = stormwindmodel:::will10a(Vmax, phi),
-                              n = stormwindmodel:::will10b(Vmax, phi),
-                              A = stormwindmodel:::will10c(Vmax, phi),
-                              eq3_right = stormwindmodel:::will3_right(n, A, X1, Rmax),
-                              xi = mapply(stormwindmodel:::solve_for_xi, eq3_right = eq3_right),
-                              R1 = stormwindmodel:::calc_R1(Rmax, xi),
-                              R2 = ifelse(Rmax > 20, R1 + 25, R1 + 15)
-                              )
-        return(with_wind_radii)
-}
-#Create new data frame with corrected `cspeed` values for Floyd Example
-with_wind_radii_2 <- add_wind_radii_2(full_track = full_track)
-```
-
-```{r echo = FALSE, warning = FALSE}
-ggplot(with_wind_radii_2, aes(x = cspeed, y = forward_speed)) + geom_point() + 
-  geom_abline(intercept = 0, slope = 1)
-coef(lm(forward_speed ~ cspeed, data = with_wind_radii_2))
-```
-
-As you can see, with the changes made to the `cspeed` function, the values generated when calculating forward speed using the new `forward_speed`) versus old (`cspeed`) methods are nearly identical.
-
-If you agree, I think we should move forward using the new code. 
+- This I have coded differently from the original code. In the original code, this was calculated by calculating the u- and v-components of speed (forward progress per time) based on the distance traveled from the observation before the current one to the observation after the current one, measuring this distance with something that looks like it was simpler than the Haversine method for determing distance (something closer to Euclidean distance, perhaps, but determining the exact degrees-to-kilometers conversion factor for degrees longitude based on latitude). I think that the Haversine method to calculate the distance traveled using the great circle method, as I've done in the new function, would be preferable to the old code, although  in talking with Andrea, we don't think it should make much difference in final estimates whether we do this or a simpler method of calculating distance. This is one spot where we might want to check profiling and simplify the method if this step takes a while to run.
+- The current method of calculating distance assumes the earth has a radius of 6378.14. 
 
 ### Calculate direction of storm movement ("heading")
 
@@ -326,68 +184,10 @@ This is implemented in our package through the `calc_bearing` function:
 stormwindmodel::calc_bearing
 ```
 
-Questions: 
+Notes: 
 
-1. The previous code seems to have used the direction from the previous observation to the following one. I instead used the angle from the *current* observation to the next one. It seemed to me like what you really want here is the *current* bearing of the storm, or what direction it needs to move toward as of right now to get to the next observed point. Are we okay with this change? (See code below for old code).
-2. Any reason to use the old method versus the new one? They give very similar results (see below)
-
-```{r eval = FALSE}
-# Old code:
-lon2km = 111.32*cos(rcv*(lat[i]))
-lat2km = 110.54
-
-# calculate motion direction angle (`mda`)
-# Use trig angles, so E=0, N=90, W=180, S=270)
-
-calcangle_pair <- function(dx, dy) {
-  if(is.na(dx) | is.na(dy)){
-    return(NA)
-  } else {
-    if (dx > 0) {
-      angle <- atan(dy / dx) * 180 / pi
-    } else if (dx < 0) {
-      angle <- 180 + atan(dy / dx) * 180 / pi
-    } else {
-      if (dy == 0) {
-        angle <- 0
-      } else{
-        angle <- atan2(dy, dx) * 180 / pi
-      }
-    }
-    if (angle < 0) {
-      angle <- 360 + angle
-    }
-    else if (angle > 360) {
-      angle <- angle - 360
-    }
-    return(angle)
-  }
-}
-
-calcangle <- function(dx, dy){
-  calcd_angle <- mapply(calcangle_pair, dx, dy)
-  return(calcd_angle)
-}
-
-mda <- calcangle(dx,dy)
-```
-
-Based on the current code, these two now agree pretty well, although they're not identical (`mda` is calculated using the current code, `mda2` is calculated using the old code).
-
-```{r echo = FALSE, warning = FALSE}
-ggplot(with_wind_radii, aes(x = mda2, y = mda)) + geom_point()
-coef(lm(mda ~ mda2, data = with_wind_radii))
-```
-
-Here is a plot of Floyd's track, with the motion direction angle shown by the color, to help us figure out how to interpret this angle and whether we want to make any alterations to this code: 
-
-```{r fig.width = 5, fig.height = 3, echo = FALSE}
-ggplot(with_wind_radii, aes(x = -lon, y = phi, color = mda)) + 
-  geom_point() + theme_tufte() + 
-    scale_colour_gradientn(colours=rainbow(4))
-```
-
-This seems to be doing okay, with an `mda` of 0 indicating the storm is moving directly east, one of 180 indicating it's moving directly west, etc. 
+- Again, I'm using a bit of a more complex method here than in the old code. Based on talking with Andrea, we could simplify this method if it's computationally expensive. 
+- The old code used the direction from the previous observation to the following one. I instead used the angle from the *current* observation to the next one. It seemed to me like what you really want here is the *current* bearing of the storm, or what direction it needs to move toward as of right now to get to the next observed point. This new code reflects this.
 
 ### Convert 1-min sustained wind at 10 m to gradient level wind speed 
 
@@ -413,15 +213,6 @@ Questions:
 - Is the 0.9 value too high? It seems like it might be on the higher end for some of the range of values given in different papers, although I'm not positive that they are all referring to the same thing. We do use this same value later to bring winds back down from gradient back to surface, so maybe it doesn't matter much as long as we're consistent?
 - Should we try to use a different value for points over land? It sounded like 0.9 might be a more reasonable value over open water, but we're trying to model wind speeds over land, right? From talking with John and Andrea, it sounds like it might be appropriate to use a value about 20% lower for over-land (so, .9 * .8 = `r round(.9 * .8, 1)`). Do we want to change this? Some of the storm observations are over water, but if we needed to, we could calculate how close a storm observation is to its closest county, and it that is not very, very small, assume that the storm is over water (there are probably plenty of other ways we could do that, too, but that would be the simplest with the tools we have already in the package or easily available through other R packages). 
 
-```{r eval = FALSE}
-# Old code: 
-
-# convert 1-min sustained wind at 10m to gradient level wind speed (for use in Holland wind profile calculation)
-for(i in 1:ntime){
-  r_vmax[i] = vmax[i]/0.9
-}
-```
-
 Notes: 
 
 - John and Andrea noted that, while this seemed high for any observations over land, we shouldn't change this until we're clear about how we're getting back down to surface level winds later (because it might be that we should change this the same way now when we go from surface to gradient and later when we transfer back down to surface). However, we might want a different value here depending on whether the storm is over land or over water, as long as we ensure that doesn't break anything further down the line in the code.  
@@ -443,17 +234,6 @@ where:
 ```{r}
 stormwindmodel::will7a
 ```
-
-```{r eval = FALSE}
-# Old code: 
-
-# Calculate Radii for wind model calculations
-Rmax = 46.4*exp(-0.0155*r_vmax[i]+0.0169*lat[i])   # Willoughby et al. 2006, Eqn 7a
-```
-
-Questions: 
-
-- No questions. This part is straightforward.
 
 Notes: 
 
@@ -477,15 +257,6 @@ where:
 stormwindmodel::will10a
 ```
 
-```{r eval = FALSE}
-# Old code: 
-X1=317.1-2.026*r_vmax[i]+1.915*lat[i]				# Willoughby et al. 2006, Eqn 10a
-```
-
-Questions: 
-
-- No questions. This part is straightforward.
-
 ### Willoughby et al. 2006, Eqn 10b
 
 Next, we need to calculate another Willoughby parameter. Here is the equation from the Willoughby et al. 2006 paper:
@@ -503,15 +274,6 @@ where:
 ```{r}
 stormwindmodel::will10b
 ```
-
-```{r eval = FALSE}
-# Old code: 
-n=0.4067 + 0.0144*r_vmax[i]-0.0038*lat[i]			# Willoughby et al. 2006, Eqn 10b
-```
-
-Questions: 
-
-- No questions. This part is straightforward.
 
 ### Willoughby et al. 2006, Eqn 10c
 
@@ -536,18 +298,6 @@ where:
 ```{r}
 stormwindmodel::will10c
 ```
-
-```{r eval = FALSE}
-# Old code: 
-A = 0.0696 + 0.0049*r_vmax[i]-0.0064*lat[i]  	# Willoughby et al. 2006, Eqn 10c
-if(A<0){
-  A=0
-}
-```
-
-Questions: 
-
-- No questions. This part is straightforward.
 
 ### Determine $R_1$ using numerical methods
 
@@ -616,68 +366,10 @@ stormwindmodel::will3_deriv_func
 stormwindmodel::solve_for_xi
 ```
 
-```{r eval = FALSE}
-# Old code: 
+Notes: 
 
-f <- function(x, known){
-  deriv <- 70 * 9 * x ^ 8 - 315 * 8 * x ^ 7 + 540 * 7 * x ^ 6 -
-    420 * 6 * x ^ 5 + 126 * 5 * x ^ 4
-  f <- 70 * x ^ 9 - 315 * x ^ 8 + 540 * x ^ 7 - 420 * x ^ 6 +
-    126 * x ^ 5 - known
-  temp <-c(deriv, f)
-  return(temp)
-}
-
-newton2 <-function(known, eps = 10e-4, itmax = 100){
-
-  x <- 0.5
-  for(it in seq(1,itmax,by=1)){
-    xo <- x
-    temp2 <- f(xo,known)
-    dfdx <- temp2[1]
-    fx <- temp2[2]
-    dx <- -fx / dfdx
-    x <- xo + dx
-    if(abs(dx) < eps){
-      x <- 0.5
-      break
-    }
-  }
-
-  xin <- 0.5 + 0.1
-  for(it in seq(0, itmax, by = 2)){
-    xo <- x
-    temp2 <- f(xo, known)
-    dfdx <- temp2[1]
-    fx <- temp2[2]
-    dx <- -fx/dfdx
-    x <- xo + dx
-    if(abs(dx) < eps * abs(x)){
-      break
-    }
-  }
-  sigma <- x
-  return(sigma)
-}
-
-known=n*((1-A)*X1+A*X2)/(n*((1-A)*X1+A*X2)+Rmax)	# Willoughby et al. 2006, Eqn 3 (RHS)
-
-#sub function newton2( unfinished )
-sigma = newton2(known)
-if(Rmax>20){
-  R1 = Rmax - 25*sigma
-  R2 = R1 + 25.0
-} else {
-  R1 = Rmax - 15*sigma
-  R2 = R1 + 15.0
-}
-```
-
-Questions: 
-
-1. It looks like the old code has more to its numerical method than the function I wrote to implement the Newton-Raphson method. Am I missing something? Should there be some more to the function I wrote?
-2. It sounds like Newton-Raphson can be sensitive to the starting guess ($x_0$), so it's important to have a good starting guess. Are we sure that $x_0 = 0.5$ is good for this?
-3. Should I have the function print a warning if the algorithm doesn't converge for that observation? Currently, it sets $\xi$ to be missing (`NA`) if the algorithm doesn't converge, but maybe we also need to print a message or warning every time that happens? I don't have a great idea of how often we would expect it to not converge.
+- It sounds like Newton-Raphson can be sensitive to the starting guess ($x_0$), so it's important to have a good starting guess. We may want to try to confirm that $x_0 = 0.5$ is a good starting guess for our application.
+- I addd code to have have the function print a warning if the algorithm doesn't converge for that observation. It also sets $\xi$ to be missing (`NA`) if the algorithm doesn't converge. I don't have a great idea of how often we would expect it to not converge, so maybe this will clarify for us if this is a common problem as we work through historical hurricanes.
 
 ### Determine R1 once you've found xi
 
@@ -692,22 +384,6 @@ For this function, we're assuming that $R_2 - R_1$ (the width of the transition 
 ```{r}
 stormwindmodel::calc_R1
 ```
-
-```{r eval = FALSE}
-# Old code: 
-
-if(Rmax>20){
-  R1 = Rmax - 25*sigma
-  R2 = R1 + 25.0
-} else {
-  R1 = Rmax - 15*sigma
-  R2 = R1 + 15.0
-}
-```
-
-Questions: 
-
-- No questions. This part is straightforward.
 
 Note: 
 
@@ -732,29 +408,6 @@ where:
 Questions:
 
 - It seems the distance of the transition region is being set to 25 for larger storms (with $R_{max} > 20$) and to 15 for smaller storms (with $R_{max} \le 20$). I'm not sure if this is an arbitrary choice, or is there's some reference for this choice?
-
-Here are histograms of the values we have for the radius values: 
-
-```{r message = FALSE, warning = FALSE, fig.width = 4, fig.height = 5, echo = FALSE}
-to_plot <- select(with_wind_radii, Rmax, R1, R2) %>%
-  gather(key = key, value = value) %>%
-  mutate(key = factor(key, levels = c("R1", "Rmax", "R2")))
-ggplot(to_plot, aes(x = value)) + geom_histogram() + 
-  facet_wrap(~ key, ncol = 1) + xlab("Radius (km)") + 
-  theme_tufte()
-```
-
-Here are histograms for some of the other Willoughby parameters we get for Floyd:
-
-```{r message = FALSE, warning = FALSE, fig.width = 5, fig.height = 4, echo = FALSE}
-to_plot <- select(with_wind_radii, Vmax, Rmax, X1, n, A, xi) %>%
-  gather(key, value)
-ggplot(to_plot, aes(x = value)) + geom_histogram() + 
-  facet_wrap(~ key, ncol = 2, scales = "free") + 
-  theme_tufte()
-```
-
-We can check these against the Willoughby paper to make sure that we're getting reasonable values for all of the parameters.
 
 # Calculate wind speed at each grid point 
 
