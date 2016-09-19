@@ -206,6 +206,7 @@ will3_deriv_func <- function(xi, eq3_right){
 solve_for_xi <- function(xi0 = 0.5, eq3_right, eps = 10e-4, itmax = 100){
   if(is.na(eq3_right)){
     return(NA)
+    warning("Newton-Raphson did not converge.")
   } else{
     i <- 1
     xi <- xi0
