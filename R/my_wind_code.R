@@ -148,16 +148,11 @@ calc_grid_wind <- function(grid_point = stormwindmodel::county_points[1, ],
                       windspd = mapply(gradient_to_surface, track = track, r = r),
                       # Get surface wind direction
                       swd = mapply(add_inflow, gwd = gwd, r = r, Rmax = Rmax),
-                      # Calculate u- and v-components of surface wind speed
-                      windspd_u = windspd * cos(degrees_to_radians(swd)),
-                      windspd_v =  windspd * sin(degrees_to_radians(swd)),
-                      # Add back in component from forward motion of the storm
-                      correction_factor = (Rmax * r) / (Rmax^2 + r^2),
-                      windspd_u = windspd_u + correction_factor * forward_speed_u,
-                      windspd_v = windspd_v + correction_factor * forward_speed_v,
-                      windspd = sqrt(windspd_u^2 + windspd_v^2),
-                      # Reset any negative values to 0
-                      windspd = ifelse(windspd > 0, windspd, 0),
+                      # Add back in storm forward motion component
+                      windspd = add_forward_speed(windspd,
+                                                  forward_speed_u,
+                                                  forward_speed_v,
+                                                  swd, r, Rmax),
                       # Convert 1-min winds at 10-m to 3-sec gust at surface,
                       sust_windspd = windspd,
                       gust_windspd = windspd * 1.49) %>%

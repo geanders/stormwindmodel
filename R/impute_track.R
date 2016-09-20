@@ -42,8 +42,7 @@
 #' @importFrom dplyr %>%
 #'
 #' @export
-create_full_track <- function(hurr_track = subset(hurr_tracks,
-                                                  storm_id == "Floyd-1999"),
+create_full_track <- function(hurr_track = subset(hurr_tracks, storm_id == "Floyd-1999"),
                               tint = 0.25){
   hurr_track <- dplyr::select(hurr_track, date, latitude, longitude, wind) %>%
     dplyr::mutate(date = lubridate::ymd_hm(date),
