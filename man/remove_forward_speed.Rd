@@ -4,25 +4,11 @@
 \alias{remove_forward_speed}
 \title{Remove forward speed estimate from maximum wind speed}
 \usage{
-remove_forward_speed(sustained_vmax, phi_1, L_1, time_1, phi_2, L_2, time_2)
+remove_forward_speed(sustained_vmax, forward_speed)
 }
 \arguments{
 \item{sustained_vmax}{A numeric vector of 1-minute sustained wind speed at
 10 meters, in meters / second.}
-
-\item{phi_1}{Latitude of the first location, in degrees.}
-
-\item{L_1}{Longitude of the first location, in degrees. This value should
-be expressed as a positive value for Western hemisphere longitudes.}
-
-\item{time_1}{Time of the first observation.}
-
-\item{phi_2}{Latitude of the second location, in degrees.}
-
-\item{L_2}{Longitude of the second location, in degrees. This value should
-be expressed as a positive value for Western hemisphere longitudes.}
-
-\item{time_2}{Time of the second observation.}
 }
 \value{
 A numerical vector with the maximum storm wind speed, with forward
@@ -33,8 +19,10 @@ This function takes the forward speed of the storm and subtracts it from
 the maximum storm wind speed, \eqn{V_{max}}.
 }
 \details{
-This function is based on equation 12 (and accompanying)
-   text) in Phadke et al. 2003.
+This function is based on equation 12 (and accompanying
+   text) in Phadke et al. 2003. Based on this paper, the correction
+   factor for forward speed is at its highest at the radius of
+   maximum winds, where it equals 0.5 times the forward wind speed.
 }
 \references{
 Padke AC, Martino CD, Cheung KF, and Houston SH. 2003. Modeling of

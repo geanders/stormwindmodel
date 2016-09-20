@@ -34,7 +34,7 @@
 #'    }
 #'
 #' @export
-latlon_to_meters <- function(phi_1, L_1, phi_2, L_2){
+latlon_to_km <- function(phi_1, L_1, phi_2, L_2){
   phi_1 <- degrees_to_radians(phi_1)
   L_1 <- degrees_to_radians(L_1)
   phi_2 <- degrees_to_radians(phi_2)
@@ -61,12 +61,12 @@ latlon_to_meters <- function(phi_1, L_1, phi_2, L_2){
 #'
 #' @param time_1 Time of the first observation.
 #' @param time_2 Time of the second observation.
-#' @inheritParams latlon_to_meters
+#' @inheritParams latlon_to_km
 #'
 #' @return A numeric vector with the average forward speed of the storm between
 #'    the two observations, in meters per second.
 calc_forward_speed <- function(phi_1, L_1, time_1, phi_2, L_2, time_2){
-  dist <- latlon_to_meters(phi_1, L_1, phi_2, L_2) * 1000
+  dist <- latlon_to_km(phi_1, L_1, phi_2, L_2) * 1000
   time <- as.numeric(difftime(time_2, time_1, units = "secs"))
   forward_speed <- dist / time
   return(forward_speed)
@@ -78,7 +78,7 @@ calc_forward_speed <- function(phi_1, L_1, time_1, phi_2, L_2, time_2){
 #' the first location, based on latitude and longitude coordinates for both
 #' locations.
 #'
-#' @inheritParams latlon_to_meters
+#' @inheritParams latlon_to_km
 #'
 #' @return The direction of the second location as seen from the first location,
 #'    in degrees. A direction of 0 degrees indicates the second location is

@@ -46,31 +46,29 @@
 #' @export
 add_wind_radii <- function(full_track = create_full_track()){
 
-        with_wind_radii <- dplyr::mutate(full_track,
-                                  forward_speed = calc_forward_speed(phi, lon,
-                                                                     date,
-                                                                     lead(phi),
-                                                                     lead(lon),
-                                                                     lead(date)),
-                                  mda = calc_bearing(phi, lon,
-                                                     lead(phi), lead(lon)),
-                              sustained_Vmax = remove_forward_speed(sustained_Vmax,
-                                                                    lag(phi),
-                                                                    lag(lon),
-                                                                    lag(date),
-                                                                    lead(phi),
-                                                                    lead(lon),
-                                                                    lead(date)),
-                              Vmax = calc_gradient_speed(sustained_Vmax),
-                              Rmax = will7a(Vmax, phi),
-                              X1 = will10a(Vmax, phi),
-                              n = will10b(Vmax, phi),
-                              A = will10c(Vmax, phi),
-                              eq3_right = will3_right(n, A, X1, Rmax),
-                              xi = mapply(solve_for_xi, eq3_right = eq3_right),
-                              R1 = calc_R1(Rmax, xi),
-                              R2 = ifelse(Rmax > 20, R1 + 25, R1 + 15)
-                              )
+        with_wind_radii <- full_track %>%
+          dplyr::mutate(forward_speed = calc_forward_speed(phi, lon, date,
+                                                           lead(phi), lead(lon),
+                                                           lead(date)),
+                        mda = calc_bearing(phi, lon, lead(phi), lead(lon)),
+                        forward_speed_u = forward_speed * cos(degrees_to_radians(mda)),
+                        forward_speed_v = forward_speed * sin(degrees_to_radians(mda)),
+                        sustained_Vmax = remove_forward_speed(sustained_Vmax,
+                                                              forward_speed),
+                        over_land = TRUE,
+                        #over_land = mapply(check_over_land, phi, lon),
+                        Vmax = mapply(calc_gradient_speed,
+                                      sustained_vmax = sustained_Vmax,
+                                      over_land = over_land),
+                        Rmax = will7a(Vmax, phi),
+                        X1 = will10a(Vmax, phi),
+                        n = will10b(Vmax, phi),
+                        A = will10c(Vmax, phi),
+                        eq3_right = will3_right(n, A, X1, Rmax),
+                        xi = mapply(solve_for_xi, eq3_right = eq3_right),
+                        R1 = calc_R1(Rmax, xi),
+                        R2 = ifelse(Rmax > 20, R1 + 25, R1 + 15)
+                        )
         return(with_wind_radii)
 }
 
@@ -133,15 +131,10 @@ calc_grid_wind <- function(grid_point = stormwindmodel::county_points[1, ],
                            sust_duration_cut = 20){
 
         grid_wind <- mutate(with_wind_radii,
-                      # lon2km = 111.32 * cos(pi * phi / 180),
-                      # dx = lon2km * (lon - (-grid_point$glon)),
-                      # dy = 110.54 * (grid_point$glat - phi),
-                      # r2 = sqrt(dx^2 + dy^2),
                       # Calculated distance from storm center to location
-                      r = latlon_to_meters(phi, lon,
-                                            grid_point$glat,
-                                            -grid_point$glon),
-                      # Calculate tangential windspeed at the point
+                      r = latlon_to_km(phi, lon, grid_point$glat,
+                                       -grid_point$glon),
+                      # Calculate rotational windspeed at the point
                       track = mapply(will1, r = r, Rmax = Rmax,
                                      R1 = R1, R2 = R2,
                                      Vmax = Vmax, n = n, A = A, X1 = X1),
@@ -151,16 +144,18 @@ calc_grid_wind <- function(grid_point = stormwindmodel::county_points[1, ],
                                                         grid_point$glat,
                                                         - grid_point$glon),
                       gwd = (90 + bearing_from_storm) %% 360,
-                      # oldangle = stormwindmodel:::calcangle(dx, dy),
-                      # gwd2 = (90 + oldangle)  %% 360,
-                      swd = mapply(add_inflow, gwd = gwd, r = r, Rmax = Rmax),
                       # Bring back to surface level (surface wind reduction factor)
-                      windspd = 0.9 * track,
-                      windspd = mapply(add_asymmetry, windspd = windspd,
-                                       swd = swd, mda = mda,
-                                       forward_speed = forward_speed),
-                      # Add  a water-to-land wind ratio correction
-                      windspd = 0.89 * windspd,
+                      windspd = mapply(gradient_to_surface, track = track, r = r),
+                      # Get surface wind direction
+                      swd = mapply(add_inflow, gwd = gwd, r = r, Rmax = Rmax),
+                      # Calculate u- and v-components of surface wind speed
+                      windspd_u = windspd * cos(degrees_to_radians(swd)),
+                      windspd_v =  windspd * sin(degrees_to_radians(swd)),
+                      # Add back in component from forward motion of the storm
+                      correction_factor = (Rmax * r) / (Rmax^2 + r^2),
+                      windspd_u = windspd_u + correction_factor * forward_speed_u,
+                      windspd_v = windspd_v + correction_factor * forward_speed_v,
+                      windspd = sqrt(windspd_u^2 + windspd_v^2),
                       # Reset any negative values to 0
                       windspd = ifelse(windspd > 0, windspd, 0),
                       # Convert 1-min winds at 10-m to 3-sec gust at surface,

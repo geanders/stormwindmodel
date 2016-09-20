@@ -1,6 +1,6 @@
 ---
 title: "Vignette for `stormwindmodel`"
-author: "G. Brooke Anderson, Seth Guikema, Joshua M. Ferreri, ..., Steven Quiring"
+author: "G. Brooke Anderson, Andrea Schumacher, Seth Guikema, Joshua M. Ferreri, ..., Steven Quiring"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
@@ -125,11 +125,11 @@ where:
 - $R$: Radius of the earth, here assumed to be 6378.14 kilometers
 - $D$: Distance between the two locations, in kilometers
 
-To do this in the package, first we've got a helper function to convert between degrees and radians (`degrees_to_radians`), and then a function called `latlon_to_meters` that uses the haversine approach to calculate the distance between two latitude-longitude pairs (`phi_1` and `phi_2` are the two latitudes; `L_1` and `L_2` are the two longitudes):
+To do this in the package, first we've got a helper function to convert between degrees and radians (`degrees_to_radians`), and then a function called `latlon_to_km` that uses the haversine approach to calculate the distance between two latitude-longitude pairs (`phi_1` and `phi_2` are the two latitudes; `L_1` and `L_2` are the two longitudes):
 
 ```{r}
 stormwindmodel:::degrees_to_radians
-stormwindmodel:::latlon_to_meters
+stormwindmodel:::latlon_to_km
 ```
 
 As a note, these are helper functions that other functions in our package use, but that users would not directly access.
@@ -138,12 +138,6 @@ We then have a function called `calc_forward_speed` that caculates the distance 
 
 ```{r}
 stormwindmodel:::calc_forward_speed
-```
-
-Next, there's a function called `remove_forward_speed` that uses `calc_forward_speed` to calculate the translational speed and then subtracts this from the maximum surface wind speed. If $V_{max}$ after removing the forward storm motion is ever negative, the `remove_forward_speed` function resets the value to 0 m / s.
-
-```{r}
-stormwindmodel:::remove_forward_speed
 ```
 
 Notes:
@@ -189,33 +183,79 @@ Notes:
 - Again, I'm using a bit of a more complex method here than in the old code. Based on talking with Andrea, we could simplify this method if it's computationally expensive. 
 - The old code used the direction from the previous observation to the following one. I instead used the angle from the *current* observation to the next one. It seemed to me like what you really want here is the *current* bearing of the storm, or what direction it needs to move toward as of right now to get to the next observed point. This new code reflects this.
 
+### Calculate u- and v-components of forward speed
+
+Next, we use the estimated magnitude and direction of the storm's forward speed to calculate u- and v-components of this forward speed. Later, we will add back in these two components, after adjusting for the Phadke correction factor for forward motion.
+
+To calculate the u- and v-components of forward motion, $V_{F,u}$ and $V_{F,v}$, we used: 
+
+$$
+V_{F,u} = \left|\overrightarrow{V_{F}}\right| cos(\theta)
+$$
+
+$$
+V_{F,v} = \left|\overrightarrow{V_{F}}\right| sin(\theta)
+$$
+
+where $\theta$ is the direction of the storm movement (0 for due east, 90 for due north, etc.).
+
+### Adjust wind speed to remove forward motion of storm
+
+Next, there's a function called `remove_forward_speed` that uses the estimated forward speed in equation 12 (and accompanying text) from Phadke et al. 2003 to adjust wind speed to remove the component from forward motion. 
+
+Because here we are trying to adjust the maximum sustained wind to remove the component from forward speed, we can assume that we adjusting wind speed at the radius of maximum winds and for winds blowing in the same direction as the direction of the forward motion of the storm. Therefore, the correction term for forward motion is $U = 0.5 * V_F$ (Phadke et al. 2003), or half the total forward speed of the storm. We substract this correction factor from the maximum sustained wind speed to remove the forward component, and because we assume that the maximum winds are blowing in the same direction as the direction of the storm's forward motion, we can directly subtract this correction term from the magnitude of the wind speed (rather than needing to break into u- and v-components for a vector addition).
+
+If $V_{max}$ after removing the forward storm motion is ever negative, the `remove_forward_speed` function resets the value to 0 m / s.
+
+```{r}
+stormwindmodel:::remove_forward_speed
+```
+
 ### Convert 1-min sustained wind at 10 m to gradient level wind speed 
 
 The extended tracks database gives maximum winds as one minute sustained wind speeds 10 meters above the ground. To make calculations easier (by not having to deal with friction), we convert the 1-minute sustained wind speeds at 10 meters (`sustained_Vmax` in the created dataframe), which is what is given in the hurricane tracking data, to gradient level wind speed (`Vmax` in the created dataframe), using the following equation:
 
 $$
-V_{max} = \frac{V_{max,sustained}}{0.9}
+V_{max} = \frac{V_{max,sustained}}{rf}
 $$
 
 where:
 
 - $V_{max}$: Mean wind speed at gradient level (m / s) 
 - $V_{max,sustained}$: Surface wind speed (10 meters above the water or ground) (m / s)
+- $rf$: Reduction factor for $r \le$ 100 km.
 
-This conversion seems to come from Vickery et al. 2009 (and maybe from Schwerdt et al., 1979, before that). I think they called this the "wind speed reduction factor". 
+The reduction factor come from Knaff et al., 2003, Figure 3. We assume that $R_{max}$ is always 100 km or less. Then, $rf$ is 0.9 if the storm's center is over water and 80% of that, 0.72, if the storm's center is over land.  
 
 ```{r}
 stormwindmodel::calc_gradient_speed
 ```
 
-Questions: 
+To determine if the storm center is over land or over water, we calculate its distance to all the county centers (eastern half of the United States). If the storm is within 30 km of at least one county center, we designate the storm center as "over land", and "over water" otherwise: 
 
-- Is the 0.9 value too high? It seems like it might be on the higher end for some of the range of values given in different papers, although I'm not positive that they are all referring to the same thing. We do use this same value later to bring winds back down from gradient back to surface, so maybe it doesn't matter much as long as we're consistent?
-- Should we try to use a different value for points over land? It sounded like 0.9 might be a more reasonable value over open water, but we're trying to model wind speeds over land, right? From talking with John and Andrea, it sounds like it might be appropriate to use a value about 20% lower for over-land (so, .9 * .8 = `r round(.9 * .8, 1)`). Do we want to change this? Some of the storm observations are over water, but if we needed to, we could calculate how close a storm observation is to its closest county, and it that is not very, very small, assume that the storm is over water (there are probably plenty of other ways we could do that, too, but that would be the simplest with the tools we have already in the package or easily available through other R packages). 
+```{r}
+stormwindmodel:::check_over_land
+```
 
-Notes: 
+```{r warning = FALSE, fig.width = 8, fig.height = 6}
+over_land <- mapply(stormwindmodel:::check_over_land,
+                    phi = full_track$phi,
+                    lon = full_track$lon)
+to_plot <- full_track %>%
+  mutate(over_land = over_land)
+us <- ggmap::get_map("North Caroline", zoom = 4)
+ggmap::ggmap(us) + 
+  geom_point(data = to_plot, aes(x = -lon, y = phi, color = over_land),
+             size = 0.2, alpha = 0.7)
+```
 
-- John and Andrea noted that, while this seemed high for any observations over land, we shouldn't change this until we're clear about how we're getting back down to surface level winds later (because it might be that we should change this the same way now when we go from surface to gradient and later when we transfer back down to surface). However, we might want a different value here depending on whether the storm is over land or over water, as long as we ensure that doesn't break anything further down the line in the code.  
+At the moment, there are three problems with this: (1) it takes a long time to run, (2) it might be missing sometimes, it looks like (saying over water when it's over land), although these cases do seem to be coastal, and (3) if it's over non-US land, this doesn't catch that.
+
+Because of these concerns, I've got the code running right now to always specify that the storm center is over land. 
+
+Note: 
+
+- In a later version, it might make more sense to use a land mask rather than basing land / water on distance to the nearest county center.
 
 ### Calculate radius of maximum wind speed (Willoughby et al. 2006, Eqn 7a)
 
@@ -237,7 +277,7 @@ stormwindmodel::will7a
 
 Notes: 
 
-- From talking with John and Andrea, this could be the place where we could most improve our models. There are a lot of equations for calculating the radius of maximum windspeed, and there are also estimates based on radius data from the extended tracks database (and this is probably based more on observations for the real storm). We could potentially try out different equations for this part to optimize our model if we ever want to try that in the future.
+- This could be the place where we could most improve our models in later version. There are a lot of equations for calculating the radius of maximum windspeed, and there are also estimates based on radius data from the extended tracks database (and this is probably based more on observations for the real storm). We could potentially try out different equations for this part to optimize our model if we ever want to try that in the future.
 
 ### Willoughby et al. 2006, Eqn 10a
 
@@ -454,45 +494,17 @@ calc_grid_wind(grid_point = grid_point,
                sust_duration_cut = 15)
 ```
 
-### Get r for the grid point
+### Get the radius from the storm center to the grid point
 
-The first step is to determine the distance between the grid point and the center of the storm ($r$). As with the previous main function, here I am using the haversine method of great circle distance to calculate this distance. For this, I use the `latlon_to_meters` function given in the code shown above.
+The first step is to determine the distance between the grid point and the center of the storm ($r$). As with the previous main function, here I am using the haversine method of great circle distance to calculate this distance. For this, I use the `latlon_to_km` function given in the code shown above.
 
-Here is the relationship between $r$ determined using the old (`r2`) and the new (`r`) methods (the blue points show the values for $r$ and $r2$, while the black line is a reference with zero intercept and slope of 1): 
+Notes: 
 
-```{r echo = FALSE}
- grid_wind <- mutate(with_wind_radii,
-                            lon2km = 111.32 * cos(pi * phi / 180),
-                      dx = lon2km * (-lon - grid_point$glon),
-                      dy = 110.54 * (grid_point$glat - phi),
-                      r2 = sqrt(dx^2 + dy^2),
-                      r = latlon_to_meters(phi, -lon,
-                                            grid_point$glat,
-                                            grid_point$glon))
-ggplot(grid_wind, aes(x = r2, y = r)) + 
-  geom_point(alpha = 0.2, size = 0.2, color = "blue") + 
-  geom_abline(intercept = 0, slope = 1) + 
-  theme_tufte()
-```
+- Again, if this is taking a lot of computation time, we could probably use a simpler method without much loss of accuracy. 
 
-To me, it looks like the two sets of code are pretty similar on this, certainly for points close to the storm track. 
+### Determine tangential gradient wind speed at each location
 
-Here are the distances between the storm center and the example grid point across all of the storm track observations. 
-
-```{r fig.width = 5, fig.height = 3, echo = FALSE}
-ggplot(grid_wind, aes(x = -lon, y = phi, color = r)) + geom_point() + 
-  geom_point(data = grid_point, aes(x = glon, y = glat), color = "red") + 
-  theme_tufte() + 
-    scale_colour_gradientn(colours=rainbow(4))
-```
-
-Questions: 
-
-- The two methods for determining distance to the grid point (something that looks like Euclidean distance and the haversine method) seem to give pretty similar answers. I think the second method appeals more to me. Any votes otherwise, to keep the old way of determining this?
-
-### Determine gradient wind speed (tangential wind) at each location
-
-Next, the package calculates $V(r)$, the tangential wind component at radius $r$. Note there are different equations for this for (1) the eye to the start of the transition region; (2) outside the transition region; and (3) within the transition region.
+Next, the package calculates $V(r)$, the tangential wind component at the grid point, which is at radius $r$ from the storm center. Note there are different equations for this for (1) the eye to the start of the transition region; (2) outside the transition region; and (3) within the transition region.
 
 First, if $r \le R_1$, you are supposed to use this equation to calculate $V(r)$ (Willoughby et al. 2006, Eqn 1 (a)):
 
@@ -543,172 +555,36 @@ All of this is wrapped in the `will1` function (named after the equation in Will
 stormwindmodel:::will1
 ```
 
-```{r eval = FALSE}
-# Old code
+### Calculate the direction of gradient winds at each location 
 
-# Begin Holland2 model to calculate gradient windspeed distribution
-    # *Note:  Wind speed scaled by 100 - must undo after calculation
-    if(r < R1){
-      track[j]=r_vmax[i]*(r/Rmax)^n*100
-    } else if (r > R2){
-      track[j]=r_vmax[i]*((1-A)*exp((Rmax-r)/X1)+A*exp((Rmax-r)/X2))*100
-    } else if(r > R1 && r < R2){
-      eps=(r-R1)/25
-      w=126*eps^5-420*eps^6+540*eps^7-315*eps^8+70*eps^9
-      v_temp1=r_vmax[i]*(r/Rmax)^n
-      v_temp2=r_vmax[i]*((1-A)*exp((Rmax-r)/X1)+A*exp((Rmax-r)/X2))
-      track[j]=(v_temp1*(1-w)+v_temp2*w)*100
-    }
-    track[j] = track[j]/100.0
-    if (track[j] < 0.0){
-      track[j] = 0.0
-    }
-```
-
-Questions: 
-
-- I don't think I have any questions about this part.
-
-Here are some values from doing this process for the county center of Dare County, NC, during Hurricane Floyd (`track` is the gradient rotational wind speed, in meters per second):
-
-```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width = 8, fig.height = 2.5}
-grid_point <- dplyr::filter(county_points, gridid == "37055")
-grid_wind <- mutate(with_wind_radii,
-                      r = latlon_to_meters(phi, -lon,
-                                            grid_point$glat,
-                                            grid_point$glon),
-                      track = mapply(will1, r = r, Rmax = Rmax,
-                                     R1 = R1, R2 = R2,
-                                     Vmax = Vmax, n = n, A = A, X1 = X1))
-a <- ggplot(grid_wind, aes(x = track)) + geom_histogram() + 
-  theme_tufte()
-b <- ggplot(grid_wind, aes(x = -lon, y = phi, color = track)) + 
-  geom_point() + 
-  geom_point(data = grid_point, aes(x = glon, y = glat), color = "red") + 
-  theme_tufte() + 
-    scale_colour_gradientn(colours=rainbow(4))
-grid.arrange(a, b, ncol = 2)
-```
-
-The graph on the right shows the wind speed in Dare County, NC, for each time on the storm's track. In other words, Dare did not have storm-related winds when the storm was just starting, but had winds over 20 m / s when the storm was closest.
-
-To me, this seems to be doing okay. It would probably be worthwhile to compare with any reported values of rotational wind speeds at the Outer Banks during this storm to verify that these values are in the right neighborhood.
-
-### Calculate the angle between the storm center and each location
-
-So far, the model has just calculated the the rotational component of the wind speed at each grid location (tangential wind). Now it needs to add back in the forward motion component of the wind speed (translational wind) at each location. This requires, for each grid point, adding the separate vectors of tangential and translational winds. When these vectors point in the same direction, the total storm winds will be increased by the forward motion (the right side of the storm). Conversely, on the left side of the storm, the forward motion of the storm will offset some of the storm-related wind. 
+So far, the model has just calculated the the rotational component of the wind speed at each grid location (tangential wind). Now we need to add back in the forward motion component of the wind speed (translational wind) at each location. This requires, for each grid point, adding the separate vectors of tangential and translational winds. When these vectors point in the same direction, the total storm winds will be increased by the forward motion (the right side of the storm). Conversely, on the left side of the storm, the forward motion of the storm will offset some of the storm-related wind. 
 
 To get the total wind speed at a grid point, we need to add these two wind speed vectors together and then take the magnitude of the resulting vector. The wind speed from the forward motion of the storm will have the same angle and magnitude at every grid point. [I think that this is generally what's going on from this point forward-- correct me if I'm wrong.]
 
 We've already determined the direction of the forward direction of the storm. So, to add the two wind components together, we need to get the direction of the storm winds at each location we want to assess (grid points or counties).
 
-First, we need to determine, for each storm location, the direction from the storm center to the locations. For this, we can use the `calc_bearing` function that we used earlier to determine the bearing of the storm at each storm observation. Now, we use it to calculate the angle from the storm center to the grid point, and then add 90 degrees to get the angle of the tangential winds:
+First, we need to determine, for each storm location, the direction from the storm center to the locations. For this, we can use the `calc_bearing` function that we used earlier to determine the bearing of the storm at each storm observation. Now, we use it to calculate the angle from the storm center to the grid point:
 
 ```{r}
 stormwindmodel:::calc_bearing
 ```
 
-```{r eval = FALSE}
-# Old code
+Next, we calculate the gradient wind direction based on the bearing of a location from the storm. This gradient wind direction is calculated by adding 90 degrees to the bearing of the grid point from the storm center.
 
-dx = lon2km*(lon[i]-glon[j])
-    dy = lat2km*(glat[j]-lat[i]) #changed k to j
-    r = sqrt(dx*dx+dy*dy)
-    # calculate the gradient wind direction (gwd) at this grid point
-    gwd <- calcangle(dx, dy)
-    gwd = gwd - 90.0
+### Go from gradient level to surface level winds
 
-    if (gwd < 0.0){
-      gwd = 360.0 + gwd
-    } else if (gwd > 360.0){
-      gwd = gwd - 360.0
-    }
-    
-calcangle_pair <- function(dx, dy) {
-  if(is.na(dx) | is.na(dy)){
-    return(NA)
-  } else {
-    if (dx > 0) {
-      angle <- atan(dy / dx) * 180 / pi
-    } else if (dx < 0) {
-      angle <- 180 + atan(dy / dx) * 180 / pi
-    } else {
-      if (dy == 0) {
-        angle <- 0
-      } else{
-        angle <- atan2(dy, dx) * 180 / pi
-      }
-    }
-    if (angle < 0) {
-      angle <- 360 + angle
-    }
-    else if (angle > 360) {
-      angle <- angle - 360
-    }
-    return(angle)
-  }
-}
+Now, to get estimated surface-level tangential winds from gradient-levels winds, we reverse what we did before, again using methods from Knaff et al., 2011. 
 
-calc_bearing <- function(phi_1, L_1, phi_2, L_2){
-  phi_1 <- degrees_to_radians(phi_1)
-  L_1 <- degrees_to_radians(L_1)
-  phi_2 <- degrees_to_radians(phi_2)
-  L_2 <- degrees_to_radians(L_2)
+In this case, we can always assume we're over land, not water, so we always reduce the reduction factor by 20%. Now, however, we cannot assume that $r$ is always $R_{max}$, so we need to include a function that calculates the reduction factor as a function of radius from the storm center.
 
-  S <- cos(phi_2) * sin(L_1 - L_2)
-  C <- cos(phi_1) * sin(phi_2) - sin(phi_1) * cos(phi_2) * cos(L_1 - L_2)
+Here is the function we use for this part:
 
-  beta_rad <- atan2(S, C)
-  beta <- radians_to_degrees(beta_rad) + 90
-  return(beta)
-}
+```{r}
+stormwindmodel:::gradient_to_surface
 ```
 
-Here is a plot of the bearing of Dare County, NC, from the storm at each storm observation for Hurricane Floyd:
-
-```{r echo = FALSE}
-grid_wind <- mutate(with_wind_radii,
-                      lon2km = 111.32 * cos(pi * phi / 180),
-                      dx = lon2km * (lon - (-grid_point$glon)),
-                      dy = 110.54 * (grid_point$glat - phi),
-                      # calculate the gradient wind direction (gwd) at this
-                      # grid point
-                      bearing_from_storm = stormwindmodel:::calc_bearing(phi,
-                                                                        lon,
-                                                              grid_point$glat,
-                                                          - grid_point$glon),
-                      gwd = (90 + bearing_from_storm) %% 360,
-                      oldangle = stormwindmodel:::calcangle(dx, dy),
-                      gwd2 = (90 + oldangle)  %% 360)
-ggplot(grid_wind, aes(x = oldangle, y = bearing_from_storm)) + geom_point() +
-  theme_tufte()
-coef(lm(gwd ~ gwd2, data = grid_wind))
-```
-
-The old and new methods seem to agree very well. Here are the bearings from the storm for this sample county over time, so we can check if the directions are reasonable. 
-
-```{r echo = FALSE, fig.width = 5, fig.height = 3}
-ggplot(grid_wind, aes(x = -lon, y = phi, color = bearing_from_storm)) +
-  geom_point() + 
-  geom_point(data = grid_point, aes(x = glon, y = glat), color = "red") +
-  theme_tufte() + 
-    scale_colour_gradientn(colours=rainbow(4)) 
-```
+This is from Figure 3 in Knaff et al. 2011. It uses a reduction factor of 0.90 up to a radius of 100 km, a reduction factor of 0.75 for any radius 700 km or greater, and a linear decreasing reduction factor for any radius between those two radius values. If the point is over land (true for any county), this reduction factor is further reduced by 20%.
  
-### Calculate the direction of gradient winds at each location 
- 
-The direction seems to change from positive to negative right when the storm passes, which seems right since the bearing is changing from northeast to southeast, and due east is 0 degrees. I think that could also be a good sign that this model is working reasonably well for getting bearing from the storm. 
-Next, we calculate the gradient wind direction based on the bearing of a location from the storm. This should be the bearing from the storm plus 90 degrees. Here is a map of that for the same county: 
-
-```{r echo = FALSE, fig.width = 5, fig.height = 3}
-ggplot(grid_wind, aes(x = -lon, y = phi, color = gwd)) +
-  geom_point() + 
-  geom_point(data = grid_point, aes(x = glon, y = glat), color = "red") +
-  theme_tufte() + 
-    scale_colour_gradientn(colours=rainbow(4)) 
-```
-
-This also looks right. Winds are due east (0 degrees) when the county is directly south of the storm.
 
 ### Calculate the surface wind direction
 
@@ -738,111 +614,17 @@ Here is the new function for this step:
 add_inflow
 ```
 
-Here is the old code for this step:
+### Add back in wind component from forward speed of storm
+
+Next, to add back in the storm's forward motion at each grid point, we reserve what we did before with the Phadke correction factor from Phadke et al., 2003, Eq. 12. We calculate a constant correction factor (`correction_factor`), as a function of `r`, radius from the storm center to the grid point, and `R_{max}`, radius from storm center to maximum winds. We then correct both the u- and v-components of forward speed with this correction factor, add these to the u- and v-components of tangential surface wind, and then use these u- and v-components to calculate the magnitude of total wind associated with the storm at the grid point:
 
 ```{r eval = FALSE}
-# Old code
-swd = gwd + 20
-if (swd < 0.0){
-      swd = 360.0 + swd
-} else if (swd > 360.0){
-      swd = swd - 360.0
-}
+## New code
+correction_factor = (Rmax * r) / (Rmax^2 + r^2)
+windspd_u = windspd_u + correction_factor * forward_speed_u
+windspd_v = windspd_v + correction_factor * forward_speed_v
+windspd = sqrt(windspd_u^2 + windspd_v^2)
 ```
-
-Notes: 
-
-- From talking with John and Andrea, we need to check into whether this calculation should be moved after the part where we add the asymmetry. I think we might be able to figure out the right order by looking at the NOAA 23 document. 
-
-### Go from gradient level to surface level winds
-
-At this point in the old code, there was some code that did two things at one: 
-1. Broke the surface wind speed down into u- and v-components and;
-2. Applied the factor of 0.9 to bring wind speeds back from gradient level to surface level (very early in the code, we use 1 / 0.9 to change from surface level wind speed in best tracks to gradient level wind speed to generate the wind profile). 
-
-I don't think we need to break the surface wind into u- and v-components anymore. I imagine that sometime a while ago, there was a spot in the code where the u- and v-components of forward wind speed were being added in directly before the u- and v-components of total wind speed were added back together to get the total magnitude of the wind speed. However, now it seems we're using an asymmetry adjustment to add back in the forward wind speed, and the old code seemed to add the u- and v-components back together immediately without adding forward speed components to them, so I've taken this part of the code out of the new version. I do still, however, apply the 0.9 factor at this point to bring winds back down from gradient to surface level:
-
-```{r eval = FALSE}
-# New code
-windspd = 0.9 * track
-
-# Old code
-mult = 0.9
-rcv = 3.14/180.0
-uwind[i,j] = mult*cos(rcv*swd)*track[j]
-vwind[i,j] = mult*sin(rcv*swd)*track[j]
-windspd[i,j] = sqrt((uwind[i,j])^2+(vwind[i,j])^2)
-```
-
-Notes:
-
-- From John and Andrea: This looks like it's just reversing what we did before, when we went from surface to gradient, so we could remove friction when calculating our estimates. However, it looks like this step does *not* adjust for the added friction over land. It sounds like at this point we probably want to do some adjustment for wind speed that accounts for all the grid points being land-based ones. So, I've added that into the code after we apply the asymmetry factor. 
-
-### Apply an asymmetry factor
-
-Next, to add back in the storm's forward motion at each grid point, it looks like we are adding in an asymmetry factor that incorporates both the magnitude and the direction (relative to surface winds at a given location) of the storm's forward motion. This equation looks a little funny because there is a constant ($0.514791^{0.37}$) to adjust for the fact that our wind speeds are in meters per second rather than knots:
-
-$$
-\beta = swd - mda
-$$
-$$
-A = 1.5\left(T^{0.63}\right)\left(0.514791^{0.37}\right)cos(\beta)
-$$
-$$
-windspd = \begin{cases}
-windspd + 1.5 * A  & \text{ if } windspd \ge 0\\ 
-0 & \text{ if } windspd < 0
-\end{cases}
-$$
-
-The $A$ calculated here is referred to in the NOAA 23 report as an "asymmetry factor" for maximum, 10-meter, 10 minute overwater windspeed. 
-
-From the NOAA 23 report: 
-
-> "A is added to the winds on the right of a storm track and subtracted from those on the left."
-
-The same report describes $\beta$ as "the angle between the track direction ($\theta$) and the surface wind direction." (Note: Since this specifies "surface wind direction" rather than "gradient wind direction", I think that we add the inflow angle before calculating this asymmetry factor.)
-
-Questions: 
-
-- I think that there's a bug in the old code here. It looks like someone put in exponential operations some places that should have been multiplications. This would probably have been an easy mistake to make in transferring the code from Fortran. The new version of calculating $A$ is the correct one, right?
-
-```{r}
-stormwindmodel::add_asymmetry
-```
-
-```{r eval = FALSE}
-# Old code
-# Add back in wind component due to storm motion (only where windspd > 0 m/s)
-# From NOAA Technical Report 23, Schwerdt et al., pg. 25
-if (windspd[i,j] > 0.0){
-  beta = swd-mda
-  windspd[i,j] = windspd[i,j]+1.5*((cspeed)^0.63)^((0.514751)^0.37)*cos(rcv*beta)
-  if (windspd[i,j] < 0.0){
-    windspd[i,j] = 0.0
-  }
-}
-```
-
-### Apply a correction for overland versus overwater
-
-From one source, here are onshore-to-overwater wind ratios that we might want to consider for adjusting from an over-weater estimate to an over-land estimate (from NOAA 23, p. 31, for 10-meter, 10-minute wind speed, to be added after adjusting for asymmetry it looks like): 
-
-location | wind ratio
----------|-----------
-water to land | 0.89
-water to awash | 0.95
-water to rough terrain | 0.83
-
-There was not anything to do this in the old code. In the new code, I have added in the following code to adjust for the fact that we're trying to estimate winds over land, rather than over water, using the "water-to-land" ratio given in the table above: 
-
-```{r eval = FALSE}
-windspd = 0.89 * windspd
-```
-
-Note: 
-
-- I wonder if we could improve the model by adding a county-specific frictional factor. Based on the NOAA 23 report, the 0.89 value is really best only fairly close to the coast, and would not work well for places, in particular, in the mountains.
 
 ### Calculate 3-second gust wind speed from sustained wind speed
 
