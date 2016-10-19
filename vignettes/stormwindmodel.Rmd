@@ -37,10 +37,6 @@ The storm tracks come in with observations every six hours (plus, for some, an o
 stormwindmodel::create_full_track
 ```
 
-Note: 
-
-- After imputing the tracks, we're expressing longitude as a positive number, to work correctly in the models. This means that we will need to graph the negative of longitude when mapping tracks from this point of the code forward.
-
 Here is an example of running this function like this, where `example_track` is a dataframe with the hurricane track information, and `tint` is the desired time interval to which to impute: 
 
 ```{r echo = FALSE}
@@ -53,8 +49,6 @@ full_track <- create_full_track(hurr_track = example_track,
                                  tint = 0.25)
 full_track[1:3, ]
 ```
-
-During this imputation, the function changes the column names to `phi` for latitude, `lon` for longitude, and `sustained_Vmax` for wind speed. This is to get these names aligned with the equations we use within the Willoughby model.
 
 # Adding Willoughby inputs
 
