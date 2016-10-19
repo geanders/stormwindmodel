@@ -13,20 +13,20 @@
 #'    following columns:
 #'    \itemize{
 #'      \item{date: Date-time, in POSIXct format and UTC time zone}
-#'      \item{phi: Latitude, in decimal degrees}
-#'      \item{lon: Longitude, in decimal degrees and expresses as positive
+#'      \item{tclat: Latitude, in decimal degrees}
+#'      \item{tclon: Longitude, in decimal degrees and expressed as positive
 #'            values (this model assumes all longitudes will be in the
 #'            Western hemisphere)}
-#'      \item{sustained_Vmax: Sustained maximum wind speed, in meters per
+#'      \item{vmax: Sustained maximum wind speed, in meters per
 #'           second}
 #'    }
 #'
 #' @return The input dataset, but with columns added for the Willoughby
 #'    parameters for every observations. Columns added include:
 #'    \itemize{
-#'      \item{forward_speed: The forward (translational) speed of the storm,
+#'      \item{tcspd: The forward (translational) speed of the storm,
 #'        in meters per second}
-#'      \item{mda: The bearing of the storm, in degrees, with 0 degrees
+#'      \item{tcdir: The bearing of the storm, in degrees, with 0 degrees
 #'        indicating the storm is moving due east, 90 degrees indicating the
 #'        storm is moving due north, etc.}
 #'      \item{Vmax: The gradient wind speed, based on the best track's
@@ -37,33 +37,31 @@
 #'    }
 #'
 #' @examples
-#' data("hurr_tracks", package = "hurricaneexposuredata")
-#' example_track <- subset(hurr_tracks, storm_id == "Floyd-1999")
-#' full_track <- create_full_track(hurr_track = example_track,
-#'                                 tint = 0.25)
+#' data("floyd_tracks")
+#' full_track <- create_full_track(hurr_track = floyd_tracks)
 #' with_wind_radii <- add_wind_radii(full_track = full_track)
 #'
 #' @export
 add_wind_radii <- function(full_track = create_full_track()){
 
         with_wind_radii <- full_track %>%
-          dplyr::mutate(forward_speed = calc_forward_speed(phi, lon, date,
-                                                           lead(phi), lead(lon),
-                                                           lead(date)),
-                        mda = calc_bearing(phi, lon, lead(phi), lead(lon)),
-                        forward_speed_u = forward_speed * cos(degrees_to_radians(mda)),
-                        forward_speed_v = forward_speed * sin(degrees_to_radians(mda)),
-                        sustained_Vmax = remove_forward_speed(sustained_Vmax,
-                                                              forward_speed),
+          dplyr::mutate(tcspd = calc_forward_speed(tclat, tclon, date,
+                                                   lead(tclat), lead(tclon),
+                                                   lead(date)),
+                        tcdir = calc_bearing(tclat, tclon,
+                                           lead(tclat), lead(tclon)),
+                        tcspd_u = tcspd * cos(degrees_to_radians(tcdir)),
+                        tcspd_v = tcspd * sin(degrees_to_radians(tcdir)),
+                        vmax_sfc_sym = remove_forward_speed(vmax, tcspd),
                         over_land = TRUE,
-                        #over_land = mapply(check_over_land, phi, lon),
-                        Vmax = mapply(calc_gradient_speed,
-                                      sustained_vmax = sustained_Vmax,
-                                      over_land = over_land),
-                        Rmax = will7a(Vmax, phi),
-                        X1 = will10a(Vmax, phi),
-                        n = will10b(Vmax, phi),
-                        A = will10c(Vmax, phi),
+                        #over_land = mapply(check_over_land, tclat, tclon),
+                        vmax_gl = mapply(calc_gradient_speed,
+                                         vmax_sfc_sym = vmax_sfc_sym,
+                                         over_land = over_land),
+                        Rmax = will7a(vmax_gl, tclat),
+                        X1 = will10a(vmax_gl, tclat),
+                        n = will10b(vmax_gl, tclat),
+                        A = will10c(vmax_gl, tclat),
                         eq3_right = will3_right(n, A, X1, Rmax),
                         xi = mapply(solve_for_xi, eq3_right = eq3_right),
                         R1 = calc_R1(Rmax, xi),
@@ -132,7 +130,7 @@ calc_grid_wind <- function(grid_point = stormwindmodel::county_points[1, ],
 
         grid_wind <- mutate(with_wind_radii,
                       # Calculated distance from storm center to location
-                      r = latlon_to_km(phi, lon, grid_point$glat,
+                      r = latlon_to_km(tclat, tclon, grid_point$glat,
                                        -grid_point$glon),
                       # Calculate rotational windspeed at the point
                       track = mapply(will1, r = r, Rmax = Rmax,
@@ -140,7 +138,7 @@ calc_grid_wind <- function(grid_point = stormwindmodel::county_points[1, ],
                                      Vmax = Vmax, n = n, A = A, X1 = X1),
                       # calculate the gradient wind direction (gwd) at this
                       # grid point
-                      bearing_from_storm = calc_bearing(phi, lon,
+                      bearing_from_storm = calc_bearing(tclat, tclon,
                                                         grid_point$glat,
                                                         - grid_point$glon),
                       gwd = (90 + bearing_from_storm) %% 360,
@@ -150,8 +148,8 @@ calc_grid_wind <- function(grid_point = stormwindmodel::county_points[1, ],
                       swd = mapply(add_inflow, gwd = gwd, r = r, Rmax = Rmax),
                       # Add back in storm forward motion component
                       windspd = add_forward_speed(windspd,
-                                                  forward_speed_u,
-                                                  forward_speed_v,
+                                                  tcspd_u,
+                                                  tcspd_v,
                                                   swd, r, Rmax),
                       # Convert 1-min winds at 10-m to 3-sec gust at surface,
                       sust_windspd = windspd,

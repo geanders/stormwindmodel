@@ -2,15 +2,15 @@
 #'
 #' @param r Numeric vector of radius from the storm center to the point you are
 #'    measuring, in kilometers
-#' @param Vmax Numeric vector of the tangential wind component of the maximum
+#' @param vmax_gl Numeric vector of the tangential wind component of the maximum
 #'    gradient wind speed, in meters per second
 #' @param Rmax Numeric vector of the radius at which the maximum wind occurs,
 #'    in kilometers
 #' @param n Numeric vector of ...
 #'
 #' @export
-will1a <- function(Vmax, r, Rmax, n){
-  Vi <- Vmax * (r / Rmax)^n
+will1a <- function(vmax_gl, r, Rmax, n){
+  Vi <- vmax_gl * (r / Rmax) ^ n
   return(Vi)
 }
 
@@ -31,7 +31,7 @@ will1a <- function(Vmax, r, Rmax, n){
 #' @details If \eqn{r \le R_1}{r \le R1}, this function is calculating the equation:
 #'
 #'    \deqn{V(r) = V_i = V_{max} \left( \frac{r}{R_{max}} \right)^n}{
-#'    V(r) = Vi = Vmax (r / Rmax)^n}
+#'    V(r) = Vi = vmax_gl (r / Rmax)^n}
 #'
 #'    where:
 #'    \itemize{
@@ -47,14 +47,14 @@ will1a <- function(Vmax, r, Rmax, n){
 #'      the equation:
 #'
 #'      \deqn{V(r) = V_o = V_{max}\left[(1 - A) e^\frac{R_{max} - r}{X_1} + A e^\frac{R_{max} - r}{X_2}\right]}{
-#'      V(r) = Vo = Vmax[(1 - A) e^((Rmax - r) / X1) + A e^((Rmax - r) / X_2)]}
+#'      V(r) = Vo = vmax_gl[(1 - A) e^((Rmax - r) / X1) + A e^((Rmax - r) / X_2)]}
 #'
 #'    where:
 #'    \itemize{
 #'      \item{\eqn{V(r)}: Maximum sustained gradient wind speed at a radius of
 #'        \eqn{r} kilometers from the storm's center}
 #'      \item{\eqn{r}: Radius from the storm center, in kilometers}
-#'      \item{\eqn{V_{max}}{Vmax}: Maximum sustained gradient wind speed of the
+#'      \item{\eqn{V_{max}}{vmax_gl}: Maximum sustained gradient wind speed of the
 #'        storm, in meters per second}
 #'      \item{\eqn{R_{max}}{Rmax}: Radius (in kilometers) to highest winds}
 #'      \item{\eqn{A}, \eqn{X_2}{X2}: Parameters for the Willoughby wind model}
@@ -84,15 +84,15 @@ will1a <- function(Vmax, r, Rmax, n){
 #'      \item{\eqn{R_1}{R1}, \eqn{R_2}{R2}: Parameters for the Willoughby wind model}
 #'    }
 #' @export
-will1 <- function(r, Rmax, R1, R2, Vmax, n, A, X1, X2 = 25){
+will1 <- function(r, Rmax, R1, R2, vmax_gl, n, A, X1, X2 = 25){
 
-  if(is.na(Rmax) || is.na(Vmax) ||
+  if(is.na(Rmax) || is.na(vmax_gl) ||
      is.na(n) || is.na(A) || is.na(X1)){
     return(NA)
   } else {
 
-    Vi <- Vmax * (r / Rmax) ^ n
-    Vo <- Vmax * ((1 - A) * exp((Rmax - r)/X1) + A * exp((Rmax - r) / X2))
+    Vi <- vmax_gl * (r / Rmax) ^ n
+    Vo <- vmax_gl * ((1 - A) * exp((Rmax - r)/X1) + A * exp((Rmax - r) / X2))
 
     if(r < R1){
       track <- Vi
@@ -258,23 +258,23 @@ calc_R1 <- function(Rmax, xi){
   return(R1)
 }
 
-#' Calculate Rmax from Vmax and phi
+#' Calculate Rmax from vmax_gl and tclat
 #'
 #' This function calculates the radius at which the maximum wind occurs
 #' (\eqn{Rmax}), based on the tangential wind component of the maximum wind
-#' speed (\eqn{Vmax}) and latitude (\eqn{\phi}). This function implements
+#' speed (\eqn{vmax_gl}) and latitude (\eqn{\phi}). This function implements
 #' Willoughby et al. (2006), Equation 7a.
 #'
-#' @param phi Numeric vector of the absolute value of latitude, in degrees.
+#' @param tclat Numeric vector of the absolute value of latitude, in degrees.
 #' @inheritParams will1a
 #'
 #' @details This function fits the following equation:
 #' \deqn{R_{max} = 46.4 e^{- 0.0155 V_{max} + 0.0169\phi}}{
-#' Rmax = 46.4 e^(- 0.0155 Vmax) + 0.0169\phi}
+#' Rmax = 46.4 e^(- 0.0155 vmax_gl) + 0.0169\phi}
 #' where:
 #' \itemize{
 #'   \item{\eqn{R_{max}}{Rmax}: Radius from the storm center to the point at which the maximum wind occurs (km)}
-#'   \item{\eqn{V_{max}}{Vmax}: Tangential wind component of the gradient-level maximum wind speed (m / s)}
+#'   \item{\eqn{V_{max}}{vmax_gl}: Tangential wind component of the gradient-level maximum wind speed (m / s)}
 #'   \item{\eqn{\phi}: Latitude (degrees)}
 #' }
 #'
@@ -282,12 +282,12 @@ calc_R1 <- function(Rmax, xi){
 #'    in kilometers.
 #'
 #' @export
-will7a <- function(Vmax, phi){
-    Rmax <- 46.4 * exp(-0.0155 * Vmax + 0.0169 * phi)
+will7a <- function(vmax_gl, tclat){
+    Rmax <- 46.4 * exp(-0.0155 * vmax_gl + 0.0169 * tclat)
     return(Rmax)
 }
 
-#' Calculate the fitted decay length from \eqn{Vmax} and \eqn{\phi}
+#' Calculate the fitted decay length from \eqn{vmax_gl} and \eqn{\phi}
 #'
 #' This function implements Willoughby et al. (2006), Equation 10a.
 #'
@@ -300,22 +300,22 @@ will7a <- function(Vmax, phi){
 #' @details This function uses the following equation to calculate the
 #'    \eqn{X_1}{X1} parameter:
 #'    \deqn{X_1 = 317.1 - 2.026V_{max} + 1.915 \phi}{
-#'    X1 = 317.1 - 2.026Vmax + 1.915 \phi}
+#'    X1 = 317.1 - 2.026vmax_gl + 1.915 \phi}
 #'    where:
 #'    \itemize{
 #'      \item{\eqn{X_1}{X1}: Parameter for the Willoughby wind model}
-#'      \item{\eqn{V_{max}}{Vmax}: Tangential component of the maximum
+#'      \item{\eqn{V_{max}}{vmax_gl}: Tangential component of the maximum
 #'            gradient-level sustained wind speed (in m / s)}
 #'      \item{\eqn{\phi}: Latitude, in decimal degrees}
 #'    }
 #'
 #' @export
-will10a <- function(Vmax, phi){
-  X1 <- 317.1 - 2.026 * Vmax + 1.915 * phi
+will10a <- function(vmax_gl, tclat){
+  X1 <- 317.1 - 2.026 * vmax_gl + 1.915 * tclat
   return(X1)
 }
 
-#' Calculate the power law exponential from \eqn{Vmax} and \eqn{\phi}
+#' Calculate the power law exponential from \eqn{vmax_gl} and \eqn{\phi}
 #'
 #' This function implements Willoughby et al. (2006), Equation 10b.
 #'
@@ -326,22 +326,22 @@ will10a <- function(Vmax, phi){
 #'
 #' @details This function is calculating the equation:
 #'    \deqn{n = 0.4067 + 0.0144 V_{max} - 0.0038 \phi}{
-#'    n = 0.4067 + 0.0144 Vmax - 0.0038 \phi}
+#'    n = 0.4067 + 0.0144 vmax_gl - 0.0038 \phi}
 #'    where:
 #'    \itemize{
 #'      \item{\eqn{n}: Parameter for the Willoughby wind model}
-#'      \item{\eqn{V_{max}}{Vmax}: Tangential component of the maximum
+#'      \item{\eqn{V_{max}}{vmax_gl}: Tangential component of the maximum
 #'            gradient-level sustained wind speed (in m / s)}
 #'      \item{\eqn{\phi}: Latitude, in decimal degrees}
 #'    }
 #'
 #' @export
-will10b <- function(Vmax, phi){
-  n <- 0.4067 + 0.0144 * Vmax - 0.0038 * phi
+will10b <- function(vmax_gl, tclat){
+  n <- 0.4067 + 0.0144 * vmax_gl - 0.0038 * tclat
   return(n)
 }
 
-#' Calculate a parameter for the Willoughby model from \eqn{Vmax} and \eqn{\phi}
+#' Calculate a parameter for the Willoughby model from \eqn{vmax_gl} and \eqn{\phi}
 #'
 #' This function implements Willoughby et al. (2006), Equation 10c to generate
 #' a parameter needed for the Willoughby wind model.
@@ -354,20 +354,20 @@ will10b <- function(Vmax, phi){
 #'
 #' @details This function is calculating the equation:
 #'
-#'    \deqn{A = 0.0696 + 0.0049 Vmax - 0.0064 \phi}
+#'    \deqn{A = 0.0696 + 0.0049 vmax_gl - 0.0064 \phi}
 #'
 #'    where:
 #'    \itemize{
 #'      \item{\eqn{A}: Parameter for the Willoughby wind model (any value
 #'          of A calculated as negative is re-set to 0)}
-#'      \item{\eqn{V_{max}}{Vmax}: Tangential component of the maximum
+#'      \item{\eqn{V_{max}}{vmax_gl}: Tangential component of the maximum
 #'            gradient-level sustained wind speed (in m / s)}
 #'      \item{\eqn{\phi}: Latitude, in decimal degrees}
 #'    }
 #'
 #' @export
-will10c <- function(Vmax, phi){
-  A <- 0.0696 + 0.0049 * Vmax - 0.0064 * phi
+will10c <- function(vmax_gl, tclat){
+  A <- 0.0696 + 0.0049 * vmax_gl - 0.0064 * tclat
   A[A < 0 & !is.na(A)] <- 0
   return(A)
 }

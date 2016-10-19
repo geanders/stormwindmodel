@@ -3,18 +3,19 @@
 #' This function converts 1-minute sustained wind speed at 10 meters to gradient
 #' level wind speed.
 #'
-#' @param sustained_vmax A numeric vector of 1-minute sustained wind speed at
+#' @param vmax_sfc_sym A numeric vector of 1-minute sustained wind speed at
 #'    10 meters, in meters / second.
 #' @param over_land TRUE / FALSE or whether the storm is over land (the
 #'    alternative is that the storm is over water).
 #'
 #' @details This function uses the following conversion:
-#'  \deqn{V_{max} = \frac{V_{max,sustained}}{0.9}}{
-#'  Vmax = Vmax_sustained / reduction_factor}
+#'  \deqn{V_{max,sfc} = \frac{V_{max}}{rf}}{
+#'  Vmax,sfc = Vmax / rf}
 #'  where:
 #'  \itemize{
 #'    \item{\eqn{V_{max}}{Vmax}: Mean wind speed at gradient level (m / s) }
-#'    \item{\eqn{V_{max,sustained}}{Vmax_sustained}: Surface wind speed (10 meters above the water or ground) (m / s)}
+#'    \item{\eqn{V_{max,src}}{Vmax_sfc}: Surface wind speed (10 meters above the water or ground) (m / s)}
+#'    \item{\eqn{rf}: Reduction factor (see below)}
 #'  }
 #'  We make this adjustment based on Figure 3 in Knaff et al., 2011.
 #'    If over water and within 100 kilometers of the storm's center,
@@ -32,13 +33,13 @@
 #' @return A numeric vector with gradient-level wind speed, in meters / second.
 #'
 #' @export
-calc_gradient_speed <- function(sustained_vmax, over_land){
+calc_gradient_speed <- function(vmax_sfc_sym, over_land){
   reduction_factor <- 0.9
   if(over_land){
     reduction_factor <- reduction_factor * 0.8
   }
-  Vmax <- sustained_vmax / reduction_factor
-  return(Vmax)
+  vmax_gl <- vmax_sfc_sym / reduction_factor
+  return(vmax_gl)
 }
 
 #' Estimate if storm is over land or water
@@ -74,8 +75,8 @@ check_over_land <- function(phi, lon){
 #' Padke AC, Martino CD, Cheung KF, and Houston SH. 2003. Modeling of
 #'    tropical cyclone winds and waves for emergency management. Ocean
 #'    Engineering 30:553-578.
-remove_forward_speed <- function(sustained_vmax, forward_speed){
-  sustained_vmax <- sustained_vmax - 0.5 * forward_speed
+remove_forward_speed <- function(sustained_vmax, tcspd){
+  sustained_vmax <- sustained_vmax - 0.5 * tcspd
   sustained_vmax[sustained_vmax < 0] <- 0
   return(sustained_vmax)
 }

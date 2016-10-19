@@ -29,6 +29,47 @@ Here is an overview of the wind modeling process implemented by this package:
 3. For each county center (or other grid point), estimate surface-level sustained wind and 3-second wind gusts at all storm observation points (i.e., all points along the interpolated storm track). This step includes: measuring distance to county from storm center (radius); calculating tangential gradient wind components at that grid point; calculating gradient wind direction at that grid point; calculating surface wind speed; calculating surface wind direction, adding storm forward motion back into surface wind estimate.
 4. Determine for each county: the maximum sustained winds and wind gust speeds at any point on the storm's track; the duration of sustained and gust winds over a certain speed (i.e., how many minutes winds were above a cutoff).
 
+```{r echo = FALSE}
+var_names <- dplyr::data_frame(var = c("`vmax`",
+                                       "`vmax_sfc_sym`",
+                                       "`vmax_gl`",
+                                       "`tclat`",
+                                       "`tclon`",
+                                       "tcspd",
+                                       "tcspd_u", 
+                                       "tcspd_v",
+                                       "tcdir"),
+                               math = c("$V_{max}$",
+                                        "$V_{max,sym}$",
+                                        "$V_{max,G}$",
+                                        "$\\phi$",
+                                        "$L",
+                                        "$V_F$",
+                                        "$V_{F,u}$",
+                                        "$V_{F,v}$",
+                                        "$\\theta$"),
+                               defn = c("Max 10-m 10min sustained wind",
+                                        "Max 10-m 10min sustained wind with motion asymmetry removed",
+                                        "Max gradient-level 10min sustained wind",
+                                        "Center position latitude",
+                                        "Center position longitude (0 to 360)",
+                                        "Tropical cyclone forward speed",
+                                        "Tropical cyclone forward speed, u-component",
+                                        "Tropical cyclone forward speed, v-component",
+                                        "Tropical cyclone forward direction"),
+                               units = c("m/s",
+                                         "m/s",
+                                         "m/s",
+                                         "degrees North",
+                                         "degrees East",
+                                         "m/s",
+                                         "m/s",
+                                         "m/s",
+                                         "degrees (trigonomical)"))
+knitr::kable(var_names, col.names = c("R variable", "Expression in equations",
+                                      "Definition", "Units"))
+```
+
 # Impute storm tracks
 
 The storm tracks come in with observations every six hours (plus, for some, an observation at landfall). Our package has a function called `create_full_track` that imputes both locations (latitude and longitude) and intensity (maximum wind speed) from the hurricane tracks data to a finer time resolution (default is 15 minutes, but you can also select other values using the `tint` argument). This imputation uses a natural cubic spline, with the degrees of freedom set as the number of timed observations for the storm in the input data (typically best tracks data) divided by two. The option `tint` in this function gives the time interval you want to use, where `1` equals one hour. 
@@ -37,32 +78,26 @@ The storm tracks come in with observations every six hours (plus, for some, an o
 stormwindmodel::create_full_track
 ```
 
-Here is an example of running this function like this, where `example_track` is a dataframe with the hurricane track information, and `tint` is the desired time interval to which to impute: 
-
-```{r echo = FALSE}
-data("hurr_tracks", package = "hurricaneexposuredata")
-example_track <- subset(hurr_tracks, storm_id == "Floyd-1999")
-```
+Here is an example of running this function like this, where `floyd_tracks` is a dataframe with the hurricane track information for Hurricane Floyd (saved as data with this package), and `tint` is the desired time interval to which to impute: 
 
 ```{r}
-full_track <- create_full_track(hurr_track = example_track,
-                                 tint = 0.25)
-full_track[1:3, ]
+data("floyd_tracks")
+full_track <- create_full_track(hurr_track = floyd_tracks, tint = 0.25)
+full_track %>% slice(1:3)
 ```
 
 # Adding Willoughby inputs
 
 The next step is to process this imputed track and add in, for each observation point, the inputs and model parameters required for the Willoughby model. This process is done using the `add_wind_radii` function. As an input, it takes the imputed dataframe create by the `create_full_track` function. It outputs the same dataframe, but with columns added for the inputs and parameters required for the Willoughby wind model. 
 
-For the Hurricane Floyd example: 
+For the Hurricane Floyd example, here is an example of running the code and the first three and last three line of output: 
 
 ```{r}
 with_wind_radii <- stormwindmodel::add_wind_radii(full_track = full_track)
-head(with_wind_radii, 3)
-tail(with_wind_radii, 3)
+with_wind_radii %>% slice(c(1:3, (n()-3):n()))
 ```
 
-This adds lots of measurements and parameters for each observation. The first line has some missing values, and the last line does, too. This is because you need points before and after the current point to calculate forward speed and bearing of the storm. 
+This adds lots of measurements and parameters for each observation. The last line has some missing values. This is because you need points after the current point to calculate forward speed and bearing of the storm. 
 
 Here is the full code for this function:
 
@@ -74,7 +109,7 @@ You can see that this function is mostly wrapping helper functions, which do eac
 
 Note: 
 
-- Because I've made this modular, it would be pretty easy to get a student to go back and re-code any of the helper functions in C++ to increase speed. However, other than the function that uses the Newton-Raphson method, I would imagine that this step is not nearly as slow as the step that calculates wind speed at each grid point, so this might be lower priority for shifting to C++.
+- Because I've made this modular, it would be pretty easy to re-code any of the helper functions in C++ to increase speed. However, other than the function that uses the Newton-Raphson method, I would imagine that this step is not nearly as slow as the step that calculates wind speed at each grid point, so this might be lower priority for shifting to C++. I have an undergrad who is looking into which helper functions throughout the package we might want to write in C++ to improve performance. 
 
 ### Calculate the storm's forward speed
 
@@ -134,7 +169,7 @@ C = cos(\phi_{1,rad}) * sin(\phi_{2,rad}) - sin(\phi_{1,rad}) * cos(\phi_{2,rad}
 $$
 
 $$
-\beta = atan2(S, C) * \frac{180}{\pi} + 90
+\theta = atan2(S, C) * \frac{180}{\pi} + 90
 $$
 
 where: 
@@ -144,7 +179,7 @@ where:
 - $\phi_{2,rad}$: Latitude of second location, in radians
 - $L_{2,rad}$: Longitude of second location, in radians
 - $S$, $C$: Intermediary results
-- $\beta$ is the direction of the storm movement, in degrees
+- $\theta$ is the direction of the storm movement, in degrees
 
 This is implemented in our package through the `calc_bearing` function:
 
@@ -190,16 +225,16 @@ stormwindmodel:::remove_forward_speed
 The extended tracks database gives maximum winds as one minute sustained wind speeds 10 meters above the ground. To make calculations easier (by not having to deal with friction), we convert the 1-minute sustained wind speeds at 10 meters (`sustained_Vmax` in the created dataframe), which is what is given in the hurricane tracking data, to gradient level wind speed (`Vmax` in the created dataframe), using the following equation:
 
 $$
-V_{max} = \frac{V_{max,sustained}}{rf}
+V_{max,G} = \frac{V_{max,sym}}{f_r}
 $$
 
 where:
 
 - $V_{max}$: Mean wind speed at gradient level (m / s) 
 - $V_{max,sustained}$: Surface wind speed (10 meters above the water or ground) (m / s)
-- $rf$: Reduction factor for $r \le$ 100 km.
+- $f_r$: Reduction factor for $r \le$ 100 km. At this point, we're calculating things for $r = R_{max}$.
 
-The reduction factor come from Knaff et al., 2003, Figure 3. We assume that $R_{max}$ is always 100 km or less. Then, $rf$ is 0.9 if the storm's center is over water and 80% of that, 0.72, if the storm's center is over land.  
+The reduction factor come from Knaff et al., 2003, Figure 3. We assume that $R_{max}$ is always 100 km or less. Then, $f_r$ is 0.9 if the storm's center is over water and 80% of that, 0.72, if the storm's center is over land.  
 
 ```{r}
 stormwindmodel::calc_gradient_speed
@@ -211,7 +246,7 @@ To determine if the storm center is over land or over water, we calculate its di
 stormwindmodel:::check_over_land
 ```
 
-```{r warning = FALSE, fig.width = 8, fig.height = 6, message = FALSE}
+```{r warning = FALSE, fig.width = 8, fig.height = 6, message = FALSE, eval = FALSE}
 over_land <- mapply(stormwindmodel:::check_over_land,
                     phi = full_track$phi,
                     lon = full_track$lon)
@@ -236,13 +271,13 @@ Note:
 Here is the equation from the Willoughby et al. 2006 paper:
 
 $$
-R_{max} = 46.4 e^{- 0.0155 V_{max} + 0.0169\phi}
+R_{max} = 46.4 e^{- 0.0155 V_{max,G} + 0.0169\phi}
 $$
 
 where: 
 
 - $R_{max}$: Radius from the storm center to the point at which the maximum wind occurs (km)
-- $V_{max}$: the tangential wind component of the gradient-level maximum wind speed (m / s)
+- $V_{max,G}$: the tangential wind component of the gradient-level maximum wind speed (m / s)
 - $\phi$: Latitude, in decimal degrees
 
 ```{r}
@@ -258,13 +293,13 @@ Notes:
 Next, we calculate $X_1$, which is a parameter that we need for the Willoughby model. Here is the equation from the Willoughby et al. 2006 paper:
 
 $$
-X_1 = 317.1 - 2.026V_{max} + 1.915 \phi
+X_1 = 317.1 - 2.026V_{max,G} + 1.915 \phi
 $$
 
 where: 
 
 - $X_1$: Parameter for Willoughby wind model
-- $V_{max}$: the tangential wind component of the gradient-level maximum wind speed (m / s)
+- $V_{max,G}$: the tangential wind component of the gradient-level maximum wind speed (m / s)
 - $\phi$: Latitude, in decimal degrees
 
 ```{r}
@@ -276,13 +311,13 @@ stormwindmodel::will10a
 Next, we need to calculate another Willoughby parameter. Here is the equation from the Willoughby et al. 2006 paper:
 
 $$
-n = 0.4067 + 0.0144 V_{max} - 0.0038 \phi
+n = 0.4067 + 0.0144 V_{max,G} - 0.0038 \phi
 $$
 
 where: 
 
 - $n$: the exponential for the power law inside the eye
-- $V_{max}$: the tangential wind component of the gradient-level maximum wind speed (m / s)
+- $V_{max,G}$: the tangential wind component of the gradient-level maximum wind speed (m / s)
 - $\phi$: Latitude, in decimal degrees
 
 ```{r}
@@ -294,7 +329,7 @@ stormwindmodel::will10b
 Next, we need to calculate another Willoughby parameter. Here is the equation from the Willoughby et al. 2006 paper:
 
 $$
-A = 0.0696 + 0.0049 V_{max} - 0.0064 \phi
+A = 0.0696 + 0.0049 V_{max,G} - 0.0064 \phi
 $$
 $$
 A = \begin{cases}
@@ -306,7 +341,7 @@ $$
 where: 
 
 - $A$: "the fitted contribution of the faster exponential to the profile" (Willoughby, p.110)
-- $V_{max}$: maximum wind (in m / s)
+- $V_{max,G}$: maximum wind (in m / s)
 - $\phi$: absolute value of latitude (degrees)
 
 ```{r}
@@ -384,6 +419,7 @@ Notes:
 
 - It sounds like Newton-Raphson can be sensitive to the starting guess ($x_0$), so it's important to have a good starting guess. We may want to try to confirm that $x_0 = 0.5$ is a good starting guess for our application.
 - I addd code to have have the function print a warning if the algorithm doesn't converge for that observation. It also sets $\xi$ to be missing (`NA`) if the algorithm doesn't converge. I don't have a great idea of how often we would expect it to not converge, so maybe this will clarify for us if this is a common problem as we work through historical hurricanes.
+- It would be worth checking if R already has a function for doing Newton-Raphson that's been optimized to run faster.
 
 ### Determine R1 once you've found xi
 
