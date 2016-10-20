@@ -134,7 +134,7 @@ calc_grid_wind <- function(grid_point = stormwindmodel::county_points[1, ],
                                            grid_point$glat, -grid_point$glon),
                       # Calculate gradient winds at the point
                       wind_gl_aa = mapply(will1, cdist = cdist, Rmax = Rmax,
-                                          R1 = R1, R2 = R2, Vmax = Vmax,
+                                          R1 = R1, R2 = R2, vmax = vmax,
                                           n = n, A = A, X1 = X1),
                       # calculate the gradient wind direction (gwd) at this
                       # grid point
