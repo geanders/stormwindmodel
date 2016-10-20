@@ -1,6 +1,6 @@
 ---
-title: "Vignette for `stormwindmodel`"
-author: "G. Brooke Anderson, Andrea Schumacher, Seth Guikema, Joshua M. Ferreri, ..., Steven Quiring"
+title: "Details of `stormwindmodel` package"
+author: "G. Brooke Anderson, Andrea Schumacher, Seth Guikema, Joshua M. Ferreri, Steven Quiring"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
@@ -24,10 +24,16 @@ library(ggthemes)
 
 Here is an overview of the wind modeling process implemented by this package: 
 
-1. Impute location and maximum wind speed from hurricane track data (every 6 hours) to 15-minute intervals
+1. Impute location and maximum wind speed from hurricane track data (every 6 hours) to more frequent intervals. The default is to impute to every 15 minutes.
 2. For each storm track location, calculate all the inputs needed for the Willoughby wind speed model (forward speed, direction of forward motion of the storm, gradient-level wind speed, radius of maximum winds, parameters for decay of winds away from the storm's center for Willoughby model). 
 3. For each county center (or other grid point), estimate surface-level sustained wind and 3-second wind gusts at all storm observation points (i.e., all points along the interpolated storm track). This step includes: measuring distance to county from storm center (radius); calculating tangential gradient wind components at that grid point; calculating gradient wind direction at that grid point; calculating surface wind speed; calculating surface wind direction, adding storm forward motion back into surface wind estimate.
 4. Determine for each county: the maximum sustained winds and wind gust speeds at any point on the storm's track; the duration of sustained and gust winds over a certain speed (i.e., how many minutes winds were above a cutoff).
+
+This process is conducted in the `stormwindmodel` package using three main functions: `create_full_track`, `add_wind_radii`, and `calc_grid_wind`. Each of these functions has a number of helper functions to do each required modeling step. Details of all of these are included in this vignette. The full process is then wrapped in the `get_grid_winds` function, which is the main function most people will use from this package. 
+
+## Variable definitions
+
+Here are variables used in this modeling process. 
 
 ```{r echo = FALSE}
 var_names <- dplyr::data_frame(var = c("`vmax`",
@@ -35,10 +41,37 @@ var_names <- dplyr::data_frame(var = c("`vmax`",
                                        "`vmax_gl`",
                                        "`tclat`",
                                        "`tclon`",
-                                       "tcspd",
-                                       "tcspd_u", 
-                                       "tcspd_v",
-                                       "tcdir"),
+                                       "`tcspd`",
+                                       "`tcspd_u`", 
+                                       "`tcspd_v`",
+                                       "`tcdir`",
+                                       "`X1`",
+                                       "`X2`",
+                                       "`n`",
+                                       "`A`",
+                                       "`xi`",
+                                       "`R1`",
+                                       "`R2`",
+                                       "`beta`",
+                                       "`Vi`",
+                                       "`V0`",
+                                       "`wind_gl_aa`",
+                                       "`wind_gl`",
+                                       "`cdist`",
+                                       "`chead`",
+                                       "`wind_sfc_sym_u`",
+                                       "`wind_sfc_sym_v`",
+                                       "`wind_sfc_u`",
+                                       "`wind_sfc_v`",
+                                       "`r`",
+                                       "`Rmax`",
+                                       "`reduction_factor`",
+                                       "`windspeed`",
+                                       "`gustspeed`",
+                                       "`vmax_sust`",
+                                       "`vmax_gust`",
+                                       "`sust_dur`",
+                                       "`gust_dur`"),
                                math = c("$V_{max}$",
                                         "$V_{max,sym}$",
                                         "$V_{max,G}$",
@@ -47,7 +80,34 @@ var_names <- dplyr::data_frame(var = c("`vmax`",
                                         "$V_F$",
                                         "$V_{F,u}$",
                                         "$V_{F,v}$",
-                                        "$\\theta$"),
+                                        "$\\theta$",
+                                        "$X_1$",
+                                        "$X_2$",
+                                        "$n$",
+                                        "$A$",
+                                        "$\\xi$",
+                                        "$R_1$",
+                                        "$R_2$",
+                                        "$\\beta$",
+                                        "$V_i$",
+                                        "$V_0$",
+                                        "$V_G(r)$",
+                                        "?",
+                                        "$C_{dist}$",
+                                        "$C_{head}$",
+                                        "$V_{sfc,sym,u}$",
+                                        "$V_{sfc,sym,v}$",
+                                        "$V_{sfc,u}$",
+                                        "$V_{sfc,v}$",
+                                        "$r$",
+                                        "$R_{max}$",
+                                        "$f_r$",
+                                        "$V_{sfc}$",
+                                        "$V_{sfc,gust}$",
+                                        "$V_{max,sust}$",
+                                        "$V_{max,gust}$",
+                                        "$T_{sust}$",
+                                        "$T_{gust}$"),
                                defn = c("Max 10-m 10min sustained wind",
                                         "Max 10-m 10min sustained wind with motion asymmetry removed",
                                         "Max gradient-level 10min sustained wind",
@@ -56,7 +116,34 @@ var_names <- dplyr::data_frame(var = c("`vmax`",
                                         "Tropical cyclone forward speed",
                                         "Tropical cyclone forward speed, u-component",
                                         "Tropical cyclone forward speed, v-component",
-                                        "Tropical cyclone forward direction"),
+                                        "Tropical cyclone forward direction",
+                                        "Parameter for Willoughby model",
+                                        "Parameter for Willoughby model",
+                                        "Parameter for Willoughby model",
+                                        "Parameter for Willoughby model",
+                                        "Parameter for Willoughby model",
+                                        "Parameter for Willoughby model",
+                                        "Parameter for Willoughby model",
+                                        "Inflow angle (0 to 360)",
+                                        "Azimuthal average winds inside $R_1$",
+                                        "Azimuthal average winds outside $R_2$",
+                                        "Azimuthal average winds, varies by radius $r$", 
+                                        "Gradient level winds (u, v) at grid point",
+                                        "Distance from tropical cyclone to grid point",
+                                        "Heading of grid point from tropical cyclone center",
+                                        "Symmetric surface winds at grid point, u-component",
+                                        "Symmetric surface winds at grid point, v-component",
+                                        "Asymmetric surface winds at grid point, u-component",
+                                        "Asymmetric surface winds at grid point, v-component",
+                                        "Radius from the center of tropical cyclone",
+                                        "Radius of maximum winds",
+                                        "Reduction factor for converting between surface and gradient winds",
+                                        "Asymmetric surface sustained wind at grid point",
+                                        "Asymmetric surface wind gust at grid point",
+                                        "Max 10-m 1-min sustained wind experienced at grid point",
+                                        "Max 10-m 1-min gust wind experienced at grid point",
+                                        "Duration of time a certain sustained wind was experienced at grid point",
+                                        "Duration of time a certain gust wind was experienced at grid point"),
                                units = c("m/s",
                                          "m/s",
                                          "m/s",
@@ -65,12 +152,39 @@ var_names <- dplyr::data_frame(var = c("`vmax`",
                                          "m/s",
                                          "m/s",
                                          "m/s",
-                                         "degrees (trigonomical)"))
+                                         "degrees (trigonomical)",
+                                        "--",
+                                        "--",
+                                        "--",
+                                        "--",
+                                        "--",
+                                        "km",
+                                        "km",
+                                         "degrees",
+                                         "m/s",
+                                         "m/s",
+                                         "km",
+                                         "degrees (trigonomical)",
+                                         "m/s",
+                                         "m/s",
+                                         "m/s",
+                                         "m/s",
+                                         "m/s",
+                                         "m/s",
+                                         "km",
+                                         "km",
+                                         "--",
+                                         "m/s",
+                                         "m/s",
+                                         "m/s",
+                                         "m/s",
+                                         "minutes",
+                                         "minutes"))
 knitr::kable(var_names, col.names = c("R variable", "Expression in equations",
                                       "Definition", "Units"))
 ```
 
-# Impute storm tracks
+## Impute storm tracks
 
 The storm tracks come in with observations every six hours (plus, for some, an observation at landfall). Our package has a function called `create_full_track` that imputes both locations (latitude and longitude) and intensity (maximum wind speed) from the hurricane tracks data to a finer time resolution (default is 15 minutes, but you can also select other values using the `tint` argument). This imputation uses a natural cubic spline, with the degrees of freedom set as the number of timed observations for the storm in the input data (typically best tracks data) divided by two. The option `tint` in this function gives the time interval you want to use, where `1` equals one hour. 
 
@@ -86,7 +200,7 @@ full_track <- create_full_track(hurr_track = floyd_tracks, tint = 0.25)
 full_track %>% slice(1:3)
 ```
 
-# Adding Willoughby inputs
+## Add Willoughby inputs and parameters
 
 The next step is to process this imputed track and add in, for each observation point, the inputs and model parameters required for the Willoughby model. This process is done using the `add_wind_radii` function. As an input, it takes the imputed dataframe create by the `create_full_track` function. It outputs the same dataframe, but with columns added for the inputs and parameters required for the Willoughby wind model. 
 
@@ -459,7 +573,7 @@ Questions:
 
 - It seems the distance of the transition region is being set to 25 for larger storms (with $R_{max} > 20$) and to 15 for smaller storms (with $R_{max} \le 20$). I'm not sure if this is an arbitrary choice, or is there's some reference for this choice?
 
-# Calculate wind speed at each grid point 
+## Calculate wind speed at each grid point 
 
 Next, we calculate wind characteristics at each grid point (or county center location) for every storm observation. These characteristics are: 
 
@@ -597,7 +711,7 @@ This is from Figure 3 in Knaff et al. 2011. It uses a reduction factor of 0.90 u
 rf_example <- data.frame(r = 0:800,
                          rf = mapply(
                            stormwindmodel:::gradient_to_surface, 
-                           wind_gl_aa = 1, r = 0:800))
+                           wind_gl_aa = 1, cdist = 0:800))
 ggplot(rf_example, aes(x = r, y = rf)) + 
   geom_line() + 
   theme_minimal() + 
@@ -689,42 +803,56 @@ with the maxmium sustained and gust wind speeds (in meters per second) and durat
 I also have a function to map county-level estimates. Here's an example of calculating and mapping county winds for Katrina:
 
 ```{r fig.width = 7, fig.height = 4, warning = FALSE, message = FALSE}
-a <- map_wind(grid_winds_katrina, value = "max_gust") + 
+a <- map_wind(grid_winds_katrina, value = "vmax_gust") + 
   ggtitle("Maximum gust wind speeds")
 hurricaneexposure::map_tracks("Katrina-2005", plot_object = a)
+```
 
-a <- map_wind(grid_winds_katrina, value = "max_sust") + 
+```{r fig.width = 7, fig.height = 4, warning = FALSE, message = FALSE}
+a <- map_wind(grid_winds_katrina, value = "vmax_sust") + 
   ggtitle("Maximum sustained wind speeds")
 hurricaneexposure::map_tracks("Katrina-2005", plot_object = a)
+```
 
+```{r fig.width = 7, fig.height = 4, warning = FALSE, message = FALSE}
 # Show in knots
-a <- map_wind(grid_winds_katrina, value = "max_gust",
+a <- map_wind(grid_winds_katrina, value = "vmax_gust",
               wind_metric = "knots") + 
   ggtitle("Maximum gust wind speeds")
 hurricaneexposure::map_tracks("Katrina-2005", plot_object = a)
+```
 
-a <- map_wind(grid_winds_katrina, value = "max_sust",
+```{r fig.width = 7, fig.height = 4, warning = FALSE, message = FALSE}
+a <- map_wind(grid_winds_katrina, value = "vmax_sust",
               wind_metric = "knots") + 
   ggtitle("Maximum sustained wind speeds")
 hurricaneexposure::map_tracks("Katrina-2005", plot_object = a)
+```
 
+```{r fig.width = 7, fig.height = 4, warning = FALSE, message = FALSE}
 # Sustained winds of 20 m / s or more
-a <- map_wind(grid_winds_katrina, value = "max_sust", 
+a <- map_wind(grid_winds_katrina, value = "vmax_sust", 
          break_point = 20)
 hurricaneexposure::map_tracks("Katrina-2005", plot_object = a)
+```
 
+```{r fig.width = 7, fig.height = 4, warning = FALSE, message = FALSE}
 # Sustained winds of 34 knots or more
-a <- map_wind(grid_winds_katrina, value = "max_sust", wind_metric = "knots", 
+a <- map_wind(grid_winds_katrina, value = "vmax_sust", wind_metric = "knots", 
          break_point = 34)
 hurricaneexposure::map_tracks("Katrina-2005", plot_object = a)
+```
 
+```{r fig.width = 7, fig.height = 4, warning = FALSE, message = FALSE}
 # Sustained winds of 50 knots or more
-a <- map_wind(grid_winds_katrina, value = "max_sust", wind_metric = "knots", 
+a <- map_wind(grid_winds_katrina, value = "vmax_sust", wind_metric = "knots", 
          break_point = 50)
 hurricaneexposure::map_tracks("Katrina-2005", plot_object = a)
+```
 
+```{r fig.width = 7, fig.height = 4, warning = FALSE, message = FALSE}
 # Sustained winds of 64 knots or more
-a <- map_wind(grid_winds_katrina, value = "max_sust", wind_metric = "knots", 
+a <- map_wind(grid_winds_katrina, value = "vmax_sust", wind_metric = "knots", 
          break_point = 64)
 hurricaneexposure::map_tracks("Katrina-2005", plot_object = a)
 ```
