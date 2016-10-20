@@ -58,12 +58,15 @@ create_full_track <- function(hurr_track = floyd_tracks, tint = 0.25){
                   tclon = as.numeric(tclon),
                   tclon = ifelse(tclon > -180, tclon, tclon + 360),
                   tclon = -1 * tclon,
-                  vmax = 0.51444 * as.numeric(vmax)) # Convert from ks to m / s
+                  vmax = weathermetrics::convert_wind_speed(vmax,
+                                                            "knots", "mps",
+                                                            round = 3))
 
   interp_df <- floor(nrow(hurr_track) / 2)
   interp_date <- seq(from = min(hurr_track$date),
                      to = max(hurr_track$date),
-                     by = tint * 3600)
+                     by = tint * 3600) # Date time sequence must use `by` in
+                                       # seconds
   interp_date <- data.frame(date = interp_date)
 
   tclat_spline <- stats::glm(tclat ~ splines::ns(date, df = interp_df),

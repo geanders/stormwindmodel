@@ -34,7 +34,7 @@
 #'    }
 #'
 #' @export
-latlon_to_km <- function(tclat_1, tclon_1, tclat_2, tclon_2){
+latlon_to_km <- function(tclat_1, tclon_1, tclat_2, tclon_2, Rearth = 6378.14){
   tclat_1 <- degrees_to_radians(tclat_1)
   tclon_1 <- degrees_to_radians(tclon_1)
   tclat_2 <- degrees_to_radians(tclat_2)
@@ -49,7 +49,7 @@ latlon_to_km <- function(tclat_1, tclon_1, tclat_2, tclon_2){
   hav_theta <- hav_tclat + cos(tclat_1) * cos(tclat_2) * hav_L
   theta <- 2 * asin(sqrt(hav_theta))
 
-  dist <- 6378.14 * theta
+  dist <- Rearth * theta
   return(dist)
 }
 
