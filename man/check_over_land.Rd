@@ -2,11 +2,11 @@
 % Please edit documentation in R/wind_conversions.R
 \name{check_over_land}
 \alias{check_over_land}
-\title{Estimate if storm is over land or water}
+\title{Determine if storm is over land or water}
 \usage{
-check_over_land(phi, lon)
+check_over_land(tclat, tclon)
 }
 \description{
-Estimate if storm is over land or water
+Determine if storm is over land or water
 }
 

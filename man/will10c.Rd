@@ -2,15 +2,15 @@
 % Please edit documentation in R/willoughby2006eqs.R
 \name{will10c}
 \alias{will10c}
-\title{Calculate a parameter for the Willoughby model from \eqn{Vmax} and \eqn{\phi}}
+\title{Calculate a parameter for the Willoughby model from \eqn{vmax_gl} and \eqn{\phi}}
 \usage{
-will10c(Vmax, phi)
+will10c(vmax_gl, tclat)
 }
 \arguments{
-\item{Vmax}{Numeric vector of the tangential wind component of the maximum
+\item{vmax_gl}{Numeric vector of the tangential wind component of the maximum
 gradient wind speed, in meters per second}
 
-\item{phi}{Numeric vector of the absolute value of latitude, in degrees.}
+\item{tclat}{Numeric vector of the absolute value of latitude, in degrees.}
 }
 \value{
 A numeric vector that is a parameter required for the Willoughby
@@ -23,13 +23,13 @@ a parameter needed for the Willoughby wind model.
 \details{
 This function is calculating the equation:
 
-   \deqn{A = 0.0696 + 0.0049 Vmax - 0.0064 \phi}
+   \deqn{A = 0.0696 + 0.0049 vmax_gl - 0.0064 \phi}
 
    where:
    \itemize{
      \item{\eqn{A}: Parameter for the Willoughby wind model (any value
          of A calculated as negative is re-set to 0)}
-     \item{\eqn{V_{max}}{Vmax}: Tangential component of the maximum
+     \item{\eqn{V_{max}}{vmax_gl}: Tangential component of the maximum
            gradient-level sustained wind speed (in m / s)}
      \item{\eqn{\phi}: Latitude, in decimal degrees}
    }

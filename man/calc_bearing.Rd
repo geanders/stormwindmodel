@@ -4,17 +4,17 @@
 \alias{calc_bearing}
 \title{Calculate the direction from one location to another}
 \usage{
-calc_bearing(phi_1, L_1, phi_2, L_2)
+calc_bearing(tclat_1, tclon_1, tclat_2, tclon_2)
 }
 \arguments{
-\item{phi_1}{Latitude of the first location, in degrees.}
+\item{tclat_1}{Latitude of the first location, in degrees.}
 
-\item{L_1}{Longitude of the first location, in degrees. This value should
+\item{tclon_1}{Longitude of the first location, in degrees. This value should
 be expressed as a positive value for Western hemisphere longitudes.}
 
-\item{phi_2}{Latitude of the second location, in degrees.}
+\item{tclat_2}{Latitude of the second location, in degrees.}
 
-\item{L_2}{Longitude of the second location, in degrees. This value should
+\item{tclon_2}{Longitude of the second location, in degrees. This value should
 be expressed as a positive value for Western hemisphere longitudes.}
 }
 \value{
@@ -38,7 +38,7 @@ This function uses the following equations to calculate the bearing
    \deqn{C = cos(\phi_1) * sin(\phi_2) - sin(\phi_1) * cos(\phi_2) * cos(L_1 - L_2)}{
    C = cos(\phi1) * sin(\phi2) - sin(\phi1) * cos(\phi2) * cos(L1 - L2)}
 
-   \deqn{\beta = atan2(S, C) * \frac{180}{\pi} + 90}
+   \deqn{\theta = atan2(S, C) * \frac{180}{\pi} + 90}
 
    where:
    \itemize{
@@ -47,7 +47,7 @@ This function uses the following equations to calculate the bearing
      \item{\eqn{\phi_2}{\phi2}: Latitude of second location, in radians}
      \item{\eqn{L_2}{L2}: Longitude of second location, in radians}
      \item{\eqn{S, C}: Intermediary results}
-     \item{\eqn{\beta}: Direction of the storm movement, in degrees}
+     \item{\eqn{\theta}: Direction of the storm movement, in degrees}
    }
 
    In cases where this equation results in values below 0 degrees or above

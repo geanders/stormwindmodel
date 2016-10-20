@@ -2,15 +2,15 @@
 % Please edit documentation in R/willoughby2006eqs.R
 \name{will10b}
 \alias{will10b}
-\title{Calculate the power law exponential from \eqn{Vmax} and \eqn{\phi}}
+\title{Calculate the power law exponential from \eqn{vmax_gl} and \eqn{\phi}}
 \usage{
-will10b(Vmax, phi)
+will10b(vmax_gl, tclat)
 }
 \arguments{
-\item{Vmax}{Numeric vector of the tangential wind component of the maximum
+\item{vmax_gl}{Numeric vector of the tangential wind component of the maximum
 gradient wind speed, in meters per second}
 
-\item{phi}{Numeric vector of the absolute value of latitude, in degrees.}
+\item{tclat}{Numeric vector of the absolute value of latitude, in degrees.}
 }
 \value{
 A numeric vector of the exponential for the power law inside the eye
@@ -21,11 +21,11 @@ This function implements Willoughby et al. (2006), Equation 10b.
 \details{
 This function is calculating the equation:
    \deqn{n = 0.4067 + 0.0144 V_{max} - 0.0038 \phi}{
-   n = 0.4067 + 0.0144 Vmax - 0.0038 \phi}
+   n = 0.4067 + 0.0144 vmax_gl - 0.0038 \phi}
    where:
    \itemize{
      \item{\eqn{n}: Parameter for the Willoughby wind model}
-     \item{\eqn{V_{max}}{Vmax}: Tangential component of the maximum
+     \item{\eqn{V_{max}}{vmax_gl}: Tangential component of the maximum
            gradient-level sustained wind speed (in m / s)}
      \item{\eqn{\phi}: Latitude, in decimal degrees}
    }

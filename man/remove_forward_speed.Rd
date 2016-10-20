@@ -4,11 +4,7 @@
 \alias{remove_forward_speed}
 \title{Remove forward speed estimate from maximum wind speed}
 \usage{
-remove_forward_speed(sustained_vmax, forward_speed)
-}
-\arguments{
-\item{sustained_vmax}{A numeric vector of 1-minute sustained wind speed at
-10 meters, in meters / second.}
+remove_forward_speed(sustained_vmax, tcspd)
 }
 \value{
 A numerical vector with the maximum storm wind speed, with forward

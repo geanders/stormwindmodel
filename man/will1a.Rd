@@ -4,10 +4,10 @@
 \alias{will1a}
 \title{Willoughby et al. (2006), Equation 1(a)}
 \usage{
-will1a(Vmax, r, Rmax, n)
+will1a(vmax_gl, r, Rmax, n)
 }
 \arguments{
-\item{Vmax}{Numeric vector of the tangential wind component of the maximum
+\item{vmax_gl}{Numeric vector of the tangential wind component of the maximum
 gradient wind speed, in meters per second}
 
 \item{r}{Numeric vector of radius from the storm center to the point you are

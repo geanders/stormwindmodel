@@ -4,13 +4,13 @@
 \alias{gradient_to_surface}
 \title{Calculate surface wind speed from gradient}
 \usage{
-gradient_to_surface(track, r)
+gradient_to_surface(wind_gl_aa, cdist)
 }
 \arguments{
+\item{cdist}{Radius from storm center to the grid point, in kilometers.}
+
 \item{track}{Estimated gradient-level wind speed (m / s) at a grid
 point.}
-
-\item{r}{Radius from storm center to the grid point, in kilometers.}
 }
 \value{
 Estimate of surface wind speed at grid point, in meters / second.

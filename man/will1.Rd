@@ -4,16 +4,15 @@
 \alias{will1}
 \title{Model wind speed at each grid point for each storm track observation}
 \usage{
-will1(r, Rmax, R1, R2, Vmax, n, A, X1, X2 = 25)
+will1(cdist, Rmax, R1, R2, vmax_gl, n, A, X1, X2 = 25)
 }
 \arguments{
-\item{r}{Numeric vector of radius from the storm center to the point you are
-measuring, in kilometers}
+\item{cdist}{Distance (in km) from center of tropical cyclone to grid point.}
 
 \item{Rmax}{Numeric vector of the radius at which the maximum wind occurs,
 in kilometers}
 
-\item{Vmax}{Numeric vector of the tangential wind component of the maximum
+\item{vmax_gl}{Numeric vector of the tangential wind component of the maximum
 gradient wind speed, in meters per second}
 
 \item{n}{Numeric vector of ...}
@@ -37,7 +36,7 @@ as inputs, all the Willoughby wind model parameters calculated using the
 If \eqn{r \le R_1}{r \le R1}, this function is calculating the equation:
 
    \deqn{V(r) = V_i = V_{max} \left( \frac{r}{R_{max}} \right)^n}{
-   V(r) = Vi = Vmax (r / Rmax)^n}
+   V(r) = Vi = vmax_gl (r / Rmax)^n}
 
    where:
    \itemize{
@@ -53,14 +52,14 @@ If \eqn{r \le R_1}{r \le R1}, this function is calculating the equation:
      the equation:
 
      \deqn{V(r) = V_o = V_{max}\left[(1 - A) e^\frac{R_{max} - r}{X_1} + A e^\frac{R_{max} - r}{X_2}\right]}{
-     V(r) = Vo = Vmax[(1 - A) e^((Rmax - r) / X1) + A e^((Rmax - r) / X_2)]}
+     V(r) = Vo = vmax_gl[(1 - A) e^((Rmax - r) / X1) + A e^((Rmax - r) / X_2)]}
 
    where:
    \itemize{
      \item{\eqn{V(r)}: Maximum sustained gradient wind speed at a radius of
        \eqn{r} kilometers from the storm's center}
      \item{\eqn{r}: Radius from the storm center, in kilometers}
-     \item{\eqn{V_{max}}{Vmax}: Maximum sustained gradient wind speed of the
+     \item{\eqn{V_{max}}{vmax_gl}: Maximum sustained gradient wind speed of the
        storm, in meters per second}
      \item{\eqn{R_{max}}{Rmax}: Radius (in kilometers) to highest winds}
      \item{\eqn{A}, \eqn{X_2}{X2}: Parameters for the Willoughby wind model}

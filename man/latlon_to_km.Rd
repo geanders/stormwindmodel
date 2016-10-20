@@ -4,17 +4,17 @@
 \alias{latlon_to_km}
 \title{Calculate distance between two locations}
 \usage{
-latlon_to_km(phi_1, L_1, phi_2, L_2)
+latlon_to_km(tclat_1, tclon_1, tclat_2, tclon_2)
 }
 \arguments{
-\item{phi_1}{Latitude of the first location, in degrees.}
+\item{tclat_1}{Latitude of the first location, in degrees.}
 
-\item{L_1}{Longitude of the first location, in degrees. This value should
+\item{tclon_1}{Longitude of the first location, in degrees. This value should
 be expressed as a positive value for Western hemisphere longitudes.}
 
-\item{phi_2}{Latitude of the second location, in degrees.}
+\item{tclat_2}{Latitude of the second location, in degrees.}
 
-\item{L_2}{Longitude of the second location, in degrees. This value should
+\item{tclon_2}{Longitude of the second location, in degrees. This value should
 be expressed as a positive value for Western hemisphere longitudes.}
 }
 \value{

@@ -4,19 +4,19 @@
 \alias{calc_forward_speed}
 \title{Calculate storm's forward speed}
 \usage{
-calc_forward_speed(phi_1, L_1, time_1, phi_2, L_2, time_2)
+calc_forward_speed(tclat_1, tclon_1, time_1, tclat_2, tclon_2, time_2)
 }
 \arguments{
-\item{phi_1}{Latitude of the first location, in degrees.}
+\item{tclat_1}{Latitude of the first location, in degrees.}
 
-\item{L_1}{Longitude of the first location, in degrees. This value should
+\item{tclon_1}{Longitude of the first location, in degrees. This value should
 be expressed as a positive value for Western hemisphere longitudes.}
 
 \item{time_1}{Time of the first observation.}
 
-\item{phi_2}{Latitude of the second location, in degrees.}
+\item{tclat_2}{Latitude of the second location, in degrees.}
 
-\item{L_2}{Longitude of the second location, in degrees. This value should
+\item{tclon_2}{Longitude of the second location, in degrees. This value should
 be expressed as a positive value for Western hemisphere longitudes.}
 
 \item{time_2}{Time of the second observation.}

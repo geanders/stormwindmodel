@@ -4,13 +4,13 @@
 \alias{add_inflow}
 \title{Add overland inflow angle}
 \usage{
-add_inflow(gwd, r, Rmax)
+add_inflow(gwd, cdist, Rmax)
 }
 \arguments{
 \item{gwd}{Wind direction of the gradient wind at a location, in degrees. Due
 east is 0 degrees, due north 90 degrees, etc.}
 
-\item{r}{Radius (in kilometers) from the storm center to a location.}
+\item{cdist}{Radius (in kilometers) from the storm center to a location.}
 
 \item{Rmax}{A numeric vector giving the radius to maximum winds (in kilometers)}
 }

@@ -4,7 +4,7 @@
 \alias{add_forward_speed}
 \title{Adds forward speed component}
 \usage{
-add_forward_speed(windspd, forward_speed_u, forward_speed_v, swd, r, Rmax)
+add_forward_speed(wind_sfc_sym, tcspd_u, tcspd_v, swd, cdist, Rmax)
 }
 \description{
 Adds the storm's forward speed component back into the estimated

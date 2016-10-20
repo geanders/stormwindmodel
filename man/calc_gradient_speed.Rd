@@ -4,10 +4,10 @@
 \alias{calc_gradient_speed}
 \title{Convert sustained wind to gradient wind.}
 \usage{
-calc_gradient_speed(sustained_vmax, over_land)
+calc_gradient_speed(vmax_sfc_sym, over_land)
 }
 \arguments{
-\item{sustained_vmax}{A numeric vector of 1-minute sustained wind speed at
+\item{vmax_sfc_sym}{A numeric vector of 1-minute sustained wind speed at
 10 meters, in meters / second.}
 
 \item{over_land}{TRUE / FALSE or whether the storm is over land (the
@@ -22,12 +22,13 @@ level wind speed.
 }
 \details{
 This function uses the following conversion:
- \deqn{V_{max} = \frac{V_{max,sustained}}{0.9}}{
- Vmax = Vmax_sustained / reduction_factor}
+ \deqn{V_{max,sfc} = \frac{V_{max}}{f_r}}{
+ Vmax,sfc = Vmax / fr}
  where:
  \itemize{
    \item{\eqn{V_{max}}{Vmax}: Mean wind speed at gradient level (m / s) }
-   \item{\eqn{V_{max,sustained}}{Vmax_sustained}: Surface wind speed (10 meters above the water or ground) (m / s)}
+   \item{\eqn{V_{max,src}}{Vmax_sfc}: Surface wind speed (10 meters above the water or ground) (m / s)}
+   \item{\eqn{f_r}: Reduction factor (see below)}
  }
  We make this adjustment based on Figure 3 in Knaff et al., 2011.
    If over water and within 100 kilometers of the storm's center,

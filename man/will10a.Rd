@@ -2,15 +2,15 @@
 % Please edit documentation in R/willoughby2006eqs.R
 \name{will10a}
 \alias{will10a}
-\title{Calculate the fitted decay length from \eqn{Vmax} and \eqn{\phi}}
+\title{Calculate the fitted decay length from \eqn{vmax_gl} and \eqn{\phi}}
 \usage{
-will10a(Vmax, phi)
+will10a(vmax_gl, tclat)
 }
 \arguments{
-\item{Vmax}{Numeric vector of the tangential wind component of the maximum
+\item{vmax_gl}{Numeric vector of the tangential wind component of the maximum
 gradient wind speed, in meters per second}
 
-\item{phi}{Numeric vector of the absolute value of latitude, in degrees.}
+\item{tclat}{Numeric vector of the absolute value of latitude, in degrees.}
 }
 \value{
 A numeric vector giving one of the parameters (\eqn{X_1}{X1})
@@ -23,11 +23,11 @@ This function implements Willoughby et al. (2006), Equation 10a.
 This function uses the following equation to calculate the
    \eqn{X_1}{X1} parameter:
    \deqn{X_1 = 317.1 - 2.026V_{max} + 1.915 \phi}{
-   X1 = 317.1 - 2.026Vmax + 1.915 \phi}
+   X1 = 317.1 - 2.026vmax_gl + 1.915 \phi}
    where:
    \itemize{
      \item{\eqn{X_1}{X1}: Parameter for the Willoughby wind model}
-     \item{\eqn{V_{max}}{Vmax}: Tangential component of the maximum
+     \item{\eqn{V_{max}}{vmax_gl}: Tangential component of the maximum
            gradient-level sustained wind speed (in m / s)}
      \item{\eqn{\phi}: Latitude, in decimal degrees}
    }

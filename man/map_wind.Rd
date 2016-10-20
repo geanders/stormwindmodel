@@ -4,7 +4,7 @@
 \alias{map_wind}
 \title{Map wind exposure at the county level}
 \usage{
-map_wind(grid_winds, value = "max_gust", break_point = NULL,
+map_wind(grid_winds, value = "vmax_sust", break_point = NULL,
   wind_metric = "mps")
 }
 \arguments{

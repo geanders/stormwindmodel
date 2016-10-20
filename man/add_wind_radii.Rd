@@ -12,11 +12,11 @@ created by \code{create_full_track}. This dataframe must have the
 following columns:
 \itemize{
   \item{date: Date-time, in POSIXct format and UTC time zone}
-  \item{phi: Latitude, in decimal degrees}
-  \item{lon: Longitude, in decimal degrees and expresses as positive
+  \item{tclat: Latitude, in decimal degrees}
+  \item{tclon: Longitude, in decimal degrees and expressed as positive
         values (this model assumes all longitudes will be in the
         Western hemisphere)}
-  \item{sustained_Vmax: Sustained maximum wind speed, in meters per
+  \item{vmax: Sustained maximum wind speed, in meters per
        second}
 }}
 }
@@ -24,9 +24,9 @@ following columns:
 The input dataset, but with columns added for the Willoughby
    parameters for every observations. Columns added include:
    \itemize{
-     \item{forward_speed: The forward (translational) speed of the storm,
+     \item{tcspd: The forward (translational) speed of the storm,
        in meters per second}
-     \item{mda: The bearing of the storm, in degrees, with 0 degrees
+     \item{tcdir: The bearing of the storm, in degrees, with 0 degrees
        indicating the storm is moving due east, 90 degrees indicating the
        storm is moving due north, etc.}
      \item{Vmax: The gradient wind speed, based on the best track's
@@ -46,10 +46,8 @@ its maximum windspeed.These parameters are later used to model wind speed
 at each grid point for every observation.
 }
 \examples{
-data("hurr_tracks", package = "hurricaneexposuredata")
-example_track <- subset(hurr_tracks, storm_id == "Floyd-1999")
-full_track <- create_full_track(hurr_track = example_track,
-                                tint = 0.25)
+data("floyd_tracks")
+full_track <- create_full_track(hurr_track = floyd_tracks)
 with_wind_radii <- add_wind_radii(full_track = full_track)
 
 }
