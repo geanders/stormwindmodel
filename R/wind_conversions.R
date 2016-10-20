@@ -110,6 +110,6 @@ gradient_to_surface <- function(wind_gl_aa, cdist){
   # Since all counties are over land, reduction factor should
   # be 20% lower than if it were over water
   reduction_factor <- reduction_factor * 0.8
-  wind_sfc_sym <- wind_sfc_sym * reduction_factor
+  wind_sfc_sym <- wind_gl_aa * reduction_factor
   return(wind_sfc_sym)
 }

@@ -160,7 +160,7 @@ calc_grid_wind <- function(grid_point = stormwindmodel::county_points[1, ],
                           vmax_sust = max(windspeed, na.rm = TRUE),
                           gust_dur = 60 * sum(gustspeed > gust_duration_cut,
                                               na.rm = TRUE),
-                          sust_dur = 60 * sum(sust_windspd > sust_duration_cut,
+                          sust_dur = 60 * sum(windspeed > sust_duration_cut,
                                               na.rm = TRUE)) %>%
           dplyr::mutate(gust_dur = gust_dur * tint,
                         sust_dur = sust_dur * tint)

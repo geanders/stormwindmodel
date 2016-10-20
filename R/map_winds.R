@@ -22,10 +22,10 @@
 #' @importFrom dplyr %>%
 #'
 #' @export
-map_wind <- function(grid_winds, value = "max_gust", break_point = NULL,
+map_wind <- function(grid_winds, value = "vmax_sust", break_point = NULL,
                      wind_metric = "mps"){
-  if(!(value %in% c("max_gust", "max_sust"))){
-    stop("`value` must be either `max_gust` or `sust_gust`.")
+  if(!(value %in% c("vmax_gust", "vmax_sust"))){
+    stop("`value` must be either `vmax_gust` or `vsust_gust`.")
   }
 
   grid_winds$value <- grid_winds[ , value]
