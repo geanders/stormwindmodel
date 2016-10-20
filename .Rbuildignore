@@ -2,3 +2,5 @@
 ^\.Rproj\.user$
 ^writing/*$
 ^writing$
+^README\.Rmd$
+^README-.*\.png$
