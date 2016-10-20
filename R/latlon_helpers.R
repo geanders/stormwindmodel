@@ -4,11 +4,11 @@
 #' calculates the distance (in meters) between the locations using the
 #' haversine method.
 #'
-#' @param phi_1 Latitude of the first location, in degrees.
-#' @param L_1 Longitude of the first location, in degrees. This value should
+#' @param tclat_1 Latitude of the first location, in degrees.
+#' @param tclon_1 Longitude of the first location, in degrees. This value should
 #'    be expressed as a positive value for Western hemisphere longitudes.
-#' @param phi_2 Latitude of the second location, in degrees.
-#' @param L_2 Longitude of the second location, in degrees. This value should
+#' @param tclat_2 Latitude of the second location, in degrees.
+#' @param tclon_2 Longitude of the second location, in degrees. This value should
 #'    be expressed as a positive value for Western hemisphere longitudes.
 #'
 #' @return Distance between the two locations, in kilometers.
@@ -34,19 +34,19 @@
 #'    }
 #'
 #' @export
-latlon_to_km <- function(phi_1, L_1, phi_2, L_2){
-  phi_1 <- degrees_to_radians(phi_1)
-  L_1 <- degrees_to_radians(L_1)
-  phi_2 <- degrees_to_radians(phi_2)
-  L_2 <- degrees_to_radians(L_2)
+latlon_to_km <- function(tclat_1, tclon_1, tclat_2, tclon_2){
+  tclat_1 <- degrees_to_radians(tclat_1)
+  tclon_1 <- degrees_to_radians(tclon_1)
+  tclat_2 <- degrees_to_radians(tclat_2)
+  tclon_2 <- degrees_to_radians(tclon_2)
 
-  delta_L <- L_1 - L_2
-  delta_phi <- phi_1 - phi_2
+  delta_L <- tclon_1 - tclon_2
+  delta_tclat <- tclat_1 - tclat_2
 
   hav_L <- sin(delta_L / 2) ^ 2
-  hav_phi <- sin(delta_phi / 2) ^ 2
+  hav_tclat <- sin(delta_tclat / 2) ^ 2
 
-  hav_theta <- hav_phi + cos(phi_1) * cos(phi_2) * hav_L
+  hav_theta <- hav_tclat + cos(tclat_1) * cos(tclat_2) * hav_L
   theta <- 2 * asin(sqrt(hav_theta))
 
   dist <- 6378.14 * theta
@@ -65,8 +65,8 @@ latlon_to_km <- function(phi_1, L_1, phi_2, L_2){
 #'
 #' @return A numeric vector with the average forward speed of the storm between
 #'    the two observations, in meters per second.
-calc_forward_speed <- function(phi_1, L_1, time_1, phi_2, L_2, time_2){
-  dist <- latlon_to_km(phi_1, L_1, phi_2, L_2) * 1000
+calc_forward_speed <- function(tclat_1, tclon_1, time_1, tclat_2, tclon_2, time_2){
+  dist <- latlon_to_km(tclat_1, tclon_1, tclat_2, tclon_2) * 1000
   time <- as.numeric(difftime(time_2, time_1, units = "secs"))
   forward_speed <- dist / time
   return(forward_speed)
@@ -94,7 +94,7 @@ calc_forward_speed <- function(phi_1, L_1, time_1, phi_2, L_2, time_2){
 #'    \deqn{C = cos(\phi_1) * sin(\phi_2) - sin(\phi_1) * cos(\phi_2) * cos(L_1 - L_2)}{
 #'    C = cos(\phi1) * sin(\phi2) - sin(\phi1) * cos(\phi2) * cos(L1 - L2)}
 #'
-#'    \deqn{\beta = atan2(S, C) * \frac{180}{\pi} + 90}
+#'    \deqn{\theta = atan2(S, C) * \frac{180}{\pi} + 90}
 #'
 #'    where:
 #'    \itemize{
@@ -103,7 +103,7 @@ calc_forward_speed <- function(phi_1, L_1, time_1, phi_2, L_2, time_2){
 #'      \item{\eqn{\phi_2}{\phi2}: Latitude of second location, in radians}
 #'      \item{\eqn{L_2}{L2}: Longitude of second location, in radians}
 #'      \item{\eqn{S, C}: Intermediary results}
-#'      \item{\eqn{\beta}: Direction of the storm movement, in degrees}
+#'      \item{\eqn{\theta}: Direction of the storm movement, in degrees}
 #'    }
 #'
 #'    In cases where this equation results in values below 0 degrees or above
@@ -111,19 +111,19 @@ calc_forward_speed <- function(phi_1, L_1, time_1, phi_2, L_2, time_2){
 #'    back within the 0-360 degree range.
 #'
 #' @export
-calc_bearing <- function(phi_1, L_1, phi_2, L_2){
-  phi_1 <- degrees_to_radians(phi_1)
-  L_1 <- degrees_to_radians(-L_1)
-  phi_2 <- degrees_to_radians(phi_2)
-  L_2 <- degrees_to_radians(-L_2)
+calc_bearing <- function(tclat_1, tclon_1, tclat_2, tclon_2){
+  tclat_1 <- degrees_to_radians(tclat_1)
+  tclon_1 <- degrees_to_radians(-tclon_1)
+  tclat_2 <- degrees_to_radians(tclat_2)
+  tclon_2 <- degrees_to_radians(-tclon_2)
 
-  S <- cos(phi_2) * sin(L_1 - L_2)
-  C <- cos(phi_1) * sin(phi_2) - sin(phi_1) * cos(phi_2) * cos(L_1 - L_2)
+  S <- cos(tclat_2) * sin(tclon_1 - tclon_2)
+  C <- cos(tclat_1) * sin(tclat_2) - sin(tclat_1) * cos(tclat_2) * cos(tclon_1 - tclon_2)
 
-  beta_rad <- atan2(S, C)
-  beta <- radians_to_degrees(beta_rad) + 90
-  beta <- beta %% 360 # restrict to be between 0 and 360 degrees
-  return(beta)
+  theta_rad <- atan2(S, C)
+  theta <- radians_to_degrees(theta_rad) + 90
+  theta <- theta %% 360 # restrict to be between 0 and 360 degrees
+  return(theta)
 }
 
 #' Convert from degrees to radians

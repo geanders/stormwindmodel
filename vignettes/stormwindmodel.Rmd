@@ -488,7 +488,7 @@ The column names for latitude and longitude must be `glat` and `glon`, both shou
 Here is an example of running that functions, and the output you get (notice that it only outputs a one-row matrix, because it only works with one location at a time):
 
 ```{r}
-grid_point <- dplyr::filter(county_points, gridid == "37055")
+grid_point <- county_points %>% filter(gridid == "37055")
 calc_grid_wind(grid_point = grid_point,
                with_wind_radii = with_wind_radii)
 ```
@@ -514,18 +514,18 @@ Notes:
 
 ### Determine tangential gradient wind speed at each location
 
-Next, the package calculates $V(r)$, the tangential wind component at the grid point, which is at radius $r$ from the storm center. Note there are different equations for this for (1) the eye to the start of the transition region; (2) outside the transition region; and (3) within the transition region.
+Next, the package calculates $V_G(r)$, the gradient level 1-minute sustained wind at the grid point, which is at radius $r$ from the tropical cyclone center. Note there are different equations for this for (1) the eye to the start of the transition region; (2) outside the transition region; and (3) within the transition region.
 
-First, if $r \le R_1$, you are supposed to use this equation to calculate $V(r)$ (Willoughby et al. 2006, Eqn 1 (a)):
+First, if $r \le R_1$, you are supposed to use this equation to calculate $V_G(r)$ (Willoughby et al. 2006, Eqn 1 (a)):
 
 $$
-V(r) = V_i = V_{max} \left( \frac{r}{R_{max}} \right)^n, (0 \le r \le R_1)
+V_G(r) = V_i = V_{max,G} \left( \frac{r}{R_{max}} \right)^n, (0 \le r \le R_1)
 $$
 
 Next, if $r \ge R_2$, you are suppose to use this equation to calculate $V(r)$ using this equation (Willoughby et al. 2006, Eqn 4; dual-exponential replacement of Eqn 1 (b)):
 
 $$
-V(r) = V_o = V_{max}\left[(1 - A) e^\frac{R_{max} - r}{X_1} + A e^\frac{R_{max} - r}{X_2}\right], R_2 < r
+V_G(r) = V_o = V_{max,G}\left[(1 - A) e^\frac{R_{max} - r}{X_1} + A e^\frac{R_{max} - r}{X_2}\right], R_2 < r
 $$
 
 Finally, if $r$ for the grid point is between $R_1$ and $R_2$, we need to calculate $\xi$ using the value we calculated for $r$ for the grid point: 
@@ -556,7 +556,7 @@ where:
 Willoughby et al. 2006, Eqn 1 (c):
 
 $$
-V(r) = V_i (1 - w) + V_o w, (R_1 \le r \le R_2)
+V_G(r) = V_i (1 - w) + V_o w, (R_1 \le r \le R_2)
 $$
 
 All of this is wrapped in the `will1` function (named after the equation in Willoughby et al.):
@@ -597,7 +597,7 @@ This is from Figure 3 in Knaff et al. 2011. It uses a reduction factor of 0.90 u
 rf_example <- data.frame(r = 0:800,
                          rf = mapply(
                            stormwindmodel:::gradient_to_surface, 
-                           track = 1, r = 0:800))
+                           wind_gl_aa = 1, r = 0:800))
 ggplot(rf_example, aes(x = r, y = rf)) + 
   geom_line() + 
   theme_minimal() + 
@@ -646,10 +646,13 @@ stormwindmodel:::add_forward_speed
 The last step in the code calculates gust wind speed from sustained wind speed by applying a gust factor:
 
 $$
-\mbox{gust speed} = \mbox{gust factor}*\mbox{sustained wind speed}
+V_{sfc,gust} = f_g*V_{sfc}
 $$
 
+where $V_{sfc}$ is the asymmetric surface wind speed, V_{sfc,gust} is the surface gust wind speed, and $f_g$ is the gust factor.
+
 The old code used a gust factor of 1.3. However, it sounds like we should be using a higher gust factor since our locations are over land. In one of the sources I was looking at, there's this table for this gust factor: 
+
 Location | Gust factor
 ---------|-------------
 in-land | 1.49
@@ -661,7 +664,7 @@ In the new code, I'm using the "in-land" value for the gust factor, which is a b
 
 ```{r eval = FALSE}
 # New code
-gust_windspd = windspd * 1.49
+gustspeed = windspeed * 1.49
 ```
 
 ## Putting everything together
@@ -669,6 +672,7 @@ gust_windspd = windspd * 1.49
 There's a wrapper function called `get_grid_winds` that puts everything together. As inputs, it takes the storm tracks and the grid point locations. It outputs a dataframe like this: 
 
 ```{r cache = TRUE}
+data("hurr_tracks", package = "hurricaneexposuredata")
 grid_winds_katrina <- get_grid_winds(hurr_track = subset(hurr_tracks,
                                                   storm_id == "Katrina-2005"),
                                      grid_df = county_points)

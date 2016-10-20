@@ -7,7 +7,7 @@
 #'
 #' @param gwd Wind direction of the gradient wind at a location, in degrees. Due
 #'    east is 0 degrees, due north 90 degrees, etc.
-#' @param r Radius (in kilometers) from the storm center to a location.
+#' @param cdist Radius (in kilometers) from the storm center to a location.
 #' @inheritParams will3_right
 #'
 #' @return Numeric vector with the gradient wind direction (in degrees),
@@ -17,17 +17,17 @@
 #' add_inflow(gwd = 160, r = 100, Rmax = 20)
 #'
 #' @export
-add_inflow <- function(gwd, r, Rmax){
-  if(is.na(gwd) | is.na(r) | is.na(Rmax)){
+add_inflow <- function(gwd, cdist, Rmax){
+  if(is.na(gwd) | is.na(cdist) | is.na(Rmax)){
     return(NA)
   }
 
   # Calculate inflow angle over water based on radius of location from storm
   # center in comparison to radius of maximum winds (Phadke et al. 2003)
-  if(r < Rmax){
-    inflow_angle <- 10 + (1 + (r / Rmax))
-  } else if(Rmax <= r & r < 1.2 * Rmax){
-    inflow_angle <- 20 + 25 * ((r / Rmax) - 1)
+  if(cdist < Rmax){
+    inflow_angle <- 10 + (1 + (cdist / Rmax))
+  } else if(Rmax <= cdist & cdist < 1.2 * Rmax){
+    inflow_angle <- 20 + 25 * ((cdist / Rmax) - 1)
   } else {
     inflow_angle <- 25
   }
@@ -45,24 +45,24 @@ add_inflow <- function(gwd, r, Rmax){
 #'
 #' Adds the storm's forward speed component back into the estimated
 #' surface wind speed.
-add_forward_speed <- function(windspd,
-                              forward_speed_u, forward_speed_v,
-                              swd, r, Rmax){
+add_forward_speed <- function(wind_sfc_sym,
+                              tcspd_u, tcspd_v,
+                              swd, cdist, Rmax){
   # Calculate u- and v-components of surface wind speed
-  windspd_u <- windspd * cos(degrees_to_radians(swd))
-  windspd_v <-  windspd * sin(degrees_to_radians(swd))
+  wind_sfc_sym_u <- wind_sfc_sym * cos(degrees_to_radians(swd))
+  wind_sfc_sym_v <-  wind_sfc_sym * sin(degrees_to_radians(swd))
 
   # Add back in component from forward motion of the storm
-  correction_factor <- (Rmax * r) / (Rmax^2 + r^2)
+  correction_factor <- (Rmax * cdist) / (Rmax ^ 2 + cdist ^ 2)
 
   # Add tangential and forward speed components and calculate
   # magnitude of this total wind
-  windspd_u <- windspd_u + correction_factor * forward_speed_u
-  windspd_v <- windspd_v + correction_factor * forward_speed_v
-  windspd <- sqrt(windspd_u^2 + windspd_v^2)
+  wind_sfc_u <- wind_sfc_sym_u + correction_factor * tcspd_u
+  wind_sfc_v <- wind_sfc_sym_v + correction_factor * tcspd_v
+  wind_sfc <- sqrt(wind_sfc_u ^ 2 + wind_sfc_v ^ 2)
 
   # Reset any negative values to 0
-  windspd <- ifelse(windspd > 0, windspd, 0)
+  wind_sfc <- ifelse(wind_sfc > 0, wind_sfc, 0)
 
-  return(windspd)
+  return(wind_sfc)
 }

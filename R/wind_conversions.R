@@ -9,13 +9,13 @@
 #'    alternative is that the storm is over water).
 #'
 #' @details This function uses the following conversion:
-#'  \deqn{V_{max,sfc} = \frac{V_{max}}{rf}}{
-#'  Vmax,sfc = Vmax / rf}
+#'  \deqn{V_{max,sfc} = \frac{V_{max}}{f_r}}{
+#'  Vmax,sfc = Vmax / fr}
 #'  where:
 #'  \itemize{
 #'    \item{\eqn{V_{max}}{Vmax}: Mean wind speed at gradient level (m / s) }
 #'    \item{\eqn{V_{max,src}}{Vmax_sfc}: Surface wind speed (10 meters above the water or ground) (m / s)}
-#'    \item{\eqn{rf}: Reduction factor (see below)}
+#'    \item{\eqn{f_r}: Reduction factor (see below)}
 #'  }
 #'  We make this adjustment based on Figure 3 in Knaff et al., 2011.
 #'    If over water and within 100 kilometers of the storm's center,
@@ -89,7 +89,7 @@ remove_forward_speed <- function(sustained_vmax, tcspd){
 #'
 #' @param track Estimated gradient-level wind speed (m / s) at a grid
 #'    point.
-#' @param r Radius from storm center to the grid point, in kilometers.
+#' @param cdist Radius from storm center to the grid point, in kilometers.
 #'
 #' @return Estimate of surface wind speed at grid point, in meters / second.
 #'
@@ -99,17 +99,17 @@ remove_forward_speed <- function(sustained_vmax, tcspd){
 #' a radius of 100 km and 700 km. Points over land should use a reduction
 #' factor that is 20% lower. Because all of the counties are over
 #' land, we make this adjustment for all grid points.
-gradient_to_surface <- function(track, r){
-  if(r <= 100){
+gradient_to_surface <- function(wind_gl_aa, cdist){
+  if(cdist <= 100){
     reduction_factor <- 0.9
-  } else if(r >= 700){
+  } else if(cdist >= 700){
     reduction_factor <- 0.75
   } else {
-    reduction_factor <- 0.90 - (r - 100) * (0.15/ 600)
+    reduction_factor <- 0.90 - (cdist - 100) * (0.15/ 600)
   }
   # Since all counties are over land, reduction factor should
   # be 20% lower than if it were over water
   reduction_factor <- reduction_factor * 0.8
-  windspd <- track * reduction_factor
-  return(windspd)
+  wind_sfc_sym <- wind_sfc_sym * reduction_factor
+  return(wind_sfc_sym)
 }

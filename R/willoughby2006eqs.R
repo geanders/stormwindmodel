@@ -22,6 +22,7 @@ will1a <- function(vmax_gl, r, Rmax, n){
 #' as inputs, all the Willoughby wind model parameters calculated using the
 #' \code{\link{add_wind_radii}} function.
 #'
+#' @param cdist Distance (in km) from center of tropical cyclone to grid point.
 #' @inheritParams will1a
 #' @inheritParams will3_right
 #'
@@ -84,30 +85,30 @@ will1a <- function(vmax_gl, r, Rmax, n){
 #'      \item{\eqn{R_1}{R1}, \eqn{R_2}{R2}: Parameters for the Willoughby wind model}
 #'    }
 #' @export
-will1 <- function(r, Rmax, R1, R2, vmax_gl, n, A, X1, X2 = 25){
+will1 <- function(cdist, Rmax, R1, R2, vmax_gl, n, A, X1, X2 = 25){
 
   if(is.na(Rmax) || is.na(vmax_gl) ||
      is.na(n) || is.na(A) || is.na(X1)){
     return(NA)
   } else {
 
-    Vi <- vmax_gl * (r / Rmax) ^ n
-    Vo <- vmax_gl * ((1 - A) * exp((Rmax - r)/X1) + A * exp((Rmax - r) / X2))
+    Vi <- vmax_gl * (cdist / Rmax) ^ n
+    Vo <- vmax_gl * ((1 - A) * exp((Rmax - cdist)/X1) + A * exp((Rmax - cdist) / X2))
 
-    if(r < R1){
-      track <- Vi
-    } else if (r > R2){
-      track <- Vo
+    if(cdist < R1){
+      wind_gl_aa <- Vi
+    } else if (cdist > R2){
+      wind_gl_aa <- Vo
     } else {
-      eps <- (r - R1) / (R2 - R1)
-      w <- 126 * eps^5 - 420 * eps^6 + 540 * eps^7- 315 *
-        eps^8 + 70 * eps^9
-      track <- Vi * (1 - w) + Vo * w
+      eps <- (cdist - R1) / (R2 - R1)
+      w <- 126 * eps ^ 5 - 420 * eps ^ 6 + 540 * eps ^ 7 - 315 *
+        eps ^ 8 + 70 * eps ^ 9
+      wind_gl_aa <- Vi * (1 - w) + Vo * w
     }
 
-    track[track < 0 & !is.na(track)] <- 0
+    wind_gl_aa[wind_gl_aa < 0 & !is.na(wind_gl_aa)] <- 0
 
-    return(track)
+    return(wind_gl_aa)
   }
 }
 
@@ -129,7 +130,8 @@ will2 <- function(r, R1){
       } else if (xi >= 1){
         w <- 1
         } else {
-          w <- 126 * xi^5 - 420 * xi^6 + 540 * xi^7 - 315 * xi^8 + 70 * xi^9
+          w <- 126 * xi ^ 5 - 420 * xi ^ 6 + 540 * xi ^ 7 - 315 * xi ^ 8 +
+            70 * xi ^ 9
         }
 
   return(w)

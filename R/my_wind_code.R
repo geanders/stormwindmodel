@@ -130,41 +130,40 @@ calc_grid_wind <- function(grid_point = stormwindmodel::county_points[1, ],
 
         grid_wind <- mutate(with_wind_radii,
                       # Calculated distance from storm center to location
-                      r = latlon_to_km(tclat, tclon, grid_point$glat,
-                                       -grid_point$glon),
-                      # Calculate rotational windspeed at the point
-                      track = mapply(will1, r = r, Rmax = Rmax,
-                                     R1 = R1, R2 = R2,
-                                     Vmax = Vmax, n = n, A = A, X1 = X1),
+                      cdist = latlon_to_km(tclat, tclon,
+                                           grid_point$glat, -grid_point$glon),
+                      # Calculate gradient winds at the point
+                      wind_gl_aa = mapply(will1, cdist = cdist, Rmax = Rmax,
+                                          R1 = R1, R2 = R2, Vmax = Vmax,
+                                          n = n, A = A, X1 = X1),
                       # calculate the gradient wind direction (gwd) at this
                       # grid point
-                      bearing_from_storm = calc_bearing(tclat, tclon,
-                                                        grid_point$glat,
-                                                        - grid_point$glon),
-                      gwd = (90 + bearing_from_storm) %% 360,
+                      chead = calc_bearing(tclat, tclon,
+                                           grid_point$glat, - grid_point$glon),
+                      gwd = (90 + chead) %% 360,
                       # Bring back to surface level (surface wind reduction factor)
-                      windspd = mapply(gradient_to_surface, track = track, r = r),
+                      wind_sfc_sym = mapply(gradient_to_surface,
+                                            wind_gl_aa = wind_gl_aa,
+                                            cdist = cdist),
                       # Get surface wind direction
-                      swd = mapply(add_inflow, gwd = gwd, r = r, Rmax = Rmax),
+                      swd = mapply(add_inflow, gwd = gwd, cdist = cdist,
+                                   Rmax = Rmax),
                       # Add back in storm forward motion component
-                      windspd = add_forward_speed(windspd,
-                                                  tcspd_u,
-                                                  tcspd_v,
-                                                  swd, r, Rmax),
+                      wind_sfc = add_forward_speed(wind_sfc_sym,
+                                                   tcspd_u, tcspd_v,
+                                                   swd, cdist, Rmax),
                       # Convert 1-min winds at 10-m to 3-sec gust at surface,
-                      sust_windspd = windspd,
-                      gust_windspd = windspd * 1.49) %>%
+                      windspeed = wind_sfc,
+                      gustspeed = wind_sfc * 1.49) %>%
                 # Determine max of windspeed and duration of wind over 20
-                dplyr::summarize(max_gust = max(gust_windspd, na.rm = TRUE),
-                          max_sust = max(sust_windspd, na.rm = TRUE),
-                          gust_duration = 60 *
-                            sum(gust_windspd > gust_duration_cut,
-                                na.rm = TRUE),
-                          sust_duration = 60 *
-                            sum(sust_windspd > sust_duration_cut,
-                                na.rm = TRUE)) %>%
-          dplyr::mutate(gust_duration = gust_duration * tint,
-                        sust_duration = sust_duration * tint)
+                dplyr::summarize(vmax_gust = max(gustspeed, na.rm = TRUE),
+                          vmax_sust = max(windspeed, na.rm = TRUE),
+                          gust_dur = 60 * sum(gustspeed > gust_duration_cut,
+                                              na.rm = TRUE),
+                          sust_dur = 60 * sum(sust_windspd > sust_duration_cut,
+                                              na.rm = TRUE)) %>%
+          dplyr::mutate(gust_dur = gust_dur * tint,
+                        sust_dur = sust_dur * tint)
         grid_wind <- as.matrix(grid_wind)
         return(grid_wind)
 }
