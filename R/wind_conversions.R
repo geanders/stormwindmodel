@@ -42,13 +42,21 @@ calc_gradient_speed <- function(vmax_sfc_sym, over_land){
   return(vmax_gl)
 }
 
-#' Estimate if storm is over land or water
-check_over_land <- function(phi, lon){
-  dist_to_counties <- mapply(latlon_to_km,
-                             phi_1 = phi, L_1 = lon,
-                             phi_2 = stormwindmodel::county_points$glat,
-                             L_2 = -stormwindmodel::county_points$glon)
-  over_land <- min(dist_to_counties) <= 30
+#' Determine if storm is over land or water
+check_over_land <- function(tclat, tclon){
+  lat_diffs <- abs(tclat - landmask$latitude)
+  closest_grid_lat <- landmask$latitude[which(lat_diffs == min(lat_diffs))][1]
+
+  lon_diffs <- abs(tclon - (360 - landmask$longitude))
+  closest_grid_lon <- landmask$longitude[which(lon_diffs == min(lon_diffs))][1]
+
+  over_land <- landmask %>%
+    dplyr::filter(latitude == closest_grid_lat &
+                    longitude == closest_grid_lon) %>%
+    dplyr::mutate(land = land == "land") %>%
+    dplyr::select(land)
+  over_land <- as.vector(over_land$land[1])
+
   return(over_land)
 }
 
@@ -75,10 +83,10 @@ check_over_land <- function(phi, lon){
 #' Padke AC, Martino CD, Cheung KF, and Houston SH. 2003. Modeling of
 #'    tropical cyclone winds and waves for emergency management. Ocean
 #'    Engineering 30:553-578.
-remove_forward_speed <- function(sustained_vmax, tcspd){
-  sustained_vmax <- sustained_vmax - 0.5 * tcspd
-  sustained_vmax[sustained_vmax < 0] <- 0
-  return(sustained_vmax)
+remove_forward_speed <- function(vmax, tcspd){
+  vmax_sfc_sym <- vmax - 0.5 * tcspd
+  vmax_sfc_sym[vmax_sfc_sym < 0] <- 0
+  return(vmax_sfc_sym)
 }
 
 #' Calculate surface wind speed from gradient
