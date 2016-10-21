@@ -14,7 +14,7 @@
 #'    adjusted with an inflow angle appropriate for being overland.
 #'
 #' @examples
-#' add_inflow(gwd = 160, r = 100, Rmax = 20)
+#' add_inflow(gwd = 160, cdist = 100, Rmax = 20)
 #'
 #' @export
 add_inflow <- function(gwd, cdist, Rmax){
