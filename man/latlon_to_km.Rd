@@ -4,7 +4,7 @@
 \alias{latlon_to_km}
 \title{Calculate distance between two locations}
 \usage{
-latlon_to_km(tclat_1, tclon_1, tclat_2, tclon_2)
+latlon_to_km(tclat_1, tclon_1, tclat_2, tclon_2, Rearth = 6378.14)
 }
 \arguments{
 \item{tclat_1}{Latitude of the first location, in degrees.}

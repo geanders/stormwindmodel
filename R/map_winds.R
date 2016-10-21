@@ -24,9 +24,9 @@
 #' @export
 map_wind <- function(grid_winds, value = "vmax_sust", break_point = NULL,
                      wind_metric = "mps"){
-  if(!(value %in% c("vmax_gust", "vmax_sust"))){
-    stop("`value` must be either `vmax_gust` or `vsust_gust`.")
-  }
+  # if(!(value %in% c("vmax_gust", "vmax_sust"))){
+  #   stop("`value` must be either `vmax_gust` or `vsust_gust`.")
+  # }
 
   grid_winds$value <- grid_winds[ , value]
   if(wind_metric != "mps"){

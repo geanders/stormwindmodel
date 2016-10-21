@@ -106,11 +106,9 @@ add_wind_radii <- function(full_track = create_full_track()){
 #'    }
 #'
 #' @examples \dontrun{
-#' data("hurr_tracks", package = "hurricaneexposuredata")
+#' data("floyd_tracks")
 #' data("county_points")
-#' example_track <- subset(hurr_tracks, storm_id == "Floyd-1999")
-#' full_track <- create_full_track(hurr_track = example_track,
-#'                                 tint = 0.25)
+#' full_track <- create_full_track(hurr_track = floyd_tracks)
 #' with_wind_radii <- add_wind_radii(full_track = full_track)
 #' wind_grid <- calc_grid_wind(grid_point = county_points[1, ],
 #'                             with_wind_radii = with_wind_radii)
@@ -122,10 +120,7 @@ add_wind_radii <- function(full_track = create_full_track()){
 #'
 #' @export
 calc_grid_wind <- function(grid_point = stormwindmodel::county_points[1, ],
-                           with_wind_radii = add_wind_radii(),
-                           tint = 0.25,
-                           gust_duration_cut = 20,
-                           sust_duration_cut = 20){
+                           with_wind_radii = add_wind_radii()){
 
         grid_wind <- mutate(with_wind_radii,
                       # Calculated distance from storm center to location
@@ -148,23 +143,48 @@ calc_grid_wind <- function(grid_point = stormwindmodel::county_points[1, ],
                       swd = mapply(add_inflow, gwd = gwd, cdist = cdist,
                                    Rmax = Rmax),
                       # Add back in storm forward motion component
-                      wind_sfc = add_forward_speed(wind_sfc_sym,
+                      windspeed = add_forward_speed(wind_sfc_sym,
                                                    tcspd_u, tcspd_v,
-                                                   swd, cdist, Rmax),
-                      # Convert 1-min winds at 10-m to 3-sec gust at surface,
-                      windspeed = wind_sfc,
-                      gustspeed = wind_sfc * 1.49) %>%
-                # Determine max of windspeed and duration of wind over 20
-                dplyr::summarize(vmax_gust = max(gustspeed, na.rm = TRUE),
-                          vmax_sust = max(windspeed, na.rm = TRUE),
-                          gust_dur = 60 * sum(gustspeed > gust_duration_cut,
-                                              na.rm = TRUE),
-                          sust_dur = 60 * sum(windspeed > sust_duration_cut,
-                                              na.rm = TRUE)) %>%
-          dplyr::mutate(gust_dur = gust_dur * tint,
-                        sust_dur = sust_dur * tint)
-        grid_wind <- as.matrix(grid_wind)
+                                                   swd, cdist, Rmax)) %>%
+          select(date, windspeed)
         return(grid_wind)
+}
+
+#' Generate wind summaries for grid point
+#' @export
+summarize_grid_wind <- function(grid_wind, tint = 0.25, gust_duration_cut = 20,
+                                sust_duration_cut = 20){
+  grid_wind_summary <- grid_wind %>%
+    mutate(gustspeed = windspeed * 1.49) %>%
+    # Determine max of windspeed and duration of wind over 20
+    dplyr::summarize(vmax_gust = max(gustspeed, na.rm = TRUE),
+                     vmax_sust = max(windspeed, na.rm = TRUE),
+                     gust_dur = 60 * sum(gustspeed > gust_duration_cut,
+                                         na.rm = TRUE),
+                     sust_dur = 60 * sum(windspeed > sust_duration_cut,
+                                         na.rm = TRUE)) %>%
+    dplyr::mutate(gust_dur = gust_dur * tint,
+                  sust_dur = sust_dur * tint)
+  grid_wind_summary <- as.matrix(grid_wind_summary)
+  return(grid_wind_summary)
+}
+
+#' Calculate and summarize grid winds
+#'
+#' This function combines the `calc_grid_wind` and `summarize_grid_wind`
+#' functions so they can be run jointly in the overall `get_grid_winds`
+#' function.
+calc_and_summarize_grid_wind <- function(grid_point = stormwindmodel::county_points[1, ],
+                                         with_wind_radii = add_wind_radii(),
+                                         tint = 0.25, gust_duration_cut = 20,
+                                         sust_duration_cut = 20){
+  grid_wind <- calc_grid_wind(grid_point = grid_point,
+                              with_wind_radii = with_wind_radii)
+  grid_wind_summary <- summarize_grid_wind(grid_wind = grid_wind, tint = tint,
+                                           gust_duration_cut = gust_duration_cut,
+                                           sust_duration_cut = sust_duration_cut)
+  return(grid_wind_summary)
+
 }
 
 #' Determine hurricane winds at locations
@@ -203,12 +223,10 @@ calc_grid_wind <- function(grid_point = stormwindmodel::county_points[1, ],
 #'
 #' @examples
 #' \dontrun{
-#' data("hurr_tracks", package = "hurricaneexposuredata")
+#' data("floyd_tracks")
 #' data("county_points")
-#' example_track <- subset(hurr_tracks, storm_id == "Floyd-1999")
-#' grid_winds <- get_grid_winds(hurr_track = example_track,
-#'                              grid_df = county_points,
-#'                              tint = 0.25)
+#' grid_winds <- get_grid_winds(hurr_track = floyd_tracks,
+#'                              grid_df = county_points)
 #' }
 #'
 #' @export
@@ -221,8 +239,11 @@ get_grid_winds <- function(hurr_track = subset(hurr_tracks,
         full_track <- create_full_track(hurr_track = hurr_track, tint = tint)
         with_wind_radii <- add_wind_radii(full_track = full_track)
 
-        grid_winds <- plyr::adply(grid_df, 1, calc_grid_wind,
-                                  with_wind_radii = with_wind_radii)
+        grid_winds <- plyr::adply(grid_df, 1, calc_and_summarize_grid_wind,
+                                  with_wind_radii = with_wind_radii,
+                                  tint = tint,
+                                  gust_duration_cut = gust_duration_cut,
+                                  sust_duration_cut = sust_duration_cut)
 
         return(grid_winds)
 }

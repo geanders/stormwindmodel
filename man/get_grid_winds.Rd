@@ -63,12 +63,10 @@ be used as the \code{grid_point} input.
 }
 \examples{
 \dontrun{
-data("hurr_tracks", package = "hurricaneexposuredata")
+data("floyd_tracks")
 data("county_points")
-example_track <- subset(hurr_tracks, storm_id == "Floyd-1999")
-grid_winds <- get_grid_winds(hurr_track = example_track,
-                             grid_df = county_points,
-                             tint = 0.25)
+grid_winds <- get_grid_winds(hurr_track = floyd_tracks,
+                             grid_df = county_points)
 }
 
 }

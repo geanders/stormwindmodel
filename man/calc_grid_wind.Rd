@@ -5,8 +5,7 @@
 \title{Calculate wind speed at grid points}
 \usage{
 calc_grid_wind(grid_point = stormwindmodel::county_points[1, ],
-  with_wind_radii = add_wind_radii(), tint = 0.25, gust_duration_cut = 20,
-  sust_duration_cut = 20)
+  with_wind_radii = add_wind_radii())
 }
 \arguments{
 \item{grid_point}{A one-row dataframe with the grid id, latitude, longitude,
@@ -14,9 +13,6 @@ and population for a single grid point of the projection grid.}
 
 \item{with_wind_radii}{A dataframe with interpolated tracks for a storm,
 including wind radii, as created by \code{add_wind_radii}.}
-
-\item{tint}{Interval (in hours) for the estimates. Default is 0.25 (i.e., 15
-minutes)}
 
 \item{gust_duration_cut}{The wind speed, in meters per second, to use as a
 cutoff point for determining the duration of gust winds. The function
@@ -52,11 +48,9 @@ level function (\code{get_grid_winds}).
 }
 \examples{
 \dontrun{
-data("hurr_tracks", package = "hurricaneexposuredata")
+data("floyd_tracks")
 data("county_points")
-example_track <- subset(hurr_tracks, storm_id == "Floyd-1999")
-full_track <- create_full_track(hurr_track = example_track,
-                                tint = 0.25)
+full_track <- create_full_track(hurr_track = floyd_tracks)
 with_wind_radii <- add_wind_radii(full_track = full_track)
 wind_grid <- calc_grid_wind(grid_point = county_points[1, ],
                             with_wind_radii = with_wind_radii)

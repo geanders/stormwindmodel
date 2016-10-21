@@ -45,9 +45,7 @@ add_inflow <- function(gwd, cdist, Rmax){
 #'
 #' Adds the storm's forward speed component back into the estimated
 #' surface wind speed.
-add_forward_speed <- function(wind_sfc_sym,
-                              tcspd_u, tcspd_v,
-                              swd, cdist, Rmax){
+add_forward_speed <- function(wind_sfc_sym, tcspd_u, tcspd_v, swd, cdist, Rmax){
   # Calculate u- and v-components of surface wind speed
   wind_sfc_sym_u <- wind_sfc_sym * cos(degrees_to_radians(swd))
   wind_sfc_sym_v <-  wind_sfc_sym * sin(degrees_to_radians(swd))
