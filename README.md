@@ -70,12 +70,12 @@ floyd_winds %>%
   dplyr::select(gridid, vmax_gust, vmax_sust, gust_dur, sust_dur) %>%
   slice(1:6)
 #>   gridid vmax_gust vmax_sust gust_dur sust_dur
-#> 1  01001  2.079997 1.3959708        0        0
-#> 2  01003  1.262794 0.8475128        0        0
-#> 3  01005  3.457852 2.3207060        0        0
-#> 4  01007  1.630225 1.0941110        0        0
-#> 5  01009  1.922359 1.2901737        0        0
-#> 6  01011  2.903270 1.9485032        0        0
+#> 1  01001  2.925477  1.963407        0        0
+#> 2  01003  1.882450  1.263389        0        0
+#> 3  01005  4.698540  3.153383        0        0
+#> 4  01007  2.292937  1.538884        0        0
+#> 5  01009  2.612183  1.753143        0        0
+#> 6  01011  3.997474  2.682868        0        0
 ```
 
 If you model winds for county centers, so the `gridid` is a county FIPS, the `stormwindmodel` package has a function called `map_wind` for mapping the estimated winds. By default, it maps the maximum sustained wind in each county during the storm in meters per second.
