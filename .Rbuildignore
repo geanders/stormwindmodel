@@ -4,3 +4,4 @@
 ^writing$
 ^README\.Rmd$
 ^README-.*\.png$
+^data-raw$
