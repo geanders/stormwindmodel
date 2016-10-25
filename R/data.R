@@ -21,6 +21,29 @@
 #' \url{http://rammb.cira.colostate.edu/research/tropical_cyclones/tc_extended_best_track_dataset/}
 "floyd_tracks"
 
+#' Hurricane Katrina tracks data
+#'
+#' A dataframe containing hurricane best tracks for Hurricane Katrina in
+#' 2005. This dataframe is included for use as an example hurricane
+#' tracks dataframe in the package documentation. This data originally
+#' came from the Extended Best Track dataset:
+#' \url{http://rammb.cira.colostate.edu/research/tropical_cyclones/tc_extended_best_track_dataset/}
+#'
+#' @format A dataframe with 48 rows and 4 variables:
+#' \describe{
+#'     \item{date}{A character string giving the date and time of the observation}
+#'     \item{latitude}{A numeric vector giving the storm's latitude at that
+#'                     observation time}
+#'     \item{longitude}{A numeric vector giving the storm's longitude at that
+#'                     observation time}
+#'     \item{wind}{A numeric vector giving the estimated maximum sustained
+#'                 wind of that storm at that observation time, in knots}
+#' }
+#'
+#' @source
+#' \url{http://rammb.cira.colostate.edu/research/tropical_cyclones/tc_extended_best_track_dataset/}
+"katrina_tracks"
+
 #' Land-sea mask
 #'
 #' A dataframe with gridded locations in the eastern United States and
