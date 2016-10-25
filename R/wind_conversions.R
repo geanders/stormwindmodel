@@ -44,13 +44,15 @@ calc_gradient_speed <- function(vmax_sfc_sym, over_land){
 
 #' Determine if storm is over land or water
 check_over_land <- function(tclat, tclon){
-  lat_diffs <- abs(tclat - landmask$latitude)
-  closest_grid_lat <- landmask$latitude[which(lat_diffs == min(lat_diffs))][1]
+  lat_diffs <- abs(tclat - stormwindmodel::landmask$latitude)
+  closest_grid_lat <- stormwindmodel::landmask$latitude[which(lat_diffs ==
+                                                                min(lat_diffs))][1]
 
-  lon_diffs <- abs(tclon - (360 - landmask$longitude))
-  closest_grid_lon <- landmask$longitude[which(lon_diffs == min(lon_diffs))][1]
+  lon_diffs <- abs(tclon - (360 - stormwindmodel::landmask$longitude))
+  closest_grid_lon <- stormwindmodel::landmask$longitude[which(lon_diffs ==
+                                                                 min(lon_diffs))][1]
 
-  over_land <- landmask %>%
+  over_land <- stormwindmodel::landmask %>%
     dplyr::filter_(~ latitude == closest_grid_lat &
                      longitude == closest_grid_lon) %>%
     dplyr::mutate_(land = ~ land == "land") %>%
