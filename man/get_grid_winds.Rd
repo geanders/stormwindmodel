@@ -4,7 +4,7 @@
 \alias{get_grid_winds}
 \title{Determine hurricane winds at locations}
 \usage{
-get_grid_winds(hurr_track = subset(hurr_tracks, storm_id == "Floyd-1999"),
+get_grid_winds(hurr_track = stormwindmodel::floyd_tracks,
   grid_df = stormwindmodel::county_points, tint = 0.25,
   gust_duration_cut = 20, sust_duration_cut = 20)
 }

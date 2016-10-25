@@ -54,6 +54,7 @@ full_track <- create_full_track(hurr_track = floyd_tracks)
 with_wind_radii <- add_wind_radii(full_track = full_track)
 wind_grid <- calc_grid_wind(grid_point = county_points[1, ],
                             with_wind_radii = with_wind_radii)
+head(wind_grid)
 }
 
 }

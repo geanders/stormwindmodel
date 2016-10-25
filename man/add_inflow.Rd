@@ -25,7 +25,7 @@ storm center to a location, and then adds 20 degrees to this inflow angle to
 account for the location being over land rather than overwater.
 }
 \examples{
-add_inflow(gwd = 160, r = 100, Rmax = 20)
+add_inflow(gwd = 160, cdist = 100, Rmax = 20)
 
 }
 
