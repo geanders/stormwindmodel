@@ -48,8 +48,9 @@
 #' @importFrom dplyr %>%
 #'
 #' @export
-create_full_track <- function(hurr_track = floyd_tracks, tint = 0.25){
-  hurr_track <- dplyr::select_(~ hurr_track, ~ date, ~ latitude,
+create_full_track <- function(hurr_track = stormwindmodel::floyd_tracks,
+                              tint = 0.25){
+  hurr_track <- dplyr::select_(hurr_track, ~ date, ~ latitude,
                                ~ longitude, ~ wind) %>%
     dplyr::rename_(vmax = ~ wind,
                    tclat = ~ latitude,
