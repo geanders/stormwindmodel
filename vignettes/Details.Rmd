@@ -828,9 +828,8 @@ gustspeed = windspeed * 1.49
 There's a wrapper function called `get_grid_winds` that puts everything together. As inputs, it takes the storm tracks and the grid point locations. It outputs a dataframe like this: 
 
 ```{r cache = TRUE}
-data("hurr_tracks", package = "hurricaneexposuredata")
-grid_winds_katrina <- get_grid_winds(hurr_track = subset(hurr_tracks,
-                                                  storm_id == "Katrina-2005"),
+data("katrina_tracks")
+grid_winds_katrina <- get_grid_winds(hurr_track = katrina_tracks,
                                      grid_df = county_points)
 ```
 
@@ -845,64 +844,64 @@ with the maxmium sustained and gust wind speeds (in meters per second) and durat
 Here is the code for this function: 
 
 ```{r}
-get_grid_winds
+stormwindmodel::get_grid_winds
 ```
 
 There is also a function to map county-level estimates. For this function to work, winds must be modeled at county centers, with FIPS codes used as the grid ids. Here's an example of calculating and mapping county winds for Katrina:
 
 ```{r fig.width = 7, fig.height = 4, warning = FALSE, message = FALSE}
-a <- map_wind(grid_winds_katrina, value = "vmax_gust") + 
+katrina_winds <- map_wind(grid_winds_katrina, value = "vmax_gust") + 
   ggtitle("Maximum gust wind speeds")
-hurricaneexposure::map_tracks("Katrina-2005", plot_object = a)
+add_storm_track(katrina_tracks, plot_object = katrina_winds)
 ```
 
 ```{r fig.width = 7, fig.height = 4, warning = FALSE, message = FALSE}
-a <- map_wind(grid_winds_katrina, value = "vmax_sust") + 
+katrina_winds <- map_wind(grid_winds_katrina, value = "vmax_sust") + 
   ggtitle("Maximum sustained wind speeds")
-hurricaneexposure::map_tracks("Katrina-2005", plot_object = a)
+add_storm_track(katrina_tracks, plot_object = katrina_winds)
 ```
 
 ```{r fig.width = 7, fig.height = 4, warning = FALSE, message = FALSE}
 # Show in knots
-a <- map_wind(grid_winds_katrina, value = "vmax_gust",
+katrina_winds <- map_wind(grid_winds_katrina, value = "vmax_gust",
               wind_metric = "knots") + 
   ggtitle("Maximum gust wind speeds")
-hurricaneexposure::map_tracks("Katrina-2005", plot_object = a)
+add_storm_track(katrina_tracks, plot_object = katrina_winds)
 ```
 
 ```{r fig.width = 7, fig.height = 4, warning = FALSE, message = FALSE}
-a <- map_wind(grid_winds_katrina, value = "vmax_sust",
+katrina_winds <- map_wind(grid_winds_katrina, value = "vmax_sust",
               wind_metric = "knots") + 
   ggtitle("Maximum sustained wind speeds")
-hurricaneexposure::map_tracks("Katrina-2005", plot_object = a)
+add_storm_track(katrina_tracks, plot_object = katrina_winds)
 ```
 
 ```{r fig.width = 7, fig.height = 4, warning = FALSE, message = FALSE}
 # Sustained winds of 20 m / s or more
-a <- map_wind(grid_winds_katrina, value = "vmax_sust", 
+katrina_winds <- map_wind(grid_winds_katrina, value = "vmax_sust", 
          break_point = 20)
-hurricaneexposure::map_tracks("Katrina-2005", plot_object = a)
+add_storm_track(katrina_tracks, plot_object = katrina_winds)
 ```
 
 ```{r fig.width = 7, fig.height = 4, warning = FALSE, message = FALSE}
 # Sustained winds of 34 knots or more
-a <- map_wind(grid_winds_katrina, value = "vmax_sust", wind_metric = "knots", 
-         break_point = 34)
-hurricaneexposure::map_tracks("Katrina-2005", plot_object = a)
+katrina_winds <- map_wind(grid_winds_katrina, value = "vmax_sust",
+                          wind_metric = "knots", break_point = 34)
+add_storm_track(katrina_tracks, plot_object = katrina_winds)
 ```
 
 ```{r fig.width = 7, fig.height = 4, warning = FALSE, message = FALSE}
 # Sustained winds of 50 knots or more
-a <- map_wind(grid_winds_katrina, value = "vmax_sust", wind_metric = "knots", 
-         break_point = 50)
-hurricaneexposure::map_tracks("Katrina-2005", plot_object = a)
+katrina_winds <- map_wind(grid_winds_katrina, value = "vmax_sust",
+                          wind_metric = "knots", break_point = 50)
+add_storm_track(katrina_tracks, plot_object = katrina_winds)
 ```
 
 ```{r fig.width = 7, fig.height = 4, warning = FALSE, message = FALSE}
 # Sustained winds of 64 knots or more
-a <- map_wind(grid_winds_katrina, value = "vmax_sust", wind_metric = "knots", 
-         break_point = 64)
-hurricaneexposure::map_tracks("Katrina-2005", plot_object = a)
+katrina_winds <- map_wind(grid_winds_katrina, value = "vmax_sust",
+                          wind_metric = "knots",  break_point = 64)
+add_storm_track(katrina_tracks, plot_object = katrina_winds)
 ```
 
 # References
