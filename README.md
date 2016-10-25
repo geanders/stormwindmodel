@@ -11,24 +11,39 @@ This package is currently in development on GitHub. You can install it using (yo
 devtools::install_github("geanders/stormwindmodel", build_vignettes = TRUE)
 ```
 
-The package includes data on the tracks of Hurricane Floyd in 1999. You can load this example best tracks data using:
+The package includes data on the tracks of Hurricane Floyd in 1999 and Hurricane Katrina in 2005. You can load this example best tracks data using:
 
 ``` r
 library(stormwindmodel)
 data("floyd_tracks")
 head(floyd_tracks)
-#>        storm_id         date latitude longitude wind
-#> 1563 Floyd-1999 199909071800     14.6     -45.6   25
-#> 1564 Floyd-1999 199909080000     15.0     -46.9   30
-#> 1565 Floyd-1999 199909080600     15.3     -48.2   35
-#> 1566 Floyd-1999 199909081200     15.8     -49.6   40
-#> 1567 Floyd-1999 199909081800     16.3     -51.1   45
-#> 1568 Floyd-1999 199909090000     16.7     -52.6   45
+#> # A tibble: 6 × 4
+#>           date latitude longitude  wind
+#>          <chr>    <dbl>     <dbl> <dbl>
+#> 1 199909071800     14.6     -45.6    25
+#> 2 199909080000     15.0     -46.9    30
+#> 3 199909080600     15.3     -48.2    35
+#> 4 199909081200     15.8     -49.6    40
+#> 5 199909081800     16.3     -51.1    45
+#> 6 199909090000     16.7     -52.6    45
+```
+
+``` r
+data("katrina_tracks")
+head(katrina_tracks)
+#> # A tibble: 6 × 4
+#>           date latitude longitude  wind
+#>          <chr>    <dbl>     <dbl> <dbl>
+#> 1 200508231800     23.1     -75.1    30
+#> 2 200508240000     23.4     -75.7    30
+#> 3 200508240600     23.8     -76.2    30
+#> 4 200508241200     24.5     -76.5    35
+#> 5 200508241800     25.4     -76.9    40
+#> 6 200508250000     26.0     -77.7    45
 ```
 
 This example data includes the following columns:
 
--   `storm_id`: Unique identifier for the tropical cyclone
 -   `date`: Date and time of the observation (in UTC)
 -   `latitude`, `longitude`: Location of the storm at that time
 -   `wind`: Maximum wind speed at that time (knots)
@@ -40,16 +55,16 @@ The `stormwindmodel` package also includes a dataset with the location of the po
 ``` r
 data(county_points)
 head(county_points)
-#>   gridid     glat      glon   gpop
-#> 1  01001 32.50039 -86.49416  54571
-#> 2  01003 30.54892 -87.76238 182265
-#> 3  01005 31.84404 -85.31004  27457
-#> 4  01007 33.03092 -87.12766  22915
-#> 5  01009 33.95524 -86.59149  57322
-#> 6  01011 32.11633 -85.70119  10914
+#>   gridid     glat      glon
+#> 1  01001 32.50039 -86.49416
+#> 2  01003 30.54892 -87.76238
+#> 3  01005 31.84404 -85.31004
+#> 4  01007 33.03092 -87.12766
+#> 5  01009 33.95524 -86.59149
+#> 6  01011 32.11633 -85.70119
 ```
 
-This package uses the wind model developed by Willoughby \[reference\] for modeling wind speed at each grid location. Full details on how this model is fit are provided in the "Details" vignetted of the `stormwindmodel` package.
+This package uses the wind model developed by Willoughby et al. (2006) for modeling wind speed at each grid location. Full details on how this model is fit are provided in the "Details" vignetted of the `stormwindmodel` package.
 
 Basic example
 -------------
@@ -84,23 +99,18 @@ If you model winds for county centers, so the `gridid` is a county FIPS, the `st
 map_wind(floyd_winds)
 ```
 
-![](README-unnamed-chunk-7-1.png)
+![](README-unnamed-chunk-8-1.png)
 
 Further functionality
 ---------------------
 
 There are a number of options when mapping wind speeds using `map_wind`.
 
-First, you can use the `map_tracks` function from `hurricaneexposure` package (also in development on GitHub) to add the storm track to the map. To do that, you save the wind map as an R object and input that object to `map_tracks` as the `plot_object`. This function can only be used for Atlantic basin storms between 1988 and 2015.
+First, you can use the `map_storm_track` function to add the storm track to the map:
 
 ``` r
-install_github("geanders/hurricaneexposure")
-```
-
-``` r
-library(hurricaneexposure)
 floyd_map <- map_wind(floyd_winds)
-map_tracks("Floyd-1999", plot_object = floyd_map)
+add_storm_track(floyd_tracks, plot_object = floyd_map)
 ```
 
 ![](README-unnamed-chunk-9-1.png)
@@ -125,11 +135,13 @@ map_wind(floyd_winds, value = "vmax_sust", wind_metric = "knots",
 Tracks data
 -----------
 
-You can get an R version of this data for Atlantic basin storms from 1988 to 2015 through the `hurricaneexposuredata` package (also in development on GitHub):
+You can get an R version of best tracks data for Atlantic basin storms from 1988 to 2015 through the `hurricaneexposuredata` package (also in development on GitHub):
 
 ``` r
 devtools::install_github("geanders/hurricaneexposuredata")
 ```
+
+Here are all the storms included in that dataset:
 
 ``` r
 library(hurricaneexposuredata)
@@ -138,145 +150,43 @@ hurr_tracks %>%
   tidyr::separate(storm_id, c("storm", "year")) %>%
   dplyr::select(storm, year) %>%
   dplyr::distinct() %>%
+  dplyr::group_by(year) %>% 
+  dplyr::summarize(storms = paste(storm, collapse = ", ")) %>% 
   knitr::kable()
 ```
 
-| storm     | year |
-|:----------|:-----|
-| Alberto   | 1988 |
-| Beryl     | 1988 |
-| Chris     | 1988 |
-| Florence  | 1988 |
-| Gilbert   | 1988 |
-| Keith     | 1988 |
-| Allison   | 1989 |
-| Chantal   | 1989 |
-| Hugo      | 1989 |
-| Jerry     | 1989 |
-| Bertha    | 1990 |
-| Marco     | 1990 |
-| Ana       | 1991 |
-| Bob       | 1991 |
-| Fabian    | 1991 |
-| Notnamed  | 1991 |
-| Andrew    | 1992 |
-| Danielle  | 1992 |
-| Earl      | 1992 |
-| Arlene    | 1993 |
-| Emily     | 1993 |
-| Alberto   | 1994 |
-| Beryl     | 1994 |
-| Gordon    | 1994 |
-| Allison   | 1995 |
-| Dean      | 1995 |
-| Erin      | 1995 |
-| Gabrielle | 1995 |
-| Jerry     | 1995 |
-| Opal      | 1995 |
-| Arthur    | 1996 |
-| Bertha    | 1996 |
-| Edouard   | 1996 |
-| Fran      | 1996 |
-| Josephine | 1996 |
-| Subtrop   | 1997 |
-| Ana       | 1997 |
-| Danny     | 1997 |
-| Bonnie    | 1998 |
-| Charley   | 1998 |
-| Earl      | 1998 |
-| Frances   | 1998 |
-| Georges   | 1998 |
-| Hermine   | 1998 |
-| Mitch     | 1998 |
-| Bret      | 1999 |
-| Dennis    | 1999 |
-| Floyd     | 1999 |
-| Harvey    | 1999 |
-| Irene     | 1999 |
-| Beryl     | 2000 |
-| Gordon    | 2000 |
-| Helene    | 2000 |
-| Leslie    | 2000 |
-| Allison   | 2001 |
-| Barry     | 2001 |
-| Gabrielle | 2001 |
-| Karen     | 2001 |
-| Michelle  | 2001 |
-| Arthur    | 2002 |
-| Bertha    | 2002 |
-| Cristobal | 2002 |
-| Edouard   | 2002 |
-| Fay       | 2002 |
-| Gustav    | 2002 |
-| Hanna     | 2002 |
-| Isidore   | 2002 |
-| Kyle      | 2002 |
-| Lili      | 2002 |
-| Bill      | 2003 |
-| Claudette | 2003 |
-| Erika     | 2003 |
-| Grace     | 2003 |
-| Henri     | 2003 |
-| Isabel    | 2003 |
-| Alex      | 2004 |
-| Bonnie    | 2004 |
-| Charley   | 2004 |
-| Frances   | 2004 |
-| Gaston    | 2004 |
-| Hermine   | 2004 |
-| Ivan      | 2004 |
-| Jeanne    | 2004 |
-| Matthew   | 2004 |
-| Arlene    | 2005 |
-| Cindy     | 2005 |
-| Dennis    | 2005 |
-| Emily     | 2005 |
-| Katrina   | 2005 |
-| Ophelia   | 2005 |
-| Rita      | 2005 |
-| Tammy     | 2005 |
-| Wilma     | 2005 |
-| Alberto   | 2006 |
-| Beryl     | 2006 |
-| Chris     | 2006 |
-| Ernesto   | 2006 |
-| Andrea    | 2007 |
-| Barry     | 2007 |
-| Erin      | 2007 |
-| Gabrielle | 2007 |
-| Humberto  | 2007 |
-| Noel      | 2007 |
-| Cristobal | 2008 |
-| Dolly     | 2008 |
-| Edouard   | 2008 |
-| Fay       | 2008 |
-| Gustav    | 2008 |
-| Hanna     | 2008 |
-| Ike       | 2008 |
-| Kyle      | 2008 |
-| Paloma    | 2008 |
-| Claudette | 2009 |
-| Ida       | 2009 |
-| Alex      | 2010 |
-| Bonnie    | 2010 |
-| Earl      | 2010 |
-| Hermine   | 2010 |
-| Nicole    | 2010 |
-| Paula     | 2010 |
-| Bret      | 2011 |
-| Don       | 2011 |
-| Emily     | 2011 |
-| Irene     | 2011 |
-| Lee       | 2011 |
-| Alberto   | 2012 |
-| Beryl     | 2012 |
-| Debby     | 2012 |
-| Isaac     | 2012 |
-| Sandy     | 2012 |
-| Andrea    | 2013 |
-| Dorian    | 2013 |
-| Karen     | 2013 |
-| Arthur    | 2014 |
-| Ana       | 2015 |
-| Bill      | 2015 |
-| Claudette | 2015 |
+| year | storms                                                                      |
+|:-----|:----------------------------------------------------------------------------|
+| 1988 | Alberto, Beryl, Chris, Florence, Gilbert, Keith                             |
+| 1989 | Allison, Chantal, Hugo, Jerry                                               |
+| 1990 | Bertha, Marco                                                               |
+| 1991 | Ana, Bob, Fabian, Notnamed                                                  |
+| 1992 | Andrew, Danielle, Earl                                                      |
+| 1993 | Arlene, Emily                                                               |
+| 1994 | Alberto, Beryl, Gordon                                                      |
+| 1995 | Allison, Dean, Erin, Gabrielle, Jerry, Opal                                 |
+| 1996 | Arthur, Bertha, Edouard, Fran, Josephine                                    |
+| 1997 | Subtrop, Ana, Danny                                                         |
+| 1998 | Bonnie, Charley, Earl, Frances, Georges, Hermine, Mitch                     |
+| 1999 | Bret, Dennis, Floyd, Harvey, Irene                                          |
+| 2000 | Beryl, Gordon, Helene, Leslie                                               |
+| 2001 | Allison, Barry, Gabrielle, Karen, Michelle                                  |
+| 2002 | Arthur, Bertha, Cristobal, Edouard, Fay, Gustav, Hanna, Isidore, Kyle, Lili |
+| 2003 | Bill, Claudette, Erika, Grace, Henri, Isabel                                |
+| 2004 | Alex, Bonnie, Charley, Frances, Gaston, Hermine, Ivan, Jeanne, Matthew      |
+| 2005 | Arlene, Cindy, Dennis, Emily, Katrina, Ophelia, Rita, Tammy, Wilma          |
+| 2006 | Alberto, Beryl, Chris, Ernesto                                              |
+| 2007 | Andrea, Barry, Erin, Gabrielle, Humberto, Noel                              |
+| 2008 | Cristobal, Dolly, Edouard, Fay, Gustav, Hanna, Ike, Kyle, Paloma            |
+| 2009 | Claudette, Ida                                                              |
+| 2010 | Alex, Bonnie, Earl, Hermine, Nicole, Paula                                  |
+| 2011 | Bret, Don, Emily, Irene, Lee                                                |
+| 2012 | Alberto, Beryl, Debby, Isaac, Sandy                                         |
+| 2013 | Andrea, Dorian, Karen                                                       |
+| 2014 | Arthur                                                                      |
+| 2015 | Ana, Bill, Claudette                                                        |
+
+References
+==========
+
+Willoughby, HE, RWR Darling, and ME Rahn. 2006. “Parametric Representation of the Primary Hurricane Vortex. Part II: A New Family of Sectionally Continuous Profiles.” *Monthly Weather Review* 134 (4): 1102–20.

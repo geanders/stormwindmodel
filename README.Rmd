@@ -1,5 +1,6 @@
 ---
 output: github_document
+bibliography: vignettes/bibliography.bib
 ---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
@@ -28,17 +29,20 @@ This package is currently in development on GitHub. You can install it using (yo
 devtools::install_github("geanders/stormwindmodel", build_vignettes = TRUE)
 ```
 
-The package includes data on the tracks of Hurricane Floyd in 1999. You can load this example best tracks data using: 
+The package includes data on the tracks of Hurricane Floyd in 1999 and Hurricane Katrina in 2005. You can load this example best tracks data using: 
 
 ```{r}
 library(stormwindmodel)
 data("floyd_tracks")
 head(floyd_tracks)
 ```
+```{r}
+data("katrina_tracks")
+head(katrina_tracks)
+```
 
 This example data includes the following columns: 
 
-- `storm_id`: Unique identifier for the tropical cyclone
 - `date`: Date and time of the observation (in UTC)
 - `latitude`, `longitude`: Location of the storm at that time
 - `wind`: Maximum wind speed at that time (knots)
@@ -52,8 +56,7 @@ data(county_points)
 head(county_points)
 ```
 
-
-This package uses the wind model developed by Willoughby [reference] for modeling wind speed at each grid location. Full details on how this model is fit are provided in the "Details" vignetted of the `stormwindmodel` package.
+This package uses the wind model developed by Willoughby et al. [-@willoughby2006parametric] for modeling wind speed at each grid location. Full details on how this model is fit are provided in the "Details" vignetted of the `stormwindmodel` package.
 
 ## Basic example
 
@@ -84,15 +87,11 @@ map_wind(floyd_winds)
 
 There are a number of options when mapping wind speeds using `map_wind`. 
 
-First, you can use the `map_tracks` function from `hurricaneexposure` package (also in development on GitHub) to add the storm track to the map. To do that, you save the wind map as an R object and input that object to `map_tracks` as the `plot_object`. This function can only be used for Atlantic basin storms between 1988 and 2015. 
+First, you can use the `map_storm_track` function to add the storm track to the map:
 
-```{r eval = FALSE}
-install_github("geanders/hurricaneexposure")
-```
 ```{r fig.width = 8}
-library(hurricaneexposure)
 floyd_map <- map_wind(floyd_winds)
-map_tracks("Floyd-1999", plot_object = floyd_map)
+add_storm_track(floyd_tracks, plot_object = floyd_map)
 ```
 
 You can also choose whether to map sustained or gust winds, as well as the unit to use for wind speed. 
@@ -108,14 +107,15 @@ map_wind(floyd_winds, value = "vmax_sust", wind_metric = "knots",
          break_point = 34)
 ```
 
-
 ## Tracks data
 
-You can get an R version of this data for Atlantic basin storms from 1988 to 2015 through the `hurricaneexposuredata` package (also in development on GitHub):
+You can get an R version of best tracks data for Atlantic basin storms from 1988 to 2015 through the `hurricaneexposuredata` package (also in development on GitHub):
 
 ```{r eval = FALSE}
 devtools::install_github("geanders/hurricaneexposuredata")
 ```
+
+Here are all the storms included in that dataset:
 
 ```{r}
 library(hurricaneexposuredata)
@@ -124,6 +124,9 @@ hurr_tracks %>%
   tidyr::separate(storm_id, c("storm", "year")) %>%
   dplyr::select(storm, year) %>%
   dplyr::distinct() %>%
+  dplyr::group_by(year) %>% 
+  dplyr::summarize(storms = paste(storm, collapse = ", ")) %>% 
   knitr::kable()
 ```
 
+# References
