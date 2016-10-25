@@ -4,7 +4,7 @@
 \alias{create_full_track}
 \title{Impute hurricane tracks to finer time scale}
 \usage{
-create_full_track(hurr_track = floyd_tracks, tint = 0.25)
+create_full_track(hurr_track = stormwindmodel::floyd_tracks, tint = 0.25)
 }
 \arguments{
 \item{hurr_track}{Dataframe with columns the hurricane track for a single
