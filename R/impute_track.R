@@ -49,18 +49,19 @@
 #'
 #' @export
 create_full_track <- function(hurr_track = floyd_tracks, tint = 0.25){
-  hurr_track <- dplyr::select(hurr_track, date, latitude, longitude, wind) %>%
-    dplyr::rename(vmax = wind,
-                  tclat = latitude,
-                  tclon = longitude) %>%
-    dplyr::mutate(date = lubridate::ymd_hm(date),
-                  tclat = abs(as.numeric(tclat)),
-                  tclon = as.numeric(tclon),
-                  tclon = ifelse(tclon > -180, tclon, tclon + 360),
-                  tclon = -1 * tclon,
-                  vmax = weathermetrics::convert_wind_speed(vmax,
-                                                            "knots", "mps",
-                                                            round = 3))
+  hurr_track <- dplyr::select_(~ hurr_track, ~ date, ~ latitude,
+                               ~ longitude, ~ wind) %>%
+    dplyr::rename_(vmax = ~ wind,
+                   tclat = ~ latitude,
+                   tclon = ~ longitude) %>%
+    dplyr::mutate_(date = ~ lubridate::ymd_hm(date),
+                   tclat = ~ abs(as.numeric(tclat)),
+                   tclon = ~ as.numeric(tclon),
+                   tclon = ~ ifelse(tclon > -180, tclon, tclon + 360),
+                   tclon = ~ -1 * tclon,
+                   vmax = ~ weathermetrics::convert_wind_speed(vmax, "knots",
+                                                               "mps",
+                                                               round = 3))
 
   interp_df <- floor(nrow(hurr_track) / 2)
   interp_date <- seq(from = min(hurr_track$date),

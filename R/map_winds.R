@@ -64,9 +64,9 @@ map_wind <- function(grid_winds, value = "vmax_sust", break_point = NULL,
                                    include.lowest = TRUE))
   }
 
-  map_data <- dplyr::mutate(grid_winds,
-                            region = as.numeric(gridid)) %>%
-    dplyr::select(region, value)
+  map_data <- dplyr::mutate_(grid_winds,
+                             region = ~ as.numeric(gridid)) %>%
+    dplyr::select_(~ region, ~ value)
 
   eastern_states <- c("alabama", "arkansas",
                       "connecticut", "delaware",

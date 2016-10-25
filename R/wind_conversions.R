@@ -51,10 +51,10 @@ check_over_land <- function(tclat, tclon){
   closest_grid_lon <- landmask$longitude[which(lon_diffs == min(lon_diffs))][1]
 
   over_land <- landmask %>%
-    dplyr::filter(latitude == closest_grid_lat &
-                    longitude == closest_grid_lon) %>%
-    dplyr::mutate(land = land == "land") %>%
-    dplyr::select(land)
+    dplyr::filter_(~ latitude == closest_grid_lat &
+                     longitude == closest_grid_lon) %>%
+    dplyr::mutate_(land = ~ land == "land") %>%
+    dplyr::select_(~ land)
   over_land <- as.vector(over_land$land[1])
 
   return(over_land)

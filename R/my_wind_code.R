@@ -37,34 +37,39 @@
 #'    }
 #'
 #' @examples
+#' \dontrun{
 #' data("floyd_tracks")
 #' full_track <- create_full_track(hurr_track = floyd_tracks)
 #' with_wind_radii <- add_wind_radii(full_track = full_track)
+#' head(with_wind_radii)
+#' }
 #'
 #' @export
 add_wind_radii <- function(full_track = create_full_track()){
 
         with_wind_radii <- full_track %>%
-          dplyr::mutate(tcspd = calc_forward_speed(tclat, tclon, date,
-                                                   lead(tclat), lead(tclon),
-                                                   lead(date)),
-                        tcdir = calc_bearing(tclat, tclon,
-                                           lead(tclat), lead(tclon)),
-                        tcspd_u = tcspd * cos(degrees_to_radians(tcdir)),
-                        tcspd_v = tcspd * sin(degrees_to_radians(tcdir)),
-                        vmax_sfc_sym = remove_forward_speed(vmax, tcspd),
-                        over_land = mapply(check_over_land, tclat, tclon),
-                        vmax_gl = mapply(calc_gradient_speed,
-                                         vmax_sfc_sym = vmax_sfc_sym,
-                                         over_land = over_land),
-                        Rmax = will7a(vmax_gl, tclat),
-                        X1 = will10a(vmax_gl, tclat),
-                        n = will10b(vmax_gl, tclat),
-                        A = will10c(vmax_gl, tclat),
-                        eq3_right = will3_right(n, A, X1, Rmax),
-                        xi = mapply(solve_for_xi, eq3_right = eq3_right),
-                        R1 = calc_R1(Rmax, xi),
-                        R2 = ifelse(Rmax > 20, R1 + 25, R1 + 15)
+          dplyr::mutate_(tcspd = ~ calc_forward_speed(tclat, tclon, date,
+                                                      dplyr::lead(tclat),
+                                                      dplyr::lead(tclon),
+                                                      dplyr::lead(date)),
+                        tcdir = ~ calc_bearing(tclat, tclon,
+                                               dplyr::lead(tclat),
+                                               dplyr::lead(tclon)),
+                        tcspd_u = ~ tcspd * cos(degrees_to_radians(tcdir)),
+                        tcspd_v = ~ tcspd * sin(degrees_to_radians(tcdir)),
+                        vmax_sfc_sym = ~ remove_forward_speed(vmax, tcspd),
+                        over_land = ~ mapply(check_over_land, tclat, tclon),
+                        vmax_gl = ~ mapply(calc_gradient_speed,
+                                           vmax_sfc_sym = vmax_sfc_sym,
+                                           over_land = over_land),
+                        Rmax = ~ will7a(vmax_gl, tclat),
+                        X1 = ~ will10a(vmax_gl, tclat),
+                        n = ~ will10b(vmax_gl, tclat),
+                        A = ~ will10c(vmax_gl, tclat),
+                        eq3_right = ~ will3_right(n, A, X1, Rmax),
+                        xi = ~ mapply(solve_for_xi, eq3_right = eq3_right),
+                        R1 = ~ calc_R1(Rmax, xi),
+                        R2 = ~ ifelse(Rmax > 20, R1 + 25, R1 + 15)
                         )
         return(with_wind_radii)
 }
@@ -112,6 +117,7 @@ add_wind_radii <- function(full_track = create_full_track()){
 #' with_wind_radii <- add_wind_radii(full_track = full_track)
 #' wind_grid <- calc_grid_wind(grid_point = county_points[1, ],
 #'                             with_wind_radii = with_wind_radii)
+#' head(wind_grid)
 #' }
 #'
 #' @references
@@ -122,31 +128,31 @@ add_wind_radii <- function(full_track = create_full_track()){
 calc_grid_wind <- function(grid_point = stormwindmodel::county_points[1, ],
                            with_wind_radii = add_wind_radii()){
 
-        grid_wind <- mutate(with_wind_radii,
+        grid_wind <- dplyr::mutate_(with_wind_radii,
                       # Calculated distance from storm center to location
-                      cdist = latlon_to_km(tclat, tclon,
-                                           grid_point$glat, -grid_point$glon),
+                      cdist = ~ latlon_to_km(tclat, tclon,
+                                             grid_point$glat, -grid_point$glon),
                       # Calculate gradient winds at the point
-                      wind_gl_aa = mapply(will1, cdist = cdist, Rmax = Rmax,
-                                          R1 = R1, R2 = R2, vmax = vmax,
-                                          n = n, A = A, X1 = X1),
+                      wind_gl_aa = ~ mapply(will1, cdist = cdist, Rmax = Rmax,
+                                            R1 = R1, R2 = R2, vmax = vmax,
+                                            n = n, A = A, X1 = X1),
                       # calculate the gradient wind direction (gwd) at this
                       # grid point
-                      chead = calc_bearing(tclat, tclon,
-                                           grid_point$glat, - grid_point$glon),
-                      gwd = (90 + chead) %% 360,
+                      chead = ~ calc_bearing(tclat, tclon,
+                                             grid_point$glat, - grid_point$glon),
+                      gwd = ~ (90 + chead) %% 360,
                       # Bring back to surface level (surface wind reduction factor)
-                      wind_sfc_sym = mapply(gradient_to_surface,
-                                            wind_gl_aa = wind_gl_aa,
-                                            cdist = cdist),
+                      wind_sfc_sym = ~ mapply(gradient_to_surface,
+                                              wind_gl_aa = wind_gl_aa,
+                                              cdist = cdist),
                       # Get surface wind direction
-                      swd = mapply(add_inflow, gwd = gwd, cdist = cdist,
-                                   Rmax = Rmax),
+                      swd = ~ mapply(add_inflow, gwd = gwd, cdist = cdist,
+                                     Rmax = Rmax),
                       # Add back in storm forward motion component
-                      windspeed = add_forward_speed(wind_sfc_sym,
-                                                   tcspd_u, tcspd_v,
-                                                   swd, cdist, Rmax)) %>%
-          select(date, windspeed)
+                      windspeed = ~ add_forward_speed(wind_sfc_sym,
+                                                      tcspd_u, tcspd_v,
+                                                      swd, cdist, Rmax)) %>%
+          dplyr::select_(~ date, ~ windspeed)
         return(grid_wind)
 }
 
@@ -155,16 +161,16 @@ calc_grid_wind <- function(grid_point = stormwindmodel::county_points[1, ],
 summarize_grid_wind <- function(grid_wind, tint = 0.25, gust_duration_cut = 20,
                                 sust_duration_cut = 20){
   grid_wind_summary <- grid_wind %>%
-    mutate(gustspeed = windspeed * 1.49) %>%
+    dplyr::mutate_(gustspeed = ~ windspeed * 1.49) %>%
     # Determine max of windspeed and duration of wind over 20
-    dplyr::summarize(vmax_gust = max(gustspeed, na.rm = TRUE),
-                     vmax_sust = max(windspeed, na.rm = TRUE),
-                     gust_dur = 60 * sum(gustspeed > gust_duration_cut,
-                                         na.rm = TRUE),
-                     sust_dur = 60 * sum(windspeed > sust_duration_cut,
-                                         na.rm = TRUE)) %>%
-    dplyr::mutate(gust_dur = gust_dur * tint,
-                  sust_dur = sust_dur * tint)
+    dplyr::summarize_(vmax_gust = ~ max(gustspeed, na.rm = TRUE),
+                      vmax_sust = ~ max(windspeed, na.rm = TRUE),
+                      gust_dur = ~ 60 * sum(gustspeed > gust_duration_cut,
+                                            na.rm = TRUE),
+                      sust_dur = ~ 60 * sum(windspeed > sust_duration_cut,
+                                            na.rm = TRUE)) %>%
+    dplyr::mutate_(gust_dur = ~ gust_dur * tint,
+                  sust_dur = ~ sust_dur * tint)
   grid_wind_summary <- as.matrix(grid_wind_summary)
   return(grid_wind_summary)
 }
@@ -221,8 +227,7 @@ calc_and_summarize_grid_wind <- function(grid_point = stormwindmodel::county_poi
 #'        surface-level gust winds were above 20 meters per second}
 #'    }
 #'
-#' @examples
-#' \dontrun{
+#' @examples \dontrun{
 #' data("floyd_tracks")
 #' data("county_points")
 #' grid_winds <- get_grid_winds(hurr_track = floyd_tracks,
@@ -230,8 +235,7 @@ calc_and_summarize_grid_wind <- function(grid_point = stormwindmodel::county_poi
 #' }
 #'
 #' @export
-get_grid_winds <- function(hurr_track = subset(hurr_tracks,
-                                               storm_id == "Floyd-1999"),
+get_grid_winds <- function(hurr_track = stormwindmodel::floyd_tracks,
                            grid_df = stormwindmodel::county_points,
                            tint = 0.25,
                            gust_duration_cut = 20,
