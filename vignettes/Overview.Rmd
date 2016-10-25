@@ -3,6 +3,7 @@ title: "Using the `stormwindmodel` package"
 author: "G. Brooke Anderson, Andrea Schumacher, Seth Guikema, Joshua M. Ferreri, Steven Quiring"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
+bibliography: bibliography.bib
 vignette: >
   %\VignetteIndexEntry{Vignette Title}
   %\VignetteEngine{knitr::rmarkdown}
@@ -16,7 +17,7 @@ library(dplyr)
 
 ## Overview
 
-You can use the `stormwindmodel` package to model wind speeds at grid points in the United States based on "best tracks" hurricane tracking data. 
+You can use the `stormwindmodel` package to model wind speeds at grid points in the United States based on "best tracks" hurricane tracking data and on a model for wind speed developed by Willoughby and coauthors [-@willoughby2006parametric]. 
 
 This package is currently in development on GitHub. You can install it using (you will need to install `devtools` if you do not already have it): 
 
@@ -109,14 +110,9 @@ You can get an R version of this data for Atlantic basin storms from 1988 to 201
 
 ```{r eval = FALSE}
 devtools::install_github("geanders/hurricaneexposuredata")
-```
-
-```{r}
 library(hurricaneexposuredata)
 data("hurr_tracks")
-hurr_tracks %>% 
-  tidyr::separate(storm_id, c("storm", "year")) %>%
-  dplyr::select(storm, year) %>%
-  dplyr::distinct() %>%
-  knitr::kable()
 ```
+
+# References
+ 
