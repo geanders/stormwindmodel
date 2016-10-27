@@ -2,7 +2,7 @@
 % Please edit documentation in R/willoughby2006eqs.R
 \name{will10b}
 \alias{will10b}
-\title{Calculate the power law exponential from \eqn{vmax_gl} and \eqn{\phi}}
+\title{Calculate n for the Willoughby model}
 \usage{
 will10b(vmax_gl, tclat)
 }
@@ -13,21 +13,28 @@ gradient wind speed, in meters per second}
 \item{tclat}{Numeric vector of the absolute value of latitude, in degrees.}
 }
 \value{
-A numeric vector of the exponential for the power law inside the eye
+A numeric vector for n, a parameter needed for the Willoughby wind
+   model.
 }
 \description{
-This function implements Willoughby et al. (2006), Equation 10b.
+Calculates n, a parameter for the Willoughby model, using equation 10b
+(Willoughby et al. 2006).
 }
 \details{
 This function is calculating the equation:
-   \deqn{n = 0.4067 + 0.0144 V_{max} - 0.0038 \phi}{
+   \deqn{n = 0.4067 + 0.0144 V_{max,G} - 0.0038 \phi}{
    n = 0.4067 + 0.0144 vmax_gl - 0.0038 \phi}
    where:
    \itemize{
      \item{\eqn{n}: Parameter for the Willoughby wind model}
-     \item{\eqn{V_{max}}{vmax_gl}: Tangential component of the maximum
-           gradient-level sustained wind speed (in m / s)}
+     \item{\eqn{V_{max,G}}{vmax_gl}:  Maximum gradient-level 1-min sustained
+        wind (m / s)}
      \item{\eqn{\phi}: Latitude, in decimal degrees}
    }
+}
+\references{
+Willoughby HE, Darling RWR, and Rahn ME. 2006. Parametric representation
+of the primary hurricane vortex. Part II: A new family of sectionally
+continuous profiles. Monthly Weather Review 134(4):1102-1120.
 }
 

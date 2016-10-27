@@ -7,7 +7,41 @@
 summarize_grid_wind(grid_wind, tint = 0.25, gust_duration_cut = 20,
   sust_duration_cut = 20)
 }
+\arguments{
+\item{grid_wind}{A dataframe with a time series of modeled wind speeds at
+a location, as created by \code{calc_grid_wind}.}
+
+\item{tint}{Interval (in hours) to which to interpolate the tracks. The
+default is 0.25 (i.e., 15 minutes)}
+
+\item{gust_duration_cut}{The wind speed, in meters per second, to use as a
+cutoff point for determining the duration of gust winds. The function
+will calculate the minutes during the storm when surface-level gust winds
+were above this speed at the location.}
+
+\item{sust_duration_cut}{The wind speed, in meters per second, to use as a
+cutoff point for determining the duration of gust winds. The function
+will calculate the minutes during the storm when surface-level gust winds
+were above this speed at the location.}
+}
+\value{
+Returns a one-row matrix with wind characteristics for a single
+   location. The wind characteristics given are:
+   \itemize{
+     \item{\code{max_gust}: Maximum value of surface-level (10 meters)
+       sustained winds, in meters per second, over the length of the
+       storm at the given location}
+     \item{\code{max_sust}: Maximum value of surface-level (10 meters)
+       gust winds, in meters per second, over the length of the
+       storm at the given location}
+     \item{\code{gust_duration}: Length of time, in minutes, that
+       surface-level sustained winds were above 20 meters per second}
+     \item{\code{sust_duration}: Length of time, in minutes, that
+       surface-level gust winds were above 20 meters per second}
+   }
+}
 \description{
-Generate wind summaries for grid point
+Summarizes the wind time series for a single grid point, as
+created by \code{calc_grid_wind}.
 }
 

@@ -2,47 +2,44 @@
 % Please edit documentation in R/my_wind_code.R
 \name{add_wind_radii}
 \alias{add_wind_radii}
-\title{Calculate Willoughby parameters for the storm}
+\title{Add Willoughby inputs and parameters}
 \usage{
 add_wind_radii(full_track = create_full_track())
 }
 \arguments{
-\item{full_track}{An interpolated version of the hurricane track data, as
+\item{full_track}{A dataframe with interpolated hurricane track data, as
 created by \code{create_full_track}. This dataframe must have the
 following columns:
 \itemize{
-  \item{date: Date-time, in POSIXct format and UTC time zone}
-  \item{tclat: Latitude, in decimal degrees}
-  \item{tclon: Longitude, in decimal degrees and expressed as positive
+  \item{\code{date:} Date-time, in POSIXct format and UTC time zone}
+  \item{\code{tclat:} Latitude (decimal degree)}
+  \item{\code{tclon:} Longitude (decimal degrees), expressed as positive
         values (this model assumes all longitudes will be in the
         Western hemisphere)}
-  \item{vmax: Sustained maximum wind speed, in meters per
-       second}
+  \item{\code{vmax:} Maximum 10-meter sustained wind speed (m / s)}
 }}
 }
 \value{
 The input dataset, but with columns added for the Willoughby
    parameters for every observations. Columns added include:
    \itemize{
-     \item{tcspd: The forward (translational) speed of the storm,
-       in meters per second}
-     \item{tcdir: The bearing of the storm, in degrees, with 0 degrees
+     \item{\code{tcspd_u, tcspd_v:} The u- and v-components of the forward
+     speed of the storm, in meters per second}
+     \item{\code{tcdir:} The bearing of the storm, in degrees, with 0 degrees
        indicating the storm is moving due east, 90 degrees indicating the
        storm is moving due north, etc.}
-     \item{Vmax: The gradient wind speed, based on the best track's
-       sustained surface wind speed}
-     \item{Rmax: The radius to maximum winds, in kilometers}
-     \item{X1, n, A, eq3_right, xi, R1, R2: Different parameters needed for
-       the Willoughby model}
+     \item{\code{vmax_gl:} The maximum gradient-level 1-minute sustained
+       wind, in m / s}
+     \item{\code{Rmax:} The radius to maximum winds, in kilometers}
+     \item{\code{X1, n, A, R1, R2:} Parameters needed for
+       the Willoughby wind model}
    }
 }
 \description{
-There are a number of parameters needed for the Willoughby model for each
-observation time for a storm. This function intakes the storm track for
-the storm, interpolated first if you want, and calculates these parameters
-for each observation in the storm tracks, based on the latitude and longitude
-of the storm at that observation, its forward speed and direction, and
-its maximum windspeed.These parameters are later used to model wind speed
+There are a number of inputs and parameters needed for the Willoughby model
+for each observation of a storm track. This function intakes an inputed storm
+track and calculates these parameters for each observation in the storm
+tracks.These inputs and parameters are later used to model wind speed
 at each grid point for every observation.
 }
 \examples{
@@ -53,5 +50,10 @@ with_wind_radii <- add_wind_radii(full_track = full_track)
 head(with_wind_radii)
 }
 
+}
+\references{
+Willoughby HE, Darling RWR, and Rahn ME. 2006. Parametric representation
+of the primary hurricane vortex. Part II: A new family of sectionally
+continuous profiles. Monthly Weather Review 134(4):1102-1120.
 }
 

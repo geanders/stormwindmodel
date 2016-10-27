@@ -12,8 +12,6 @@ vignette: >
 
 ```{r echo = FALSE, message = FALSE}
 library(stormwindmodel)
-library(hurricaneexposure)
-library(hurricaneexposuredata)
 library(ggplot2)
 library(dplyr)
 library(tidyr)
@@ -117,9 +115,9 @@ var_names <- dplyr::data_frame(var = c("`vmax`",
                                         "$T_{sust}$",
                                         "$T_{gust}$",
                                         "$G_{3,60}$"),
-                               defn = c("Max 10-m 1-min sustained wind",
-                                        "Max 10-m 1-min sustained wind with motion asymmetry removed",
-                                        "Max gradient-level 1-min sustained wind",
+                               defn = c("Maximum 10-m 1-min sustained wind for the tropical cyclone",
+                                        "Maximum 10-m 1-min sustained wind for the tropical cyclone with motion asymmetry removed",
+                                        "Maximum gradient-level 1-min sustained wind for the tropical cyclone",
                                         "Tropical cyclone center position latitude",
                                         "Tropical cyclone center position longitude (0 to 360)",
                                         "Radius of the earth",
@@ -209,7 +207,7 @@ The tropical cyclone best tracks have observations every six hours (plus, for so
 stormwindmodel::create_full_track
 ```
 
-Here is an example of running this function like this, where `floyd_tracks` is a dataframe with the hurricane track information for Hurricane Floyd (saved as data with this package), and `tint` is the desired time interval to which to impute: 
+Here is an example of running this function, where `floyd_tracks` is a dataframe with the hurricane track information for Hurricane Floyd (saved as data with this package), and `tint` is the desired time interval to which to impute: 
 
 ```{r}
 data("floyd_tracks")
@@ -217,38 +215,61 @@ full_track <- create_full_track(hurr_track = floyd_tracks, tint = 0.25)
 full_track %>% slice(1:3)
 ```
 
+Here is an example of interpolating Hurricane Floyd's tracks to 15-minute and 2-hour intervals
+
+```{r message = FALSE, warning = FALSE, echo = FALSE, fig.align = "center", fig.width = 8, fig.height = 4}
+floyd_15_min <- create_full_track(floyd_tracks)
+floyd_2_hrs <- create_full_track(floyd_tracks, tint = 2)
+
+library(ggmap)
+us_map <- get_map(location = "georgia", zoom = 5)
+a <- ggmap(us_map)
+b <- a + geom_point(data = floyd_15_min, aes(x = -tclon, y = tclat,
+                                        color = vmax), size = 0.5) + 
+  ggtitle("Interpolated to 15 minutes")
+c <- a + geom_point(data = floyd_2_hrs, aes(x = -tclon, y = tclat,
+                                       color = vmax), size = 0.5) + 
+  ggtitle("Interpolated to 2 hours")
+gridExtra::grid.arrange(b, c, ncol = 2)
+```
+
+
 ## Add Willoughby inputs and parameters
 
-The next step is to process this imputed track and add, for each observation point, the inputs and model parameters required for the Willoughby model [@willoughby2006parametric]. This process is done using the `add_wind_radii` function. As an input, it takes the imputed dataframe create by the `create_full_track` function. It outputs the same dataframe, but with columns added for the inputs and parameters required for the Willoughby wind model. 
-
-For the Hurricane Floyd example, here is an example of running the code and the first three and last three line of output: 
+Next, this imputed track is input to a function that adds inputs and model parameters for each observation that are required for the model later used to estimate wind speed at each grid point [@willoughby2006parametric]. This process is done using the `add_wind_radii` function. For the Hurricane Floyd example, here is an example of running the code and the first three and last three line of output: 
 
 ```{r}
-with_wind_radii <- stormwindmodel::add_wind_radii(full_track = full_track)
+with_wind_radii <- add_wind_radii(full_track = full_track)
 with_wind_radii %>% slice(c(1:3, (n()-3):n()))
 ```
 
-This adds lots of measurements and parameters for each observation. The last line has some missing values. This is because you need points after the current point to calculate forward speed and bearing of the storm. 
+Here is an example of Hurricane Floyd tracks, with estimated $R_{max}$ and $V_{max,G}$ shown by point size and color, respectively:
 
-Here is the full code for this function:
+```{r echo = FALSE, warning = FALSE, fig.align = "center", fig.width = 4, fig.height = 4}
+a + geom_point(data = with_wind_radii,
+               aes(x = -tclon, y = tclat, size = Rmax, color = vmax_gl),
+               alpha = 0.2) + 
+  scale_color_continuous(name = expression(V[maxG])) + 
+  scale_size_continuous(name = expression(R[max]))
+```
+
+The last line of observations has some missing values, because you need points after the current point to calculate forward speed and bearing of the storm, so these values cannot be calculated for the last observation. 
+
+Here is the full code for the `add_wind_radii` function:
 
 ```{r}
 stormwindmodel::add_wind_radii
 ```
 
-You can see that this function is mostly wrapping helper functions, which do each step of the process. I describe these helpers (and questions I have about them) below. 
-
-Note: 
-
-- Because I've made this modular, it would be pretty easy to re-code any of the helper functions in C++ to increase speed. However, other than the function that uses the Newton-Raphson method, I would imagine that this step is not nearly as slow as the step that calculates wind speed at each grid point, so this might be lower priority for shifting to C++. I have an undergrad who is looking into which helper functions throughout the package we might want to write in C++ to improve performance. 
+This function uses many helper functions, which do each step of the process to calculate inputs and parametes for the wind model. These helper functions are fully described below. 
 
 ### Calculate the storm's forward speed
 
-The first step is to determine the speed that the storm is moving forward (translational speed), in meters per second. We want to remove this from the observed maximum wind speed to get an estimate of the maximum wind speed associated just with the rotational movement of the storm, which is what needs to go into the Willoughby model [@willoughby2006parametric]. This asymmetry needs to be removed before we convert winds to gradient level. We will add back in a forward motion component to the surface winds at grid points near the end of the the modeling process.
+First, the code determines the forward speed of the storm at each observation, in meters per second. The forward speed of the storm needs to be removed from the observed maximum wind speed to get an estimate of the maximum wind speed associated just with the rotational movement of the storm, which is what needs to go into the Willoughby model [@willoughby2006parametric]. This asymmetry needs to be removed before we convert winds to gradient level. The code adds back in a forward motion component to the surface winds at grid points near the end of the the modeling process.
 
-In the new code, I'm using the Haversine method with great circle distance to calculate the distance, in kilometers, between the storm's latitude and longitude coordinates for the current observation and the following observation. I then get the time difference between those two points. From these, I estimate the storm's forward (translational) velocity. I convert to get this speed to meters per second (from kilometers per hour), so it's in the same units as $V_{max}$ from the imputed storm tracks.
+The code uses the Haversine method with great circle distance to calculate the distance, in kilometers, between the storm's latitude and longitude coordinates for the current observation and the following observation. Then the time difference is determined between those two observations. From these, the storm's forward speed is calculated. This speed is converted to meters per second (from kilometers per hour), so it's in the same units as $V_{max}$ from the imputed storm tracks.
 
-Here is the equation I use for the Haversine method with great circle distance to calculate the distance (in kilometers) between the two locations based on their latitudes and longitudes. 
+Here is the equation used in the code for the Haversine method with great circle distance to calculate the distance between two locations based on their latitudes and longitude: 
 
 $$
 hav(\gamma) = hav(\phi_1 - \phi_2) + cos(\phi_1)*cos(\phi_2)*hav(L_1 - L_2)
@@ -268,14 +289,14 @@ where:
 - $R_{earth}$: Radius of the earth, here assumed to be 6378.14 kilometers
 - $D$: Distance between the two locations, in kilometers
 
-In the package, first we've got a helper function to convert between degrees and radians (`degrees_to_radians`), and then a function called `latlon_to_km` that uses the haversine approach to calculate the distance between two storm center locations (`tclat_1` and `tclat_2` are the two storm center latitudes; `tclon_1` and `tclon_2` are the two storm center longitudes):
+In the package, there is a helper function to convert between degrees and radians (`degrees_to_radians`), as well as a function called `latlon_to_km` that uses the Haversine method to calculate the distance between two storm center locations (`tclat_1` and `tclat_2` are the two storm center latitudes; `tclon_1` and `tclon_2` are the two storm center longitudes):
 
 ```{r}
 stormwindmodel:::degrees_to_radians
 stormwindmodel:::latlon_to_km
 ```
 
-We then have a function called `calc_forward_speed` that caculates the distance between two latitude-longitude pairs, calculates the time difference in their time stamps, and from that determines the forward speed in kilometers per hour and converts it to meters per second. 
+The package uses thes functions in a function called `calc_forward_speed` that caculates the distance between two storm locations, calculates the time difference in their observation times, and from that determines the forward speed in kilometers per hour and converts it to meters per second. 
 
 ```{r}
 stormwindmodel:::calc_forward_speed
@@ -283,9 +304,7 @@ stormwindmodel:::calc_forward_speed
 
 ### Calculate direction of storm movement
 
-Next, we need to calculate the direction of the motion of the storm (storm bearing). Later, we'll use this to add back in a component for the forward motion of the storm into the wind estimates. 
-
-I found an equation for calculating the bearing of one point from another point based on latitude and longitude. So, this is calculating the bearing of a later storm observation, as seen from an earlier storm observation. The function also restricts the output to be between 0 and 360 degrees using modular arithmetic (`%% 360`). 
+Next, the code calculates the direction of the motion of the storm (storm bearing). Later code will use this to add back in a component for the forward motion of the storm into the wind estimates. The following equation is used to calculate the bearing of one point from another point based on latitude and longitude. So, this is calculating the bearing of a later storm observation, as seen from an earlier storm observation. The function restricts the output to be between 0 and 360 degrees using modular arithmetic (`%% 360`). 
 
 $$
 S = cos(\phi_{2,rad}) * sin(L_{1,rad} - L_{2,rad})
@@ -308,7 +327,7 @@ where:
 - $S$, $C$: Intermediary results
 - $\theta$ is the direction of the storm movement, in degrees
 
-This is implemented in our package through the `calc_bearing` function:
+This calculation is implemented in our package through the `calc_bearing` function:
 
 ```{r}
 stormwindmodel::calc_bearing
@@ -316,7 +335,7 @@ stormwindmodel::calc_bearing
 
 ### Calculate u- and v-components of forward speed
 
-Next, we use the estimated magnitude and direction of the storm's forward speed to calculate u- and v-components of this forward speed. Later, we will add back in these two components to the modeled surface wind speed at grid points, after adjusting for the Phadke correction factor for forward motion [@phadke2003modeling].
+Next, the code uses the estimated magnitude and direction of the storm's forward speed to calculate u- and v-components of this forward speed. Later, these two components are added back to the modeled surface wind speed at grid points, after adjusting with the Phadke correction factor for forward motion [@phadke2003modeling].
 
 To calculate the u- and v-components of forward motion, $V_{F,u}$ and $V_{F,v}$, the function uses: 
 
@@ -330,9 +349,14 @@ $$
 
 where $\theta$ is the direction of the storm movement (0 for due east, 90 for due north, etc.).
 
+```{r eval = FALSE}
+tcspd_u = tcspd * cos(degrees_to_radians(tcdir))
+tcspd_v = tcspd * sin(degrees_to_radians(tcdir))
+```
+
 ### Adjust wind speed to remove forward motion of storm
 
-Next, there's a function called `remove_forward_speed` that uses the estimated forward speed in equation 12 (and accompanying text) from Phadke et al. [-@phadke2003modeling] to adjust wind speed to remove the component from forward motion. 
+Next, there's a function called `remove_forward_speed` that uses the estimated forward speed to adjust wind speed to remove the component from forward motion, based on equation 12 (and accompanying text) from Phadke et al. [-@phadke2003modeling]. 
 
 Because here the code is adjusting the maximum sustained wind to remove the component from forward speed, we can assume that we are adjusting wind speed at the radius of maximum winds and for winds blowing in the same direction as the direction of the forward motion of the storm. Therefore, the correction term for forward motion is $U = 0.5 * V_F$ [@phadke2003modeling], or half the total forward speed of the storm. This correction factor is subtracted from the maximum sustained wind speed to remove the forward component, and because we assume that the maximum winds are blowing in the same direction as the direction of the storm's forward motion, this correction term is directly subtracted from the magnitude of the wind speed (rather than breaking into u- and v-components for a vector addition).
 
@@ -342,9 +366,9 @@ If $V_{max}$ after removing the forward storm motion is ever negative, the `remo
 stormwindmodel:::remove_forward_speed
 ```
 
-### Convert 1-min sustained wind at 10 m to gradient level wind speed 
+### Convert symmetric surface wind to gradient wind
 
-The extended tracks database gives maximum winds as one minute sustained wind speeds 10 meters above the ground. To make calculations easier (by not having to deal with friction), we convert the 1-minute sustained wind speeds at 10 meters (`vmax` in the created dataframe), which is what is given in the hurricane tracking data, to gradient level wind speed (`vmax_gl` in the created dataframe), using the following equation:
+The extended tracks database gives maximum winds as 1-minute sustained wind speeds 10 meters above the ground. To make calculations easier (by not having to deal with friction), the code converts the symmetric 1-minute sustained wind speeds at 10 meters ($V_{max,sym}$) to gradient wind speed ($V_{max,G}$), using the following equation:
 
 $$
 V_{max,G} = \frac{V_{max,sym}}{f_r}
@@ -352,24 +376,24 @@ $$
 
 where:
 
-- $V_{max,G}$: Mean wind speed at gradient level (m / s) 
-- $V_{max,sustained}$: Surface wind speed (10 meters above the water or ground) (m / s)
-- $f_r$: Reduction factor for $r \le$ 100 km. At this point, we're calculating things for $r = R_{max}$.
+- $V_{max,G}$: Maximum gradient-level 1-minute sustained wind (m/s)
+- $V_{max,sym}$: Maximum 10-m 1-minute sustained wind with motion asymmetry removed (m/s)
+- $f_r$: Reduction factor for $r \le$ 100 km. At this point, the winds are calculated for $r = R_{max}$.
 
-The reduction factor come from Figure 3 of Knaff et al. [-@knaff2011automated]. We assume that $R_{max}$ is always 100 km or less. Then, $f_r$ is 0.9 if the storm's center is over water and 80% of that, 0.72, if the storm's center is over land.  
+The code uses the reduction factor from Figure 3 of Knaff et al. [-@knaff2011automated]. We assume that $R_{max}$ is always 100 km or less. Then, $f_r$ is 0.9 if the storm's center is over water and 80% of that, 0.72, if the storm's center is over land [@knaff2011automated].  
 
 ```{r}
 stormwindmodel::calc_gradient_speed
 ```
 
-To determine if the storm center is over land or over water, we have included a dataset with the package called `landmask`. This dataset gives locations of a grid of points in eastern US and a factor saying whether each point is over land or water:  
+To determine if the storm center is over land or over water, the package includes a dataset called `landmask`, with locations of grid points in the eastern US and offshore, with a factor saying whether each point is over land or water:  
 
 ```{r}
 data(landmask)
 head(landmask)
 ```
 
-We wrote a function called `check_over_land` to find the closest grid point for a storm location and determine whether the storm is over land or over water. 
+The `check_over_land` function finds the closest grid point for a storm location and determines whether the storm is over land or over water at its observed location. 
 
 ```{r}
 stormwindmodel:::check_over_land
@@ -389,7 +413,7 @@ ggplot(landmask, aes(x = longitude - 360, y = latitude, color = land)) +
   scale_shape_discrete("Track over land")
 ```
 
-In the `add_wind_radii` function, there is code to check whether the point is overland and then apply the proper reduction factor based on whether the point is over land or water:
+In the `add_wind_radii` function, there is code to check whether the point is over land or water and apply the proper reduction factor:
 
 ```{r eval = FALSE}
 over_land = mapply(check_over_land, tclat, tclon),
@@ -409,7 +433,7 @@ $$
 where: 
 
 - $R_{max}$: Radius from the storm center to the point at which the maximum wind occurs (km)
-- $V_{max,G}$: the tangential wind component of the gradient-level maximum wind speed (m / s)
+- $V_{max,G}$: Maximum gradient-level 1-min sustained wind (m / s)
 - $\phi$: Latitude, in decimal degrees
 
 ```{r}
@@ -418,7 +442,7 @@ stormwindmodel::will7a
 
 ### Calculate parameters for Willoughby model
 
-Next, we calculate $X_1$, which is a parameter that we need for the Willoughby model. This is done using equation 10a from the Willoughby et al. paper [-@willoughby2006parametric]:
+Next, the code calculates $X_1$, which is a parameter needed for the Willoughby model. This is done using equation 10a from Willoughby et al.  [-@willoughby2006parametric]:
 
 $$
 X_1 = 317.1 - 2.026V_{max,G} + 1.915 \phi
@@ -427,14 +451,14 @@ $$
 where: 
 
 - $X_1$: Parameter for Willoughby wind model
-- $V_{max,G}$: Maximum gradient-level 1-min sustained wind
+- $V_{max,G}$: Maximum gradient-level 1-min sustained wind (m / s)
 - $\phi$: Latitude, in decimal degrees
 
 ```{r}
 stormwindmodel::will10a
 ```
 
-Next, we need to calculate another Willoughby parameter, $n$. This is done with equation 10b from the Willoughby et al. paper [-@willoughby2006parametric]:
+Next, the code calculates another Willoughby parameter, $n$. This is done with equation 10b from Willoughby et al. [-@willoughby2006parametric]:
 
 $$
 n = 0.4067 + 0.0144 V_{max,G} - 0.0038 \phi
@@ -443,14 +467,14 @@ $$
 where: 
 
 - $n$: the exponential for the power law inside the eye
-- $V_{max,G}$: Maximum gradient-level 1-min sustained wind
+- $V_{max,G}$: Maximum gradient-level 1-min sustained wind (m / s)
 - $\phi$: Latitude, in decimal degrees
 
 ```{r}
 stormwindmodel::will10b
 ```
 
-Next, we need to calculate another Willoughby parameter, $A$. We do that with equation 10c from the Willoughby et al. paper [-@willoughby2006parametric]:
+Next, the code calculates another Willoughby parameter, $A$, with equation 10c from Willoughby et al. [-@willoughby2006parametric]:
 
 $$
 A = 0.0696 + 0.0049 V_{max,G} - 0.0064 \phi
@@ -464,17 +488,17 @@ $$
 
 where: 
 
-- $A$: A parameter for the Willoughby model: "the fitted contribution of the faster exponential to the profile" (Willoughby, p.110)
-- $V_{max,G}$: Maximum gradient-level 1-min sustained wind
-- $\phi$: absolute value of latitude (degrees)
+- $A$: A parameter for the Willoughby model
+- $V_{max,G}$: Maximum gradient-level 1-min sustained wind (m / s)
+- $\phi$: Absolute value of latitude (degrees)
 
 ```{r}
 stormwindmodel::will10c
 ```
 
-### Determine radius to start of transition region
+### Determine radius of start of transition region
 
-Now, for the Willoughby model, we need to use a numerical method to determine the value of $R_1$, the radius to the start of the transition region, for the storm for a given track observation. To do that, we need to find the root of this equation: 
+Now, the code uses a numerical method to determine the value of $R_1$, the radius to the start of the transition region, for the storm for a given track observation. The requires finding the root of this equation [@willoughby2006parametric]: 
 
 $$
 w - \frac{n ((1 - A) X_1 + 25 A)}{n ((1 - A) X_1 + 25 A) + R_{max}} = 0
@@ -482,12 +506,12 @@ $$
 
 where: 
 
-- $w$: the weighting function (a function of $R_{max}$, $R_1$, and $R_2 - R_1$)
-- $n$: A parameter for the Willoughby model: the exponent for the power law inside the eye 
-- $R_{max}$: radius at which the maximum wind occurs (km)
-- $A$: "the fitted contribution of the faster exponential to the profile" [@willoughby2006parametric, p.110]
-- $X_1$: A parameter for the Willoughby model: fitted slower exponential decay length in the outer vortex (km, I think)
-- $X_2$: A parameter for the Willoughby model: "the fixed rapid decay length" [@willoughby2006parametric, p.1110]. From Willoughby p. 1110--1111: "We selected the most rapid decay length that seemed physically reasonable, 25 km."
+- $w$: The weighting function (a function of $R_{max}$, $R_1$, and $R_2 - R_1$; see below)
+- $n$: A parameter for the Willoughby model
+- $R_{max}$: Radius at which the maximum wind occurs (km)
+- $A$: A parameter for the Willoughby model
+- $X_1$: A parameter for the Willoughby model
+- $X_2$: A parameter for the Willoughby model, set to 25 [@willoughby2006parametric]
 
 The weighting function, $w$, is: 
 
@@ -539,11 +563,6 @@ stormwindmodel::will3_deriv_func
 stormwindmodel::solve_for_xi
 ```
 
-Notes: 
-
-- This function uses $x_0 = 0.5$ as a starting value. If the function has a local minimum closer to 0.5 than the global minimum, then this function would find that local minimum instead of the global minimum.
-- This function prints a warning if the algorithm doesn't converge for an observation in the hurricane tracks. It also sets $\xi$ to be missing (`NA`) if the algorithm doesn't converge. 
-
 Now an equation from the Willoughby et al. 2006 paper can be used to calculate $R_1$ [@willoughby2006parametric]:
 
 $$
@@ -556,9 +575,9 @@ For this function, the package code assumes that $R_2 - R_1$ (the width of the t
 stormwindmodel::calc_R1
 ```
 
-### Determine radius of end of transition region
+### Determine radius for end of transition region
 
-Next, we estimate the radius to the end of the transition period, $R_2$. We assume that smaller storms ($R_{max} \le 20\mbox{ km}$) had a transition region of 15 km while larger storms ($R_{max} > 20\mbox{ km}$) have a transition region of 25 km:
+Next, the code estimates the radius for the end of the transition period, $R_2$. We assume that smaller storms ($R_{max} \le 20\mbox{ km}$) have a transition region of 15 km while larger storms ($R_{max} > 20\mbox{ km}$) have a transition region of 25 km:
 
 $$
 R_2 = \begin{cases}
@@ -572,15 +591,19 @@ where:
 - $R_1$: Radius to the start of the transition region (km)
 - $R_2$: Radius to the end of the transition region (km)
 
+```{r eval = FALSE}
+R2 = ifelse(Rmax > 20, R1 + 25, R1 + 15)
+```
+
 ## Calculate wind speed at each grid point 
 
-Next, the following function models the wind speed at a location, like a county center. As a note, this function calculates wind characteristics at a single location; a later function applies this to all grid points):
+Next, the code models the wind speed at a location (e.g., a county center). As a note, this function calculates wind characteristics at a single location; a later function applies this function across many grid points):
 
 ```{r}
 stormwindmodel::calc_grid_wind
 ```
 
-Again, this function uses a lot of helper functions for each step. As an input, this function requires both the dataframe output from `add_wind_radii` (which gives all of the parameters for the Willoughby model at each point on the storm's track) and also a location (latitude and longitude) to model winds. To work well with later functions, this location information should be input as a one-row dataframe rather than a vector. The `grid_point` input might therefore look something like this:
+Again, this function uses a lot of helper functions for each step. As an input, this function requires both the dataframe output from `add_wind_radii` (which gives all of the parameters for the Willoughby model at each point on the storm's track) and also a location (latitude and longitude) at which to model winds. To work well with later functions, this location information should be input as a one-row dataframe rather than a vector. The `grid_point` input might therefore look something like this:
 
 ```{r echo = FALSE}
 data(county_points)
@@ -609,7 +632,7 @@ ggplot(grid_wind, aes(x = date, y = windspeed)) +
   ylab("Modeled surface wind (m / s)")
 ```
 
-You can also apply this function across all grid points for all time to create a large dataset with the estimated wind speed at each county at each observation point. For example, you could run this for Floyd and then plot winds at particular time "snap shots" using the following code: 
+You can also apply this function across all grid points for all storm observations to create a large dataset with the estimated wind speed at each county at each observation point. For example, you could run this for Floyd and then plot winds at particular time "snap shots" using the following code: 
 
 ```{r fig.width = 8}
 county_list <- split(county_points, f = county_points$gridid)
@@ -640,7 +663,7 @@ This function inputs the grid wind time series for a grid point and outputs the 
 summarize_grid_wind(grid_wind = grid_wind)
 ```
 
-If you want, you can change the cutoffs you're using for the duration measurements: 
+If you want, you can change the wind speed cutoffs for the duration measurements: 
 
 ```{r}
 summarize_grid_wind(grid_wind = grid_wind, gust_duration_cut = 15, 
@@ -650,35 +673,35 @@ summarize_grid_wind(grid_wind = grid_wind, gust_duration_cut = 15,
 The function `calc_and_summarize_grid_wind` combines these two actions (this is mainly useful to have for the main wrapper function for the package): 
 
 ```{r}
-stormwindmodel:::calc_and_summarize_grid_wind(grid_point = grid_point,
-                            with_wind_radii = with_wind_radii,
-                            gust_duration_cut = 15, 
-                            sust_duration_cut = 15)
+calc_and_summarize_grid_wind(grid_point = grid_point, 
+                             with_wind_radii = with_wind_radii,
+                             gust_duration_cut = 15, 
+                             sust_duration_cut = 15)
 ```
 
 The `calc_grid_wind` function uses a number of helper functions. They are described in more detail below.
 
 ### Get the radius from the storm center to the grid point
 
-The first step is to determine the distance between the grid point and the center of the storm ($C_{dist}$). This is done using the Haversine method of great circle distance to calculate this distance. For this, the package uses the `latlon_to_km` function given in the code shown above.
+The first step is to determine the distance between the grid point and the center of the storm ($C_{dist}$). This is done using the Haversine method of great circle distance to calculate this distance. For this, the package uses the `latlon_to_km` function given in the code shown earlier.
 
 ### Determine gradient wind speed at each location
 
 Next, the package calculates $V_G(r)$, the gradient level 1-minute sustained wind at the grid point, which is at radius $r$ from the tropical cyclone center ($C_{dist}$ for the grid point). Note there are different equations for $V_G(r)$ for (1) the eye to the start of the transition region; (2) outside the transition region; and (3) within the transition region.
 
-First, if $r \le R_1$ (inside the transition region), you are supposed to use this equation to calculate $V_G(r)$ (Willoughby et al. Eqn 1 (a) [-@willoughby2006parametric]):
+First, if $r \le R_1$ (inside the transition region), $V_G(r)$ is calculated using [equation 1a, @willoughby2006parametric]:
 
 $$
 V_G(r) = V_i = V_{max,G} \left( \frac{r}{R_{max}} \right)^n, (0 \le r \le R_1)
 $$
 
-Next, if $r \ge R_2$ (outside the transition region), you are suppose to use this equation to calculate $V(r)$ using this equation (Willoughby et al. 2006, Eqn 4; dual-exponential replacement of Eqn 1 (b) [-@willoughby2006parametric]):
+Next, if $r \ge R_2$ (outside the transition region), $V_G(r)$ is calculated using  [equation 4, dual-exponential replacement of equation 1b, @willoughby2006parametric]:
 
 $$
 V_G(r) = V_o = V_{max,G}\left[(1 - A) e^\frac{R_{max} - r}{X_1} + A e^\frac{R_{max} - r}{X_2}\right], R_2 < r
 $$
 
-Finally, if $r$ for the grid point is between $R_1$ and $R_2$, we need to calculate $\xi$ using the value we calculated for $r$ for the grid point: 
+Finally, if $r$ is between $R_1$ and $R_2$, first $\xi$ must be calculated for the grid point [@willoughby2006parametric]: 
 
 $$
 \xi = \frac{r - R_1}{R_2 - R_1}
@@ -703,13 +726,13 @@ where:
 - $R_1$: lower boundary of the transition zone (in km from the storm center)
 - $R_2$: upper boundary of the transition zone (in km from the storm center)
 
-Willoughby et al. 2006, Eqn 1 (c) [-@willoughby2006parametric]:
+The, $V(r)$ is calculated using [equation 1c, @willoughby2006parametric]:
 
 $$
 V_G(r) = V_i (1 - w) + V_o w, (R_1 \le r \le R_2)
 $$
 
-All of this is wrapped in the `will1` function (named after the equation in Willoughby et al. [-@willoughby2006parametric]):
+All of this is wrapped in a function:
 
 ```{r}
 stormwindmodel:::will1
@@ -717,13 +740,11 @@ stormwindmodel:::will1
 
 ### Estimate surface level winds from gradient winds
 
-Now, to get estimated surface-level tangential winds from gradient-levels winds, we reverse what we did before, again using methods from Knaff et al. [-@knaff2011automated]. 
+Now, to get estimated symmetric surface-level tangential winds from gradient-levels winds, the code uses a method from Knaff et al. [-@knaff2011automated]. 
 
-In this case, we can always assume we're over land, not water, so we always reduce the reduction factor by 20%. Now, however, we cannot assume that $r$ is always $R_{max}$, so we need to include a function that calculates the reduction factor as a function of radius from the storm center.
+In this case, we can always assume the point is over land, not water, so the code always uses a reduction factor that is reduced by 20%. This method uses a reduction factor of 0.90 up to a radius of 100 km, a reduction factor of 0.75 for any radius 700 km or greater, and a linear decreasing reduction factor for any radius between those two radius values [@knaff2011automated]. If the point is over land (true for any county), this reduction factor is further reduced by 20%.
 
-For this, we use values from Figure 3 in Knaff et al. [-@knaff2011automated]. This method uses a reduction factor of 0.90 up to a radius of 100 km, a reduction factor of 0.75 for any radius 700 km or greater, and a linear decreasing reduction factor for any radius between those two radius values. If the point is over land (true for any county), this reduction factor is further reduced by 20%.
-
-Here is the function we use for this part:
+Here is the function the code uses for this part:
 
 ```{r}
 stormwindmodel:::gradient_to_surface
@@ -746,11 +767,11 @@ ggplot(rf_example, aes(x = r, y = rf)) +
 
 ### Calculate the direction of gradient winds at each location 
 
-So far, the model has just calculated the the rotational component of the wind speed at each grid location (tangential wind). Now we need to add back in asymmetry from the forward motion component of the wind speed (translational wind) at each location. The total storm winds will be increased by forward motion of the storm on the right side of the storm. Conversely, on the left side of the storm, the forward motion of the storm will offset some of the storm-related wind. 
+So far, the model has just calculated the the rotational component of the wind speed at each grid location (tangential wind). Now the code adds back asymmetry from the forward motion component of the wind speed (translational wind) at each location. The total storm winds will be increased by forward motion of the storm on the right side of the storm. Conversely, on the left side of the storm, the forward motion of the storm will offset some of the storm-related wind. 
 
-We've already determined the direction of the forward direction of the storm. Now, we need to get the direction of the storm winds at each location we want to assess (grid points or counties).
+We've already determined the direction of the forward direction of the storm. Now, we need to get the direction of the storm winds at the grid point location.
 
-First, the function determine, for each storm location, the direction from the storm center to the locations. For this, the package uses the `calc_bearing` function described earlier to determine the bearing of the storm at each storm observation. Now, it is used to calculate the angle from the storm center to the grid point:
+First, the function determines, for each storm location, the direction from the storm center to the location. For this, the package uses the `calc_bearing` function described earlier to determine the bearing of the storm at each storm observation. Now, it is used to calculate the angle from the storm center to the grid point:
 
 ```{r}
 stormwindmodel:::calc_bearing
@@ -764,15 +785,15 @@ gwd = (90 + chead) %% 360
 
 ### Calculate the surface wind direction
 
-The next step is to change from the gradient wind direction to the surface wind direction. To do this, the function adds an inflow angle to the gradient wind direction (making sure the final answer is between 0 and 360 degrees). This step is necessary because surface friction changes the wind direction a bit near the surface compared to higher above the surface.
+The next step is to change from the gradient wind direction to the surface wind direction. To do this, the function adds an inflow angle to the gradient wind direction (making sure the final answer is between 0 and 360 degrees). This step is necessary because surface friction changes the wind direction near the surface compared to higher above the surface.
 
 The inflow angle is calculated as a function of the distance from the storm center to the location and the storm's $R_{max}$ at that observation point [eq. 11a--c, @phadke2003modeling]:
 
 $$
 \beta = \begin{cases}
- & 10 + \left(1 + \frac{R}{R_{max}}\right) \text{ if } R < R_{max}\\ 
- & 20 + 25\left(\frac{R}{R_{max}} - 1 \right ) \text{ if } R_{max} \le R \le 1.2R_{max}\\ 
- & 25 \text{ if } R \ge 1.2R_{max}
+ & 10 + \left(1 + \frac{r}{R_{max}}\right) \text{ if } r < R_{max}\\ 
+ & 20 + 25\left(\frac{r}{R_{max}} - 1 \right ) \text{ if } R_{max} \le r \le 1.2R_{max}\\ 
+ & 25 \text{ if } r \ge 1.2R_{max}
 \end{cases}
 $$
 
@@ -782,7 +803,7 @@ $$
 swd = gwd + \beta + 20
 $$
 
-Here is the new function for this step:
+Here is the function for this step:
 
 ```{r}
 add_inflow
@@ -790,7 +811,19 @@ add_inflow
 
 ### Add back in wind component from forward speed of storm
 
-Next, to add back in the storm's forward motion at each grid point, the code reverses the earlier step that used the Phadke correction factor [equation 12, @phadke2003modeling]. The package calculates a constant correction factor (`correction_factor`), as a function of `r`, radius from the storm center to the grid point, and `R_{max}`, radius from storm center to maximum winds. Both the u- and v-components of forward speed are corrected with this correction factor, then these components are added to the u- and v-components of tangential surface wind. These u- and v-components are then used to calculate the magnitude of total wind associated with the storm at the grid point:
+Next, to add back in the storm's forward motion at each grid point, the code reverses the earlier step that used the Phadke correction factor [equation 12, @phadke2003modeling]. The package calculates a constant correction factor (`correction_factor`), as a function of `r`, radius from the storm center to the grid point, and $R_{max}$, radius from storm center to maximum winds. 
+
+$$
+U(r) = \frac{R_{max}r}{R_{max}^2 + r^2}V_F
+$$
+where:
+
+- $U(r)$: Phadke correction factor at a radius $r$ from the storm's center
+- $r$: Radius from the storm's center (km)
+- $R_{max}$: Radius of maximum winds (km)
+- $V_F$: Forward speed of the storm (m / s)
+
+Both the u- and v-components of forward speed are corrected with this correction factor, then these components are added to the u- and v-components of tangential surface wind. These u- and v-components are then used to calculate the magnitude of total wind associated with the storm at the grid point:
 
 ```{r}
 stormwindmodel:::add_forward_speed
@@ -849,6 +882,10 @@ stormwindmodel::get_grid_winds
 
 There is also a function to map county-level estimates. For this function to work, winds must be modeled at county centers, with FIPS codes used as the grid ids. Here's an example of calculating and mapping county winds for Katrina:
 
+```{r eval = FALSE}
+grid_winds_katrina <- get_grid_winds(hurr_track = katrina_tracks,
+                                     grid_df = county_points)
+```
 ```{r fig.width = 7, fig.height = 4, warning = FALSE, message = FALSE}
 katrina_winds <- map_wind(grid_winds_katrina, value = "vmax_gust") + 
   ggtitle("Maximum gust wind speeds")

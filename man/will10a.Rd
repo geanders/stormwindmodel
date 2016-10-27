@@ -2,7 +2,7 @@
 % Please edit documentation in R/willoughby2006eqs.R
 \name{will10a}
 \alias{will10a}
-\title{Calculate the fitted decay length from \eqn{vmax_gl} and \eqn{\phi}}
+\title{Calculate X1 for Willoughby model}
 \usage{
 will10a(vmax_gl, tclat)
 }
@@ -17,19 +17,25 @@ A numeric vector giving one of the parameters (\eqn{X_1}{X1})
    required for the Willoughby wind model.
 }
 \description{
-This function implements Willoughby et al. (2006), Equation 10a.
+Calculates \eqn{X_1}{X1}, a parameter for the Willoughby wind model using
+equation 10a (Willoughby et al. 2006).
 }
 \details{
-This function uses the following equation to calculate the
-   \eqn{X_1}{X1} parameter:
-   \deqn{X_1 = 317.1 - 2.026V_{max} + 1.915 \phi}{
+This function uses the following equation (equation 10a, Willoughby
+et al. 2006) to calculate the \eqn{X_1}{X1} parameter:
+   \deqn{X_1 = 317.1 - 2.026V_{max,G} + 1.915 \phi}{
    X1 = 317.1 - 2.026vmax_gl + 1.915 \phi}
    where:
    \itemize{
      \item{\eqn{X_1}{X1}: Parameter for the Willoughby wind model}
-     \item{\eqn{V_{max}}{vmax_gl}: Tangential component of the maximum
-           gradient-level sustained wind speed (in m / s)}
+     \item{\eqn{V_{max,G}}{vmax_gl}: Maximum gradient-level 1-min sustained
+        wind (m / s)}
      \item{\eqn{\phi}: Latitude, in decimal degrees}
    }
+}
+\references{
+Willoughby HE, Darling RWR, and Rahn ME. 2006. Parametric representation
+of the primary hurricane vortex. Part II: A new family of sectionally
+continuous profiles. Monthly Weather Review 134(4):1102-1120.
 }
 

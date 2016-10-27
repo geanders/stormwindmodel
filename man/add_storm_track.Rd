@@ -8,6 +8,10 @@ add_storm_track(storm_tracks, plot_object, padding = 2, plot_points = FALSE,
   alpha = 1, color = "firebrick")
 }
 \arguments{
+\item{storm_tracks}{Character vector with the names of all storms to plot.
+This parameter must use the unique storm identifiers from the
+`storm_id` column of the `hurr_tracks` dataframe.}
+
 \item{plot_object}{NULL or the name of a ggplot object to use as the
 underlying plot object. If NULL, the function will generate a new
 map of the eastern US states using `default_map`.}
@@ -23,10 +27,6 @@ as well as lines, when plotting the hurricane tracks.}
 use for plotting tracks.}
 
 \item{color}{Character string giving the color to use to plot the tracks.}
-
-\item{storm_track}{Character vector with the names of all storms to plot.
-This parameter must use the unique storm identifiers from the
-`storm_id` column of the `hurr_tracks` dataframe.}
 }
 \value{
 Returns a ggplot object with plotting data for the storm tracks

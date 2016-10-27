@@ -8,43 +8,21 @@ calc_grid_wind(grid_point = stormwindmodel::county_points[1, ],
   with_wind_radii = add_wind_radii())
 }
 \arguments{
-\item{grid_point}{A one-row dataframe with the grid id, latitude, longitude,
-and population for a single grid point of the projection grid.}
+\item{grid_point}{A one-row dataframe with the grid id, latitude, and
+longitude for a single location for which you want to model winds.}
 
-\item{with_wind_radii}{A dataframe with interpolated tracks for a storm,
-including wind radii, as created by \code{add_wind_radii}.}
-
-\item{gust_duration_cut}{The wind speed, in meters per second, to use as a
-cutoff point for determining the duration of gust winds. The function
-will calculate the minutes during the storm when surface-level gust winds
-were above this speed at the location.}
-
-\item{sust_duration_cut}{The wind speed, in meters per second, to use as a
-cutoff point for determining the duration of gust winds. The function
-will calculate the minutes during the storm when surface-level gust winds
-were above this speed at the location.}
+\item{with_wind_radii}{A dataframe storm tracks, including inputs and
+parameters for the Willoughby wind model, as created by
+\code{add_wind_radii}.}
 }
 \value{
-Returns a one-row matrix with wind characteristics for a single
-   location. The wind characteristics given are:
-   \itemize{
-     \item{\code{max_gust}: Maximum value of surface-level (10 meters)
-       sustained winds, in meters per second, over the length of the
-       storm at the given location}
-     \item{\code{max_sust}: Maximum value of surface-level (10 meters)
-       gust winds, in meters per second, over the length of the
-       storm at the given location}
-     \item{\code{gust_duration}: Length of time, in minutes, that
-       surface-level sustained winds were above 20 meters per second}
-     \item{\code{sust_duration}: Length of time, in minutes, that
-       surface-level gust winds were above 20 meters per second}
-   }
+A dataframe with date (\code{date}) and modeled wind speed
+   (\code{windspeed}) at the grid point location for all storm observations.
 }
 \description{
-This function uses the Willoughby wind model to calculate wind speed at
-a grid point location. This function calculates wind characteristics at
-just one location, and then it is applied to all grid locations in a higher-
-level function (\code{get_grid_winds}).
+Uses the Willoughby wind model (Willoughby et al. 2006) to calculate wind
+speed at a grid point location. This function calculates wind time series at
+just one location.
 }
 \examples{
 \dontrun{
@@ -59,6 +37,17 @@ head(wind_grid)
 
 }
 \references{
-NOAA Technical Report NWS 23, Schwerdt and Watkins, 1979.
+Knaff JA, DeMaria M, Molenar DA, Sampson CR, and Seybold MG. 2011. An
+automated, objective, multiple-satellite-platform tropical cyclone surface
+wind speed analysis. Journal of Applied Meteorology and Climatology
+50(10):2149-2166
+
+Phadke AC, Martino CD, Cheung KF, and Houston SH. 2003. Modeling of
+   tropical cyclone winds and waves for emergency management. Ocean
+   Engineering 30(4):553-578.
+
+Willoughby HE, Darling RWR, and Rahn ME. 2006. Parametric representation
+of the primary hurricane vortex. Part II: A new family of sectionally
+continuous profiles. Monthly Weather Review 134(4):1102-1120.
 }
 

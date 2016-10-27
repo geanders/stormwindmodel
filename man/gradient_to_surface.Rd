@@ -7,13 +7,15 @@
 gradient_to_surface(wind_gl_aa, cdist)
 }
 \arguments{
-\item{cdist}{Radius from storm center to the grid point, in kilometers.}
+\item{wind_gl_aa}{A numerical value with estimated gradient-level wind speed
+(m / s) at a grid point.}
 
-\item{track}{Estimated gradient-level wind speed (m / s) at a grid
-point.}
+\item{cdist}{A numerical value with radius from storm center to the grid
+point, in kilometers.}
 }
 \value{
-Estimate of surface wind speed at grid point, in meters / second.
+A numeric vector with the estimated symmetric surface wind speed at
+   the grid point, in meters / second.
 }
 \description{
 Calculates the surface wind speed based on an estimated gradient
@@ -22,10 +24,16 @@ the grid point.
 }
 \details{
 The reduction factor is based on Figure 3 of Knaff et al., 2003.
-It is estimated to be, for over water, 0.9 up to a radius of 100 km,
+Over water, it is estimated to be 0.9 up to a radius of 100 km,
 0.75 for a radius of 700 km or more, and decrease linearly between
 a radius of 100 km and 700 km. Points over land should use a reduction
-factor that is 20% lower. Because all of the counties are over
-land, we make this adjustment for all grid points.
+factor that is 20\% lower. Because all of the counties are over
+land, the function makes this adjustment for all grid points.
+}
+\references{
+Knaff JA, DeMaria M, Molenar DA, Sampson CR, and Seybold MG. 2011. An
+automated, objective, multiple-satellite-platform tropical cyclone surface
+wind speed analysis. Journal of Applied Meteorology and Climatology
+50(10):2149-2166
 }
 

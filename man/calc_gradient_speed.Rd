@@ -2,35 +2,37 @@
 % Please edit documentation in R/wind_conversions.R
 \name{calc_gradient_speed}
 \alias{calc_gradient_speed}
-\title{Convert sustained wind to gradient wind.}
+\title{Convert symmetric surface wind to gradient wind.}
 \usage{
 calc_gradient_speed(vmax_sfc_sym, over_land)
 }
 \arguments{
 \item{vmax_sfc_sym}{A numeric vector of 1-minute sustained wind speed at
-10 meters, in meters / second.}
+10 meters, with motion asymmetry removed (m / s).}
 
-\item{over_land}{TRUE / FALSE or whether the storm is over land (the
-alternative is that the storm is over water).}
+\item{over_land}{TRUE / FALSE of whether the storm is over land (TRUE) or
+water (FALSE).}
 }
 \value{
-A numeric vector with gradient-level wind speed, in meters / second.
+A numeric vector with maximum gradient-level 1-min wind speed (m / s).
 }
 \description{
-This function converts 1-minute sustained wind speed at 10 meters to gradient
-level wind speed.
+Converts maximum 10-m 1-minute symmetric sustained wind speed to gradient
+wind speed. The conversion factor depends on whether the storm is over land
+or water.
 }
 \details{
 This function uses the following conversion:
- \deqn{V_{max,sfc} = \frac{V_{max}}{f_r}}{
- Vmax,sfc = Vmax / fr}
+ \deqn{V_{max,G} = \frac{V_{max,sym}}{f_r}}{
+ Vmax,G = Vmax,sym / fr}
  where:
  \itemize{
-   \item{\eqn{V_{max}}{Vmax}: Mean wind speed at gradient level (m / s) }
-   \item{\eqn{V_{max,src}}{Vmax_sfc}: Surface wind speed (10 meters above the water or ground) (m / s)}
-   \item{\eqn{f_r}: Reduction factor (see below)}
+   \item{\eqn{V_{max,G}}{Vmax,G}: Max gradient-level 1-min sustained wind (m / s)}
+   \item{\eqn{V_{max,sym}}{Vmax,sym}: Max 10-m 1-min sustained wind with motion
+        asymmetry removed (m / s)}
+   \item{\eqn{f_r}{fr}: Reduction factor (see below)}
  }
- We make this adjustment based on Figure 3 in Knaff et al., 2011.
+ The function uses a reduction factor based on Figure 3 in Knaff et al., 2011.
    If over water and within 100 kilometers of the storm's center,
    the ratio of gradient wind speed to surface wind speed is
    assumed to be 0.90. If over land, this reduction factor is reduced
@@ -42,5 +44,11 @@ This function uses the following conversion:
    we do not calculate \eqn{R_{max}}{R_max} until after we estimate
    gradient wind speed from surface wind speed, so we don't have that
    storm-specific estimate to use here).
+}
+\references{
+Knaff JA, DeMaria M, Molenar DA, Sampson CR, and Seybold MG. 2011. An
+automated, objective, multiple-satellite-platform tropical cyclone surface
+wind speed analysis. Journal of Applied Meteorology and Climatology
+50(10):2149-2166
 }
 

@@ -14,19 +14,32 @@ et al. (2006), Eqn. 3, the dual-exponential version. This value is
 calculated at each storm observation point using the
 \code{\link{will3_right}} function.}
 
-\item{eps}{The convergence threshold. [...] must be lower than this value
-for the algorithm to have converged.}
+\item{eps}{The convergence threshold for determining if the algorithm has
+converged.}
 
 \item{itmax}{The maximum number of iterations to try before deciding that
 the algorithm did not converge.}
 }
 \description{
-This function uses the Newton-Raphson method to solve Eqn 3. (the
-dual-exponential profile version) for \eqn{xi}. This value of \eqn{xi} can
-then be used to determine \eqn{R_1} for that storm observation.
+This function uses the Newton-Raphson method to solve equation 3 (the
+dual-exponential profile version) for \eqn{\xi} in Willoughby et al. (2006).   This value of \eqn{xi} can
+THis value of \eqn{\xi} can then be used to determine \eqn{R_1}{R1} for that
+storm observation.
 }
 \note{
 If this algorithm does not converge, it returns a missing value for
-   \eqn{xi}.
+   \eqn{\xi}.
+}
+\references{
+Jones O, Maillardet R, and Robinson A. 2009. Introduction to Scientific
+Programming and Simulation Using R. Boca Raton, FL: Chapman & Hall/CRC Press.
+
+Press WH, Teukolsky SA, Vetterling WT, and Flannery BP. 2002. Numerical
+Recipes in C++: The Art of Scientific Computing. 2nd ed. Cambridge, UK:
+Cambridge University Press.
+
+Willoughby HE, Darling RWR, and Rahn ME. 2006. Parametric representation
+of the primary hurricane vortex. Part II: A new family of sectionally
+continuous profiles. Monthly Weather Review 134(4):1102-1120.
 }
 

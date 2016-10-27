@@ -9,12 +9,12 @@ get_grid_winds(hurr_track = stormwindmodel::floyd_tracks,
   gust_duration_cut = 20, sust_duration_cut = 20)
 }
 \arguments{
-\item{hurr_track}{Dataframe with columns the hurricane track for a single
-storm. This must include columns for date-time (year, month, day, hour,
-minute; e.g., "198808051800" for August 5, 1988, 18:00 UTC),
+\item{hurr_track}{Dataframe with hurricane track data for a single
+storm. The dataframe must include columns for date-time (year, month, day,
+hour, minute; e.g., "198808051800" for August 5, 1988, 18:00 UTC),
 latitude, longitude, and wind speed (in knots). The column
-names for each of these must be "date", "latitude", "longitude",
-and "wind".}
+names for each of these must be \code{date}, \code{latitude},
+\code{longitude}, and \code{wind}.}
 
 \item{grid_df}{A dataframe of locations at which to calculate wind characteristics.
 This dataframe must include columns for latitude and longitude for each
@@ -23,8 +23,8 @@ and longitudes should be in decimal degrees, with longitudes in the
 Western hemisphere (so, almost all those for Atlantic basin storms)
 expressed as negative values.}
 
-\item{tint}{Interval (in hours) for the estimates. Default is 0.25 (i.e., 15
-minutes)}
+\item{tint}{Interval (in hours) to which to interpolate the tracks. The
+default is 0.25 (i.e., 15 minutes)}
 
 \item{gust_duration_cut}{The wind speed, in meters per second, to use as a
 cutoff point for determining the duration of gust winds. The function

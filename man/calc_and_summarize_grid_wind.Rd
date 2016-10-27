@@ -8,9 +8,61 @@ calc_and_summarize_grid_wind(grid_point = stormwindmodel::county_points[1, ],
   with_wind_radii = add_wind_radii(), tint = 0.25, gust_duration_cut = 20,
   sust_duration_cut = 20)
 }
+\arguments{
+\item{grid_point}{A one-row dataframe with the grid id, latitude, and
+longitude for a single location for which you want to model winds.}
+
+\item{with_wind_radii}{A dataframe storm tracks, including inputs and
+parameters for the Willoughby wind model, as created by
+\code{add_wind_radii}.}
+
+\item{tint}{Interval (in hours) to which to interpolate the tracks. The
+default is 0.25 (i.e., 15 minutes)}
+
+\item{gust_duration_cut}{The wind speed, in meters per second, to use as a
+cutoff point for determining the duration of gust winds. The function
+will calculate the minutes during the storm when surface-level gust winds
+were above this speed at the location.}
+
+\item{sust_duration_cut}{The wind speed, in meters per second, to use as a
+cutoff point for determining the duration of gust winds. The function
+will calculate the minutes during the storm when surface-level gust winds
+were above this speed at the location.}
+}
+\value{
+Returns a one-row matrix with wind characteristics for a single
+   location. The wind characteristics given are:
+   \itemize{
+     \item{\code{max_gust}: Maximum value of surface-level (10 meters)
+       sustained winds, in meters per second, over the length of the
+       storm at the given location}
+     \item{\code{max_sust}: Maximum value of surface-level (10 meters)
+       gust winds, in meters per second, over the length of the
+       storm at the given location}
+     \item{\code{gust_dur}: Length of time, in minutes, that
+       surface-level sustained winds were above 20 meters per second}
+     \item{\code{sust_durs}: Length of time, in minutes, that
+       surface-level gust winds were above 20 meters per second}
+   }
+}
 \description{
 This function combines the `calc_grid_wind` and `summarize_grid_wind`
 functions so they can be run jointly in the overall `get_grid_winds`
-function.
+function. This function calculates wind characteristics at
+just one location, and then it is applied to all grid locations in a
+higher-level function (\code{get_grid_winds}).
+}
+\examples{
+\dontrun{
+data(county_points)
+data("floyd_tracks")
+full_track <- create_full_track(hurr_track = floyd_tracks, tint = 0.25)
+with_wind_radii <- add_wind_radii(full_track = full_track)
+grid_point <- county_points \%>\% filter(gridid == "37055")
+grid_wind_summary <- calc_and_summarize_grid_wind(grid_point = grid_point,
+   with_wind_radii = with_wind_radii, gust_duration_cut = 15,
+   sust_duration_cut = 15)
+}
+
 }
 

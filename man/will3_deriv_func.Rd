@@ -23,8 +23,13 @@ A numeric vector of length two. The first value is the calculated
    \eqn{\xi}.
 }
 \description{
-This function calculates values of both the function and the equation for
-the function that you are trying to solve the root of in Willoughby Eqn. 3
-(the version using the dual exponential profile).
+Calculates values of both the function and the derivative of
+the function for which you are trying to solve the root in Eqn. 3
+(the version using the dual exponential profile) of Willoughby et al. (2006).
+}
+\references{
+Willoughby HE, Darling RWR, and Rahn ME. 2006. Parametric representation
+of the primary hurricane vortex. Part II: A new family of sectionally
+continuous profiles. Monthly Weather Review 134(4):1102-1120.
 }
 

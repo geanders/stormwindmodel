@@ -10,9 +10,9 @@ degrees_to_radians(degrees)
 \item{degrees}{A numeric vector with measurements in degrees.}
 }
 \value{
-A numeric vector with the measurement in radians.
+A numeric vector with measurement in radians.
 }
 \description{
-Convert from degrees to radians
+Convert an angle from degrees to radians.
 }
 

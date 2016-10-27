@@ -7,6 +7,9 @@
 #'    sustained wind speeds).
 #' @param break_point An numeric value giving the value of the "value"
 #'    parameter to break at for a binary map showing exposure versus no exposure.
+#' @param wind_metric A character vector with the wind metric to use for the map.
+#'    Possible values include \code{"knots"}, \code{"mph"}, \code{"ftps"} (ft / s),
+#'    \code{"kmph"} (km / hr), and \code{"mps"} (m / s, the default).
 #'
 #' @return This function returns a map of the "ggplot" class, plotting
 #'    exposure to hurricane winds by county for the eastern half of the United
@@ -14,7 +17,10 @@
 #'
 #' @examples
 #' \donttest{
-#' load("writing/grid_winds_katrina.Rdata")
+#' data("katrina_tracks")
+#' data("county_point")
+#' grid_winds_katrina <- get_grid_winds(hurr_track = katrina_tracks,
+#'                                      grid_df = county_points)
 #' map_wind(grid_winds_katrina)
 #' map_wind(grid_winds_katrina, break_point = 20)
 #' }
@@ -108,7 +114,7 @@ map_wind <- function(grid_winds, value = "vmax_sust", break_point = NULL,
 #'    dataset for the Atlantic basin. This function allows you to
 #'    plot a new map or add the tracks to an existing ggplot object.
 #'
-#' @param storm_track Character vector with the names of all storms to plot.
+#' @param storm_tracks Character vector with the names of all storms to plot.
 #'    This parameter must use the unique storm identifiers from the
 #'    `storm_id` column of the `hurr_tracks` dataframe.
 #' @param plot_object NULL or the name of a ggplot object to use as the

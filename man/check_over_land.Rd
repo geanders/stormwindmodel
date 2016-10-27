@@ -6,7 +6,18 @@
 \usage{
 check_over_land(tclat, tclon)
 }
+\arguments{
+\item{tclat}{Numeric vector of the absolute value of latitude, in degrees.}
+
+\item{tclon}{Numeric vector of the absolute value of latitude, in degrees.}
+}
+\value{
+A logical vector of whether the storm is over land (TRUE) or water
+   (FALSE)
+}
 \description{
-Determine if storm is over land or water
+Determines if the storm is over land or water at its observed location. This
+function finds the closest grid point in the \code{landmask} dataframe, then
+checks if that grid point is over land or water.
 }
 

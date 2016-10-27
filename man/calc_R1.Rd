@@ -2,7 +2,7 @@
 % Please edit documentation in R/willoughby2006eqs.R
 \name{calc_R1}
 \alias{calc_R1}
-\title{Calculate R1 using Rmax and xi}
+\title{Calculate radius to start of transition region}
 \usage{
 calc_R1(Rmax, xi)
 }
@@ -18,8 +18,8 @@ A numeric vector with the estimated value of \eqn{R_1}, a parameter
    required for the Willoughby wind model.
 }
 \description{
-Once you've solved for \eqn{xi}, use this value and the estimated
-\eqn{R_{max}} to determine the radius from the storm center to the start of
+Once you've solved for \eqn{\xi}, use this value and the estimated
+\eqn{R_{max}}{Rmax} to determine \eqn{R1}, the radius from the storm center to the start of
 the transition region.
 }
 \details{
@@ -37,5 +37,10 @@ This function is calculating the equation:
        assumed to be 25 kilometers if \eqn{R_{max}}{Rmax} is greater than
        20 kilometers and 15 kilometers otherwise.}
    }
+}
+\references{
+Willoughby HE, Darling RWR, and Rahn ME. 2006. Parametric representation
+of the primary hurricane vortex. Part II: A new family of sectionally
+continuous profiles. Monthly Weather Review 134(4):1102-1120.
 }
 

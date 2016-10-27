@@ -2,7 +2,7 @@
 % Please edit documentation in R/willoughby2006eqs.R
 \name{will1}
 \alias{will1}
-\title{Model wind speed at each grid point for each storm track observation}
+\title{Model wind speed at a grid point for a storm track observation}
 \usage{
 will1(cdist, Rmax, R1, R2, vmax_gl, n, A, X1, X2 = 25)
 }
@@ -12,6 +12,10 @@ will1(cdist, Rmax, R1, R2, vmax_gl, n, A, X1, X2 = 25)
 \item{Rmax}{Numeric vector of the radius at which the maximum wind occurs,
 in kilometers}
 
+\item{R1}{A numeric vector of one of the parameters of the Willoughby model.}
+
+\item{R2}{A numeric vector of one of the parameters of the Willoughby model.}
+
 \item{vmax_gl}{Numeric vector of the tangential wind component of the maximum
 gradient wind speed, in meters per second}
 
@@ -20,16 +24,18 @@ gradient wind speed, in meters per second}
 \item{A}{A numeric vector of one of the parameters of the Willoughby model.}
 
 \item{X1}{A numeric vector of one of the parameters of the Willoughby model.}
+
+\item{X2}{A numeric vector of one of the parameters of the Willoughby model.}
 }
 \value{
 Returns a numeric vector with gradient wind speed at a radius of
    \eqn{r} from the storm's center, in meters per second.
 }
 \description{
-This function estimates the gradient wind speed at a certain radius from
+Models the gradient wind speed at a certain radius from
 a storm's center. To do this, it uses different equations and subfunctions
 depending on how large the radius is (see details). This function requires,
-as inputs, all the Willoughby wind model parameters calculated using the
+as inputs, Willoughby wind model parameters calculated using the
 \code{\link{add_wind_radii}} function.
 }
 \details{
@@ -42,6 +48,9 @@ If \eqn{r \le R_1}{r \le R1}, this function is calculating the equation:
    \itemize{
      \item{\eqn{V(r)}: Maximum sustained gradient wind speed at a radius of
        \eqn{r} from the storm's center}
+     \item{\eqn{r}: Radius from the storm center, in kilometers}
+     \item{\eqn{V_{max,G}}{vmax_gl}: Maximum sustained gradient wind speed of the
+       storm, in meters per second}
      \item{\eqn{R_1}{R1}: A parameter for the Willoughby wind model (radius to
        start of transition region)}
      \item{\eqn{R_{max}}{Rmax}: Radius (in kilometers) to highest winds}
@@ -59,13 +68,14 @@ If \eqn{r \le R_1}{r \le R1}, this function is calculating the equation:
      \item{\eqn{V(r)}: Maximum sustained gradient wind speed at a radius of
        \eqn{r} kilometers from the storm's center}
      \item{\eqn{r}: Radius from the storm center, in kilometers}
-     \item{\eqn{V_{max}}{vmax_gl}: Maximum sustained gradient wind speed of the
+     \item{\eqn{V_{max,G}}{vmax_gl}: Maximum sustained gradient wind speed of the
        storm, in meters per second}
      \item{\eqn{R_{max}}{Rmax}: Radius (in kilometers) to highest winds}
-     \item{\eqn{A}, \eqn{X_2}{X2}: Parameters for the Willoughby wind model}
+     \item{\eqn{A}, \eqn{X_1}{X1}, \eqn{X_2}{X2}: Parameters for the
+        Willoughby wind model}
    }
 
-   If \eqn{R_1 < r \le R_2}{R1 < r \le R2}, this function is calculating
+   If \eqn{R_1 < r \le R_2}{R1 < r \le R2}, this function uses
      the equations:
 
      \deqn{\xi = \frac{r - R_1}{R_2 - R_1}}{
@@ -88,5 +98,10 @@ If \eqn{r \le R_1}{r \le R1}, this function is calculating the equation:
      \item{\eqn{w}: Weighting variable}
      \item{\eqn{R_1}{R1}, \eqn{R_2}{R2}: Parameters for the Willoughby wind model}
    }
+}
+\references{
+Willoughby HE, Darling RWR, and Rahn ME. 2006. Parametric representation
+of the primary hurricane vortex. Part II: A new family of sectionally
+continuous profiles. Monthly Weather Review 134(4):1102-1120.
 }
 

@@ -7,44 +7,47 @@
 latlon_to_km(tclat_1, tclon_1, tclat_2, tclon_2, Rearth = 6378.14)
 }
 \arguments{
-\item{tclat_1}{Latitude of the first location, in degrees.}
+\item{tclat_1}{A numeric vector giving latitude of the first location
+(degrees)}
 
-\item{tclon_1}{Longitude of the first location, in degrees. This value should
-be expressed as a positive value for Western hemisphere longitudes.}
+\item{tclon_1}{A numeric vector giving longitude of the first location
+(degrees). This value should be expressed as a positive value for Western
+hemisphere longitudes.}
 
-\item{tclat_2}{Latitude of the second location, in degrees.}
+\item{tclat_2}{A numeric vector giving latitude of the second location
+(degrees)}
 
-\item{tclon_2}{Longitude of the second location, in degrees. This value should
-be expressed as a positive value for Western hemisphere longitudes.}
+\item{tclon_2}{A numeric vector giving longitude of the second location
+(degrees). This value should be expressed as a positive value for Western
+hemisphere longitudes.}
+
+\item{Rearth}{Radius of the earth (km). Default is 6378.14 km.}
 }
 \value{
-Distance between the two locations, in kilometers.
+A vector with the distance between the two locations, in kilometers.
 }
 \description{
-This function takes latitude-longitude values for two locations and
+This function takes latitudes and longitudes for two locations and
 calculates the distance (in meters) between the locations using the
-haversine method.
+Haversine method.
 }
 \details{
 This function uses the Haversine method with great circle distance
    to calculate this distance. It is applying the following equations to
    determine distance (in kilometers) between two latitude-longitude pairs:
-   \deqn{hav(\theta) = hav(\phi_1 - \phi_2) + cos(\phi_1)*cos(\phi_2)*hav(L_1 - L_2)}{
-   hav(\theta) = hav(\phi1 - \phi2) + cos(\phi1)*cos(\phi2)*hav(L1 - L2)}
+   \deqn{hav(\gamma) = hav(\phi_1 - \phi_2) + cos(\phi_1)*cos(\phi_2)*hav(L_1 - L_2)}{
+   hav(\gamma) = hav(\phi1 - \phi2) + cos(\phi1)*cos(\phi2)*hav(L1 - L2)}
    where:
    \itemize{
      \item{\eqn{\phi_1}{\phi1}: Latitude of first location, in radians}
      \item{\eqn{\phi_2}{\phi2}: Latitude of second location, in radians}
      \item{\eqn{L_1}{L1}: Longitude of first location, in radians}
      \item{\eqn{L_2}{L2}: Longitude of second location, in radians}
-     \item{\eqn{hav(\alpha)}: The haversine function,
-        \eqn{hav(\alpha) = sin^2 \left(\frac{\alpha}{2}\right)}{
-        hav(\alpha) = sin^2 (\alpha / 2)}}
-     \item{\eqn{R}: Radius of the earth, here assumed to be 6378.14 kilometers}
+     \item{\eqn{hav(\gamma)}: The haversine function,
+        \eqn{hav(\gamma) = sin^2 \left(\frac{\gamma}{2}\right)}{
+        hav(\gamma) = sin^2 (\gamma / 2)}}
+     \item{\eqn{R_earth}{Rearth}: Radius of the earth, here assumed to be 6378.14 kilometers}
      \item{\eqn{D}}: Distance between the two locations, in kilometers
    }
-}
-\note{
-This function assumes the radius of the earth is 6378.14 kilometers.
 }
 

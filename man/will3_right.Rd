@@ -21,7 +21,12 @@ A numeric vector with the value for the right-hand side of Eqn. 3 in
    equation.
 }
 \description{
-Create the right hand side of the version of Eqn. 3 in Willoughby et al. 2006
-with the dual exponential profile.
+Calculates the right hand side of the version of Eqn. 3 in Willoughby et al.
+(2006) with the dual exponential profile.
+}
+\references{
+Willoughby HE, Darling RWR, and Rahn ME. 2006. Parametric representation
+of the primary hurricane vortex. Part II: A new family of sectionally
+continuous profiles. Monthly Weather Review 134(4):1102-1120.
 }
 

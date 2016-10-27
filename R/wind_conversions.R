@@ -1,23 +1,25 @@
-#' Convert sustained wind to gradient wind.
+#' Convert symmetric surface wind to gradient wind.
 #'
-#' This function converts 1-minute sustained wind speed at 10 meters to gradient
-#' level wind speed.
+#' Converts maximum 10-m 1-minute symmetric sustained wind speed to gradient
+#' wind speed. The conversion factor depends on whether the storm is over land
+#' or water.
 #'
 #' @param vmax_sfc_sym A numeric vector of 1-minute sustained wind speed at
-#'    10 meters, in meters / second.
-#' @param over_land TRUE / FALSE or whether the storm is over land (the
-#'    alternative is that the storm is over water).
+#'    10 meters, with motion asymmetry removed (m / s).
+#' @param over_land TRUE / FALSE of whether the storm is over land (TRUE) or
+#'    water (FALSE).
 #'
 #' @details This function uses the following conversion:
-#'  \deqn{V_{max,sfc} = \frac{V_{max}}{f_r}}{
-#'  Vmax,sfc = Vmax / fr}
+#'  \deqn{V_{max,G} = \frac{V_{max,sym}}{f_r}}{
+#'  Vmax,G = Vmax,sym / fr}
 #'  where:
 #'  \itemize{
-#'    \item{\eqn{V_{max}}{Vmax}: Mean wind speed at gradient level (m / s) }
-#'    \item{\eqn{V_{max,src}}{Vmax_sfc}: Surface wind speed (10 meters above the water or ground) (m / s)}
-#'    \item{\eqn{f_r}: Reduction factor (see below)}
+#'    \item{\eqn{V_{max,G}}{Vmax,G}: Max gradient-level 1-min sustained wind (m / s)}
+#'    \item{\eqn{V_{max,sym}}{Vmax,sym}: Max 10-m 1-min sustained wind with motion
+#'         asymmetry removed (m / s)}
+#'    \item{\eqn{f_r}{fr}: Reduction factor (see below)}
 #'  }
-#'  We make this adjustment based on Figure 3 in Knaff et al., 2011.
+#'  The function uses a reduction factor based on Figure 3 in Knaff et al., 2011.
 #'    If over water and within 100 kilometers of the storm's center,
 #'    the ratio of gradient wind speed to surface wind speed is
 #'    assumed to be 0.90. If over land, this reduction factor is reduced
@@ -30,7 +32,14 @@
 #'    gradient wind speed from surface wind speed, so we don't have that
 #'    storm-specific estimate to use here).
 #'
-#' @return A numeric vector with gradient-level wind speed, in meters / second.
+#' @return A numeric vector with maximum gradient-level 1-min wind speed (m / s).
+#'
+#' @references
+#'
+#' Knaff JA, DeMaria M, Molenar DA, Sampson CR, and Seybold MG. 2011. An
+#' automated, objective, multiple-satellite-platform tropical cyclone surface
+#' wind speed analysis. Journal of Applied Meteorology and Climatology
+#' 50(10):2149-2166
 #'
 #' @export
 calc_gradient_speed <- function(vmax_sfc_sym, over_land){
@@ -43,6 +52,18 @@ calc_gradient_speed <- function(vmax_sfc_sym, over_land){
 }
 
 #' Determine if storm is over land or water
+#'
+#' Determines if the storm is over land or water at its observed location. This
+#' function finds the closest grid point in the \code{landmask} dataframe, then
+#' checks if that grid point is over land or water.
+#'
+#' @param tclon Numeric vector of the absolute value of latitude, in degrees.
+#' @inheritParams will7a
+#'
+#' @return A logical vector of whether the storm is over land (TRUE) or water
+#'    (FALSE)
+#'
+#' @export
 check_over_land <- function(tclat, tclon){
   lat_diffs <- abs(tclat - stormwindmodel::landmask$latitude)
   closest_grid_lat <- stormwindmodel::landmask$latitude[which(lat_diffs ==
@@ -62,18 +83,17 @@ check_over_land <- function(tclat, tclon){
   return(over_land)
 }
 
-#' Remove forward speed estimate from maximum wind speed
+#' Remove forward speed from maximum wind speed
 #'
-#' This function takes the forward speed of the storm and subtracts it from
-#' the maximum storm wind speed, \eqn{V_{max}}.
+#' Removes the forward speed of the storm from the maximum storm wind speed,
+#' \eqn{V_{max}}{Vmax}, to estimate \eqn{V_{max,sym}}{Vmax,sym}, the storm's
+#' maximum 10-m 1-min sustained wind with motion asymmetry removed.
 #'
-#' @inheritParams will1a
-#' @inheritParams latlon_to_km
-#' @inheritParams calc_forward_speed
-#' @inheritParams calc_gradient_speed
+#' @param tcspd A numeric vector giving the tropical cyclone's forward speed (m / s).
+#' @param vmax A numeric vector giving maximum 10-m 1-minute sustained wind (m / s)
 #'
-#' @return A numerical vector with the maximum storm wind speed, with forward
-#' storm motion speed removed, in m / s.
+#' @return A numerical vector with \eqn{V_{max,sym}}{Vmax,sym}, the storm's
+#' maximum 10-m 1-min sustained wind with motion asymmetry removed, in m / s.
 #'
 #' @details This function is based on equation 12 (and accompanying
 #'    text) in Phadke et al. 2003. Based on this paper, the correction
@@ -82,9 +102,9 @@ check_over_land <- function(tclat, tclon){
 #'
 #' @references
 #'
-#' Padke AC, Martino CD, Cheung KF, and Houston SH. 2003. Modeling of
+#' Phadke AC, Martino CD, Cheung KF, and Houston SH. 2003. Modeling of
 #'    tropical cyclone winds and waves for emergency management. Ocean
-#'    Engineering 30:553-578.
+#'    Engineering 30(4):553-578.
 remove_forward_speed <- function(vmax, tcspd){
   vmax_sfc_sym <- vmax - 0.5 * tcspd
   vmax_sfc_sym[vmax_sfc_sym < 0] <- 0
@@ -97,18 +117,29 @@ remove_forward_speed <- function(vmax, tcspd){
 #' wind speed at a point and the radius from the storm center to
 #' the grid point.
 #'
-#' @param track Estimated gradient-level wind speed (m / s) at a grid
-#'    point.
-#' @param cdist Radius from storm center to the grid point, in kilometers.
+#' @param wind_gl_aa A numerical value with estimated gradient-level wind speed
+#'    (m / s) at a grid point.
+#' @param cdist A numerical value with radius from storm center to the grid
+#'    point, in kilometers.
 #'
-#' @return Estimate of surface wind speed at grid point, in meters / second.
+#' @return A numeric vector with the estimated symmetric surface wind speed at
+#'    the grid point, in meters / second.
 #'
 #' @details The reduction factor is based on Figure 3 of Knaff et al., 2003.
-#' It is estimated to be, for over water, 0.9 up to a radius of 100 km,
+#' Over water, it is estimated to be 0.9 up to a radius of 100 km,
 #' 0.75 for a radius of 700 km or more, and decrease linearly between
 #' a radius of 100 km and 700 km. Points over land should use a reduction
-#' factor that is 20% lower. Because all of the counties are over
-#' land, we make this adjustment for all grid points.
+#' factor that is 20\% lower. Because all of the counties are over
+#' land, the function makes this adjustment for all grid points.
+#'
+#' @references
+#'
+#' Knaff JA, DeMaria M, Molenar DA, Sampson CR, and Seybold MG. 2011. An
+#' automated, objective, multiple-satellite-platform tropical cyclone surface
+#' wind speed analysis. Journal of Applied Meteorology and Climatology
+#' 50(10):2149-2166
+#'
+#' @export
 gradient_to_surface <- function(wind_gl_aa, cdist){
   if(cdist <= 100){
     reduction_factor <- 0.9

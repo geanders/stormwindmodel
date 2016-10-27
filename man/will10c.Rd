@@ -2,7 +2,7 @@
 % Please edit documentation in R/willoughby2006eqs.R
 \name{will10c}
 \alias{will10c}
-\title{Calculate a parameter for the Willoughby model from \eqn{vmax_gl} and \eqn{\phi}}
+\title{Calculate A for Willoughby model}
 \usage{
 will10c(vmax_gl, tclat)
 }
@@ -17,21 +17,29 @@ A numeric vector that is a parameter required for the Willoughby
    model.
 }
 \description{
-This function implements Willoughby et al. (2006), Equation 10c to generate
-a parameter needed for the Willoughby wind model.
+Calculates A, a paramter for the Willoughby wind model, using equation 10c
+(Willoughby et al. 2006).
 }
 \details{
-This function is calculating the equation:
+This function calculates A using (equation 10c, Willoughby et al.
+   2006):
 
-   \deqn{A = 0.0696 + 0.0049 vmax_gl - 0.0064 \phi}
+   \deqn{A = 0.0696 + 0.0049 V_{max,G} - 0.0064 \phi}{
+   A = 0.0696 + 0.0049 vmax_gl - 0.0064 \phi}
 
    where:
    \itemize{
      \item{\eqn{A}: Parameter for the Willoughby wind model (any value
          of A calculated as negative is re-set to 0)}
-     \item{\eqn{V_{max}}{vmax_gl}: Tangential component of the maximum
+     \item{\eqn{V_{max,G}}{vmax_gl}: Tangential component of the maximum
            gradient-level sustained wind speed (in m / s)}
      \item{\eqn{\phi}: Latitude, in decimal degrees}
    }
+   Any negative values of \eqn{A} are reset to 0.
+}
+\references{
+Willoughby HE, Darling RWR, and Rahn ME. 2006. Parametric representation
+of the primary hurricane vortex. Part II: A new family of sectionally
+continuous profiles. Monthly Weather Review 134(4):1102-1120.
 }
 

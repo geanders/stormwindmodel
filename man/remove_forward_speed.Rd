@@ -2,17 +2,23 @@
 % Please edit documentation in R/wind_conversions.R
 \name{remove_forward_speed}
 \alias{remove_forward_speed}
-\title{Remove forward speed estimate from maximum wind speed}
+\title{Remove forward speed from maximum wind speed}
 \usage{
 remove_forward_speed(vmax, tcspd)
 }
+\arguments{
+\item{vmax}{A numeric vector giving maximum 10-m 1-minute sustained wind (m / s)}
+
+\item{tcspd}{A numeric vector giving the tropical cyclone's forward speed (m / s).}
+}
 \value{
-A numerical vector with the maximum storm wind speed, with forward
-storm motion speed removed, in m / s.
+A numerical vector with \eqn{V_{max,sym}}{Vmax,sym}, the storm's
+maximum 10-m 1-min sustained wind with motion asymmetry removed, in m / s.
 }
 \description{
-This function takes the forward speed of the storm and subtracts it from
-the maximum storm wind speed, \eqn{V_{max}}.
+Removes the forward speed of the storm from the maximum storm wind speed,
+\eqn{V_{max}}{Vmax}, to estimate \eqn{V_{max,sym}}{Vmax,sym}, the storm's
+maximum 10-m 1-min sustained wind with motion asymmetry removed.
 }
 \details{
 This function is based on equation 12 (and accompanying
@@ -21,8 +27,8 @@ This function is based on equation 12 (and accompanying
    maximum winds, where it equals 0.5 times the forward wind speed.
 }
 \references{
-Padke AC, Martino CD, Cheung KF, and Houston SH. 2003. Modeling of
+Phadke AC, Martino CD, Cheung KF, and Houston SH. 2003. Modeling of
    tropical cyclone winds and waves for emergency management. Ocean
-   Engineering 30:553-578.
+   Engineering 30(4):553-578.
 }
 

@@ -2,7 +2,7 @@
 % Please edit documentation in R/willoughby2006eqs.R
 \name{will7a}
 \alias{will7a}
-\title{Calculate Rmax from vmax_gl and tclat}
+\title{Calculate radius of maximum winds}
 \usage{
 will7a(vmax_gl, tclat)
 }
@@ -13,24 +13,29 @@ gradient wind speed, in meters per second}
 \item{tclat}{Numeric vector of the absolute value of latitude, in degrees.}
 }
 \value{
-A numeric vector with the radius at which the maximum wind occurs,
-   in kilometers.
+A numeric vector with \eqn{R_{max}}{Rmax}, the radius of maximum
+   winds, in kilometers.
 }
 \description{
-This function calculates the radius at which the maximum wind occurs
-(\eqn{Rmax}), based on the tangential wind component of the maximum wind
-speed (\eqn{vmax_gl}) and latitude (\eqn{\phi}). This function implements
-Willoughby et al. (2006), Equation 7a.
+Calculates the radius at which the maximum wind occurs
+(\eqn{R_{max}}{Rmax}), based on the maximum gradient-level 1-min sustained
+wind (\eqn{V_{max,G}}{vmax_gl}) and latitude (\eqn{\phi}). This function
+implements Willoughby et al. (2006), Equation 7a.
 }
 \details{
 This function fits the following equation:
-\deqn{R_{max} = 46.4 e^{- 0.0155 V_{max} + 0.0169\phi}}{
+\deqn{R_{max} = 46.4 e^{- 0.0155 V_{max,G} + 0.0169\phi}}{
 Rmax = 46.4 e^(- 0.0155 vmax_gl) + 0.0169\phi}
 where:
 \itemize{
   \item{\eqn{R_{max}}{Rmax}: Radius from the storm center to the point at which the maximum wind occurs (km)}
-  \item{\eqn{V_{max}}{vmax_gl}: Tangential wind component of the gradient-level maximum wind speed (m / s)}
+  \item{\eqn{V_{max,G}}{vmax_gl}: Tangential wind component of the gradient-level maximum wind speed (m / s)}
   \item{\eqn{\phi}: Latitude (degrees)}
 }
+}
+\references{
+Willoughby HE, Darling RWR, and Rahn ME. 2006. Parametric representation
+of the primary hurricane vortex. Part II: A new family of sectionally
+continuous profiles. Monthly Weather Review 134(4):1102-1120.
 }
 

@@ -7,35 +7,36 @@
 create_full_track(hurr_track = stormwindmodel::floyd_tracks, tint = 0.25)
 }
 \arguments{
-\item{hurr_track}{Dataframe with columns the hurricane track for a single
-storm. This must include columns for date-time (year, month, day, hour,
-minute; e.g., "198808051800" for August 5, 1988, 18:00 UTC),
+\item{hurr_track}{Dataframe with hurricane track data for a single
+storm. The dataframe must include columns for date-time (year, month, day,
+hour, minute; e.g., "198808051800" for August 5, 1988, 18:00 UTC),
 latitude, longitude, and wind speed (in knots). The column
-names for each of these must be "date", "latitude", "longitude",
-and "wind".}
+names for each of these must be \code{date}, \code{latitude},
+\code{longitude}, and \code{wind}.}
 
-\item{tint}{Interval (in hours) for the estimates. Default is 0.25 (i.e., 15
-minutes)}
+\item{tint}{Interval (in hours) to which to interpolate the tracks. The
+default is 0.25 (i.e., 15 minutes)}
 }
 \value{
-The function returns an extended version of the track data, with
+A preprocessed version of the track data, with
    latitude, longitude, and wind speed linearly interpolated between
    observed values. Also, wind speed is converted in this function to m / s
    and the absolute value of the latitude is taken (necessary for further
    wind speed calculations). Finally, the names of some columns are
-   changed ("tclat" for latitude, "tclon" for longitude, and "vmax"
-   for wind speed.)
+   changed (\code{tclat} for latitude, \code{tclon} for longitude, and
+   \code{vmax} for wind speed.)
 }
 \description{
-This function takes data on a hurricane's track and imputes to fill in
-values at a finer time resolution. For example, if the hurricane tracks
-are recorded at 6-hour intervals, this could be used to impute locations
-and windspeeds at 15-minute intervals.
+Inputs data on a hurricane's track and imputes to a finer time resolution.
+For example, if the hurricane tracks are recorded at 6-hour intervals, this
+could be used to impute locations and windspeeds at 15-minute intervals.
+This function also does some reformatting necessary for later functions in
+the \code{stormwindmodel} package.
 }
 \details{
-The function does a simple linear interpolation, both for location
-and for wind speed, between the measured observations in the input
-hurricane track data.
+The uses natural cubic splines for interpolation, both for location
+and for wind speed. Degrees of freedom are based on the number of available
+observations for the storm.
 }
 \note{
 This function imputes between each original data point, and it starts

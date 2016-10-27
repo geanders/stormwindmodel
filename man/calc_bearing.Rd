@@ -2,29 +2,33 @@
 % Please edit documentation in R/latlon_helpers.R
 \name{calc_bearing}
 \alias{calc_bearing}
-\title{Calculate the direction from one location to another}
+\title{Calculate bearing from one location to another}
 \usage{
 calc_bearing(tclat_1, tclon_1, tclat_2, tclon_2)
 }
 \arguments{
-\item{tclat_1}{Latitude of the first location, in degrees.}
+\item{tclat_1}{A numeric vector giving latitude of the first location
+(degrees)}
 
-\item{tclon_1}{Longitude of the first location, in degrees. This value should
-be expressed as a positive value for Western hemisphere longitudes.}
+\item{tclon_1}{A numeric vector giving longitude of the first location
+(degrees). This value should be expressed as a positive value for Western
+hemisphere longitudes.}
 
-\item{tclat_2}{Latitude of the second location, in degrees.}
+\item{tclat_2}{A numeric vector giving latitude of the second location
+(degrees)}
 
-\item{tclon_2}{Longitude of the second location, in degrees. This value should
-be expressed as a positive value for Western hemisphere longitudes.}
+\item{tclon_2}{A numeric vector giving longitude of the second location
+(degrees). This value should be expressed as a positive value for Western
+hemisphere longitudes.}
 }
 \value{
-The direction of the second location as seen from the first location,
+A numeric vector giving the direction of the second location from the first location,
    in degrees. A direction of 0 degrees indicates the second location is
-   due east of the first, and 90 degrees if the second location is due north
-   of the first.
+   due east of the first, 90 degrees indicates the second location is due
+   north of the first, etc.
 }
 \description{
-This function calculates the bearing of a second location, as seen from
+Calculates the bearing of a second location, as seen from
 the first location, based on latitude and longitude coordinates for both
 locations.
 }
@@ -52,6 +56,6 @@ This function uses the following equations to calculate the bearing
 
    In cases where this equation results in values below 0 degrees or above
    360 degrees, the function applies modular arithmetic to bring the value
-   back within the 0-360 degree range.
+   back within the 0--360 degree range.
 }
 

@@ -2,30 +2,41 @@
 % Please edit documentation in R/boundary_layer_helpers.R
 \name{add_inflow}
 \alias{add_inflow}
-\title{Add overland inflow angle}
+\title{Add inflow angle}
 \usage{
 add_inflow(gwd, cdist, Rmax)
 }
 \arguments{
-\item{gwd}{Wind direction of the gradient wind at a location, in degrees. Due
-east is 0 degrees, due north 90 degrees, etc.}
+\item{gwd}{A numeric vector giving direction of gradient wind at a location,
+in degrees. Due east is 0 degrees, due north 90 degrees, etc.}
 
-\item{cdist}{Radius (in kilometers) from the storm center to a location.}
+\item{cdist}{A numeric vector giving radius (in kilometers) from the storm
+center to a location.}
 
 \item{Rmax}{A numeric vector giving the radius to maximum winds (in kilometers)}
 }
 \value{
 Numeric vector with the gradient wind direction (in degrees),
-   adjusted with an inflow angle appropriate for being overland.
+   adjusted with an inflow angle appropriate for being over land and for the
+   location's distance from the storm's center.
 }
 \description{
 This function adds an inflow angle to the angle of the wind direction.
 It calculates an inflow angle as a function of the distance from the
-storm center to a location, and then adds 20 degrees to this inflow angle to
-account for the location being over land rather than overwater.
+storm center to a location (Phadke et al. 2003), and then adds 20 degrees to
+this inflow angle to account for the location being over land rather than
+over water.
+}
+\details{
+This function uses equations 11a-c from Phadke et al. (2003).
 }
 \examples{
 add_inflow(gwd = 160, cdist = 100, Rmax = 20)
 
+}
+\references{
+Phadke AC, Martino CD, Cheung KF, and Houston SH. 2003. Modeling of
+   tropical cyclone winds and waves for emergency management. Ocean
+   Engineering 30(4):553-578.
 }
 

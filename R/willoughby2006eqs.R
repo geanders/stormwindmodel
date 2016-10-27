@@ -14,15 +14,18 @@ will1a <- function(vmax_gl, r, Rmax, n){
   return(Vi)
 }
 
-#' Model wind speed at each grid point for each storm track observation
+#' Model wind speed at a grid point for a storm track observation
 #'
-#' This function estimates the gradient wind speed at a certain radius from
+#' Models the gradient wind speed at a certain radius from
 #' a storm's center. To do this, it uses different equations and subfunctions
 #' depending on how large the radius is (see details). This function requires,
-#' as inputs, all the Willoughby wind model parameters calculated using the
+#' as inputs, Willoughby wind model parameters calculated using the
 #' \code{\link{add_wind_radii}} function.
 #'
 #' @param cdist Distance (in km) from center of tropical cyclone to grid point.
+#' @param R1 A numeric vector of one of the parameters of the Willoughby model.
+#' @param R2 A numeric vector of one of the parameters of the Willoughby model.
+#' @param X2 A numeric vector of one of the parameters of the Willoughby model.
 #' @inheritParams will1a
 #' @inheritParams will3_right
 #'
@@ -38,6 +41,9 @@ will1a <- function(vmax_gl, r, Rmax, n){
 #'    \itemize{
 #'      \item{\eqn{V(r)}: Maximum sustained gradient wind speed at a radius of
 #'        \eqn{r} from the storm's center}
+#'      \item{\eqn{r}: Radius from the storm center, in kilometers}
+#'      \item{\eqn{V_{max,G}}{vmax_gl}: Maximum sustained gradient wind speed of the
+#'        storm, in meters per second}
 #'      \item{\eqn{R_1}{R1}: A parameter for the Willoughby wind model (radius to
 #'        start of transition region)}
 #'      \item{\eqn{R_{max}}{Rmax}: Radius (in kilometers) to highest winds}
@@ -55,13 +61,14 @@ will1a <- function(vmax_gl, r, Rmax, n){
 #'      \item{\eqn{V(r)}: Maximum sustained gradient wind speed at a radius of
 #'        \eqn{r} kilometers from the storm's center}
 #'      \item{\eqn{r}: Radius from the storm center, in kilometers}
-#'      \item{\eqn{V_{max}}{vmax_gl}: Maximum sustained gradient wind speed of the
+#'      \item{\eqn{V_{max,G}}{vmax_gl}: Maximum sustained gradient wind speed of the
 #'        storm, in meters per second}
 #'      \item{\eqn{R_{max}}{Rmax}: Radius (in kilometers) to highest winds}
-#'      \item{\eqn{A}, \eqn{X_2}{X2}: Parameters for the Willoughby wind model}
+#'      \item{\eqn{A}, \eqn{X_1}{X1}, \eqn{X_2}{X2}: Parameters for the
+#'         Willoughby wind model}
 #'    }
 #'
-#'    If \eqn{R_1 < r \le R_2}{R1 < r \le R2}, this function is calculating
+#'    If \eqn{R_1 < r \le R_2}{R1 < r \le R2}, this function uses
 #'      the equations:
 #'
 #'      \deqn{\xi = \frac{r - R_1}{R_2 - R_1}}{
@@ -84,6 +91,13 @@ will1a <- function(vmax_gl, r, Rmax, n){
 #'      \item{\eqn{w}: Weighting variable}
 #'      \item{\eqn{R_1}{R1}, \eqn{R_2}{R2}: Parameters for the Willoughby wind model}
 #'    }
+#'
+#' @references
+#'
+#' Willoughby HE, Darling RWR, and Rahn ME. 2006. Parametric representation
+#' of the primary hurricane vortex. Part II: A new family of sectionally
+#' continuous profiles. Monthly Weather Review 134(4):1102-1120.
+#'
 #' @export
 will1 <- function(cdist, Rmax, R1, R2, vmax_gl, n, A, X1, X2 = 25){
 
@@ -139,8 +153,8 @@ will2 <- function(r, R1){
 
 #' Calculate right-hand side of Willoughby Eqn. 3
 #'
-#' Create the right hand side of the version of Eqn. 3 in Willoughby et al. 2006
-#' with the dual exponential profile.
+#' Calculates the right hand side of the version of Eqn. 3 in Willoughby et al.
+#' (2006) with the dual exponential profile.
 #'
 #' @param n A numeric vector of one of the parameters of the Willoughby model.
 #' @param A A numeric vector of one of the parameters of the Willoughby model.
@@ -152,6 +166,12 @@ will2 <- function(r, R1){
 #'    Willoughby et al. 2006, using the dual exponential version of that
 #'    equation.
 #'
+#' @references
+#'
+#' Willoughby HE, Darling RWR, and Rahn ME. 2006. Parametric representation
+#' of the primary hurricane vortex. Part II: A new family of sectionally
+#' continuous profiles. Monthly Weather Review 134(4):1102-1120.
+#'
 #' @export
 will3_right <- function(n, A, X1, Rmax){
   eq3_right <- (n * ((1 - A) * X1 + 25 * A)) /
@@ -161,9 +181,9 @@ will3_right <- function(n, A, X1, Rmax){
 
 #' Calculate the function value and derivative for Willoughby Eqn. 3
 #'
-#' This function calculates values of both the function and the equation for
-#' the function that you are trying to solve the root of in Willoughby Eqn. 3
-#' (the version using the dual exponential profile).
+#' Calculates values of both the function and the derivative of
+#' the function for which you are trying to solve the root in Eqn. 3
+#' (the version using the dual exponential profile) of Willoughby et al. (2006).
 #'
 #' @param xi A numerical value for \eqn{\xi} from Willoughby et al. (2006),
 #'    Eqn. 2
@@ -178,6 +198,12 @@ will3_right <- function(n, A, X1, Rmax){
 #'    are used in iterating through the Newton-Raphson method to determine
 #'    \eqn{\xi}.
 #'
+#' @references
+#'
+#' Willoughby HE, Darling RWR, and Rahn ME. 2006. Parametric representation
+#' of the primary hurricane vortex. Part II: A new family of sectionally
+#' continuous profiles. Monthly Weather Review 134(4):1102-1120.
+#'
 #' @export
 will3_deriv_func <- function(xi, eq3_right){
   deriv <- 70 * 9 * xi ^ 8 - 315 * 8 * xi ^ 7 + 540 * 7 * xi ^ 6 -
@@ -190,25 +216,38 @@ will3_deriv_func <- function(xi, eq3_right){
 
 #' Numerically solve Willoughby Eqn. 3 for xi
 #'
-#' This function uses the Newton-Raphson method to solve Eqn 3. (the
-#' dual-exponential profile version) for \eqn{xi}. This value of \eqn{xi} can
-#' then be used to determine \eqn{R_1} for that storm observation.
+#' This function uses the Newton-Raphson method to solve equation 3 (the
+#' dual-exponential profile version) for \eqn{\xi} in Willoughby et al. (2006).   This value of \eqn{xi} can
+#' THis value of \eqn{\xi} can then be used to determine \eqn{R_1}{R1} for that
+#' storm observation.
 #'
 #' @param xi0 A numeric value giving the starting guess for \eqn{xi}
-#' @param eps The convergence threshold. [...] must be lower than this value
-#'    for the algorithm to have converged.
+#' @param eps The convergence threshold for determining if the algorithm has
+#'    converged.
 #' @param itmax The maximum number of iterations to try before deciding that
 #'    the algorithm did not converge.
 #' @inheritParams will3_deriv_func
 #'
 #' @note If this algorithm does not converge, it returns a missing value for
-#'    \eqn{xi}.
+#'    \eqn{\xi}.
+#'
+#' @references
+#'
+#' Jones O, Maillardet R, and Robinson A. 2009. Introduction to Scientific
+#' Programming and Simulation Using R. Boca Raton, FL: Chapman & Hall/CRC Press.
+#'
+#' Press WH, Teukolsky SA, Vetterling WT, and Flannery BP. 2002. Numerical
+#' Recipes in C++: The Art of Scientific Computing. 2nd ed. Cambridge, UK:
+#' Cambridge University Press.
+#'
+#' Willoughby HE, Darling RWR, and Rahn ME. 2006. Parametric representation
+#' of the primary hurricane vortex. Part II: A new family of sectionally
+#' continuous profiles. Monthly Weather Review 134(4):1102-1120.
 #'
 #' @export
 solve_for_xi <- function(xi0 = 0.5, eq3_right, eps = 10e-4, itmax = 100){
   if(is.na(eq3_right)){
     return(NA)
-    warning("Newton-Raphson did not converge.")
   } else{
     i <- 1
     xi <- xi0
@@ -220,15 +259,16 @@ solve_for_xi <- function(xi0 = 0.5, eq3_right, eps = 10e-4, itmax = 100){
     if(i < itmax){
       return(xi)
     } else{
+      warning("Newton-Raphson did not converge.")
       return(NA)
     }
   }
 }
 
-#' Calculate R1 using Rmax and xi
+#' Calculate radius to start of transition region
 #'
-#' Once you've solved for \eqn{xi}, use this value and the estimated
-#' \eqn{R_{max}} to determine the radius from the storm center to the start of
+#' Once you've solved for \eqn{\xi}, use this value and the estimated
+#' \eqn{R_{max}}{Rmax} to determine \eqn{R1}, the radius from the storm center to the start of
 #' the transition region.
 #'
 #' @param xi A numeric value with the \eqn{\xi} value determined by
@@ -253,6 +293,12 @@ solve_for_xi <- function(xi0 = 0.5, eq3_right, eps = 10e-4, itmax = 100){
 #'        20 kilometers and 15 kilometers otherwise.}
 #'    }
 #'
+#' @references
+#'
+#' Willoughby HE, Darling RWR, and Rahn ME. 2006. Parametric representation
+#' of the primary hurricane vortex. Part II: A new family of sectionally
+#' continuous profiles. Monthly Weather Review 134(4):1102-1120.
+#'
 #' @export
 calc_R1 <- function(Rmax, xi){
   R2_minus_R1 <- ifelse(Rmax > 20, 25, 15)
@@ -260,28 +306,34 @@ calc_R1 <- function(Rmax, xi){
   return(R1)
 }
 
-#' Calculate Rmax from vmax_gl and tclat
+#' Calculate radius of maximum winds
 #'
-#' This function calculates the radius at which the maximum wind occurs
-#' (\eqn{Rmax}), based on the tangential wind component of the maximum wind
-#' speed (\eqn{vmax_gl}) and latitude (\eqn{\phi}). This function implements
-#' Willoughby et al. (2006), Equation 7a.
+#' Calculates the radius at which the maximum wind occurs
+#' (\eqn{R_{max}}{Rmax}), based on the maximum gradient-level 1-min sustained
+#' wind (\eqn{V_{max,G}}{vmax_gl}) and latitude (\eqn{\phi}). This function
+#' implements Willoughby et al. (2006), Equation 7a.
 #'
 #' @param tclat Numeric vector of the absolute value of latitude, in degrees.
 #' @inheritParams will1a
 #'
 #' @details This function fits the following equation:
-#' \deqn{R_{max} = 46.4 e^{- 0.0155 V_{max} + 0.0169\phi}}{
+#' \deqn{R_{max} = 46.4 e^{- 0.0155 V_{max,G} + 0.0169\phi}}{
 #' Rmax = 46.4 e^(- 0.0155 vmax_gl) + 0.0169\phi}
 #' where:
 #' \itemize{
 #'   \item{\eqn{R_{max}}{Rmax}: Radius from the storm center to the point at which the maximum wind occurs (km)}
-#'   \item{\eqn{V_{max}}{vmax_gl}: Tangential wind component of the gradient-level maximum wind speed (m / s)}
+#'   \item{\eqn{V_{max,G}}{vmax_gl}: Tangential wind component of the gradient-level maximum wind speed (m / s)}
 #'   \item{\eqn{\phi}: Latitude (degrees)}
 #' }
 #'
-#' @return A numeric vector with the radius at which the maximum wind occurs,
-#'    in kilometers.
+#' @return A numeric vector with \eqn{R_{max}}{Rmax}, the radius of maximum
+#'    winds, in kilometers.
+#'
+#' @references
+#'
+#' Willoughby HE, Darling RWR, and Rahn ME. 2006. Parametric representation
+#' of the primary hurricane vortex. Part II: A new family of sectionally
+#' continuous profiles. Monthly Weather Review 134(4):1102-1120.
 #'
 #' @export
 will7a <- function(vmax_gl, tclat){
@@ -289,9 +341,10 @@ will7a <- function(vmax_gl, tclat){
     return(Rmax)
 }
 
-#' Calculate the fitted decay length from \eqn{vmax_gl} and \eqn{\phi}
+#' Calculate X1 for Willoughby model
 #'
-#' This function implements Willoughby et al. (2006), Equation 10a.
+#' Calculates \eqn{X_1}{X1}, a parameter for the Willoughby wind model using
+#' equation 10a (Willoughby et al. 2006).
 #'
 #' @inheritParams will1a
 #' @inheritParams will7a
@@ -299,17 +352,23 @@ will7a <- function(vmax_gl, tclat){
 #' @return A numeric vector giving one of the parameters (\eqn{X_1}{X1})
 #'    required for the Willoughby wind model.
 #'
-#' @details This function uses the following equation to calculate the
-#'    \eqn{X_1}{X1} parameter:
-#'    \deqn{X_1 = 317.1 - 2.026V_{max} + 1.915 \phi}{
+#' @details This function uses the following equation (equation 10a, Willoughby
+#' et al. 2006) to calculate the \eqn{X_1}{X1} parameter:
+#'    \deqn{X_1 = 317.1 - 2.026V_{max,G} + 1.915 \phi}{
 #'    X1 = 317.1 - 2.026vmax_gl + 1.915 \phi}
 #'    where:
 #'    \itemize{
 #'      \item{\eqn{X_1}{X1}: Parameter for the Willoughby wind model}
-#'      \item{\eqn{V_{max}}{vmax_gl}: Tangential component of the maximum
-#'            gradient-level sustained wind speed (in m / s)}
+#'      \item{\eqn{V_{max,G}}{vmax_gl}: Maximum gradient-level 1-min sustained
+#'         wind (m / s)}
 #'      \item{\eqn{\phi}: Latitude, in decimal degrees}
 #'    }
+#'
+#' @references
+#'
+#' Willoughby HE, Darling RWR, and Rahn ME. 2006. Parametric representation
+#' of the primary hurricane vortex. Part II: A new family of sectionally
+#' continuous profiles. Monthly Weather Review 134(4):1102-1120.
 #'
 #' @export
 will10a <- function(vmax_gl, tclat){
@@ -317,25 +376,33 @@ will10a <- function(vmax_gl, tclat){
   return(X1)
 }
 
-#' Calculate the power law exponential from \eqn{vmax_gl} and \eqn{\phi}
+#' Calculate n for the Willoughby model
 #'
-#' This function implements Willoughby et al. (2006), Equation 10b.
+#' Calculates n, a parameter for the Willoughby model, using equation 10b
+#' (Willoughby et al. 2006).
 #'
 #' @inheritParams will1a
 #' @inheritParams will7a
 #'
-#' @return A numeric vector of the exponential for the power law inside the eye
+#' @return A numeric vector for n, a parameter needed for the Willoughby wind
+#'    model.
 #'
 #' @details This function is calculating the equation:
-#'    \deqn{n = 0.4067 + 0.0144 V_{max} - 0.0038 \phi}{
+#'    \deqn{n = 0.4067 + 0.0144 V_{max,G} - 0.0038 \phi}{
 #'    n = 0.4067 + 0.0144 vmax_gl - 0.0038 \phi}
 #'    where:
 #'    \itemize{
 #'      \item{\eqn{n}: Parameter for the Willoughby wind model}
-#'      \item{\eqn{V_{max}}{vmax_gl}: Tangential component of the maximum
-#'            gradient-level sustained wind speed (in m / s)}
+#'      \item{\eqn{V_{max,G}}{vmax_gl}:  Maximum gradient-level 1-min sustained
+#'         wind (m / s)}
 #'      \item{\eqn{\phi}: Latitude, in decimal degrees}
 #'    }
+#'
+#' @references
+#'
+#' Willoughby HE, Darling RWR, and Rahn ME. 2006. Parametric representation
+#' of the primary hurricane vortex. Part II: A new family of sectionally
+#' continuous profiles. Monthly Weather Review 134(4):1102-1120.
 #'
 #' @export
 will10b <- function(vmax_gl, tclat){
@@ -343,10 +410,10 @@ will10b <- function(vmax_gl, tclat){
   return(n)
 }
 
-#' Calculate a parameter for the Willoughby model from \eqn{vmax_gl} and \eqn{\phi}
+#' Calculate A for Willoughby model
 #'
-#' This function implements Willoughby et al. (2006), Equation 10c to generate
-#' a parameter needed for the Willoughby wind model.
+#' Calculates A, a paramter for the Willoughby wind model, using equation 10c
+#' (Willoughby et al. 2006).
 #'
 #' @inheritParams will1a
 #' @inheritParams will7a
@@ -354,18 +421,27 @@ will10b <- function(vmax_gl, tclat){
 #' @return A numeric vector that is a parameter required for the Willoughby
 #'    model.
 #'
-#' @details This function is calculating the equation:
+#' @details This function calculates A using (equation 10c, Willoughby et al.
+#'    2006):
 #'
-#'    \deqn{A = 0.0696 + 0.0049 vmax_gl - 0.0064 \phi}
+#'    \deqn{A = 0.0696 + 0.0049 V_{max,G} - 0.0064 \phi}{
+#'    A = 0.0696 + 0.0049 vmax_gl - 0.0064 \phi}
 #'
 #'    where:
 #'    \itemize{
 #'      \item{\eqn{A}: Parameter for the Willoughby wind model (any value
 #'          of A calculated as negative is re-set to 0)}
-#'      \item{\eqn{V_{max}}{vmax_gl}: Tangential component of the maximum
+#'      \item{\eqn{V_{max,G}}{vmax_gl}: Tangential component of the maximum
 #'            gradient-level sustained wind speed (in m / s)}
 #'      \item{\eqn{\phi}: Latitude, in decimal degrees}
 #'    }
+#'    Any negative values of \eqn{A} are reset to 0.
+#'
+#' @references
+#'
+#' Willoughby HE, Darling RWR, and Rahn ME. 2006. Parametric representation
+#' of the primary hurricane vortex. Part II: A new family of sectionally
+#' continuous profiles. Monthly Weather Review 134(4):1102-1120.
 #'
 #' @export
 will10c <- function(vmax_gl, tclat){
