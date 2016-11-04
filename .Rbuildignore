@@ -6,3 +6,4 @@
 ^README-.*\.png$
 ^data-raw$
 ^old_code/*$
+^\.travis\.yml$
