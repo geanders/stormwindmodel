@@ -23,6 +23,7 @@ Imports:
     choroplethrMaps (>= 1.0.0),
     dplyr (>= 0.5.0),
     ggplot2 (>= 2.1.0),
+    Hmisc (>= 3.17.4),
     lubridate (>= 1.6.0),
     plyr (>= 1.8.4),
     weathermetrics (>= 1.2.2)
