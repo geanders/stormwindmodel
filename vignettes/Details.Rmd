@@ -81,10 +81,10 @@ var_names <- dplyr::data_frame(var = c("`vmax`",
                                         "$\\phi$",
                                         "$L$",
                                         "$R_{earth}$",
-                                        "$V_F$",
-                                        "$V_{F,u}$",
-                                        "$V_{F,v}$",
-                                        "$\\theta$",
+                                        "$F$",
+                                        "$F_{u}$",
+                                        "$F_{v}$",
+                                        "$\\theta_{F}$",
                                         "$X_1$",
                                         "$X_2$",
                                         "$n$",
@@ -92,13 +92,13 @@ var_names <- dplyr::data_frame(var = c("`vmax`",
                                         "$\\xi$",
                                         "$R_1$",
                                         "$R_2$",
-                                        "?",
+                                        "$\\theta_{G}$",
                                         "$\\beta$",
-                                        "?",
+                                        "$\\theta_{S}$",
                                         "$V_i$",
                                         "$V_0$",
                                         "$V_G(r)$",
-                                        "?",
+                                        "V_G",
                                         "$C_{dist}$",
                                         "$C_{head}$",
                                         "$V_{sfc,sym,u}$",
@@ -138,7 +138,7 @@ var_names <- dplyr::data_frame(var = c("`vmax`",
                                         "Azimuthal average winds inside $R_1$",
                                         "Azimuthal average winds outside $R_2$",
                                         "Azimuthal average winds, varies by radius $r$", 
-                                        "Gradient level winds (u, v) at grid point",
+                                        "Gradient level winds at grid point",
                                         "Distance from tropical cyclone to grid point",
                                         "Heading of grid point from tropical cyclone center",
                                         "Symmetric surface winds at grid point, u-component",
@@ -315,7 +315,7 @@ C = cos(\phi_{1,rad}) * sin(\phi_{2,rad}) - sin(\phi_{1,rad}) * cos(\phi_{2,rad}
 $$
 
 $$
-\theta = atan2(S, C) * \frac{180}{\pi} + 90
+\theta_{F} = atan2(S, C) * \frac{180}{\pi} + 90
 $$
 
 where: 
@@ -325,7 +325,7 @@ where:
 - $\phi_{2,rad}$: Latitude of second location, in radians
 - $L_{2,rad}$: Longitude of second location, in radians
 - $S$, $C$: Intermediary results
-- $\theta$ is the direction of the storm movement, in degrees
+- $\theta_F$ is the direction of the storm movement, in degrees
 
 This calculation is implemented in our package through the `calc_bearing` function:
 
@@ -337,17 +337,17 @@ stormwindmodel::calc_bearing
 
 Next, the code uses the estimated magnitude and direction of the storm's forward speed to calculate u- and v-components of this forward speed. Later, these two components are added back to the modeled surface wind speed at grid points, after adjusting with the Phadke correction factor for forward motion [@phadke2003modeling].
 
-To calculate the u- and v-components of forward motion, $V_{F,u}$ and $V_{F,v}$, the function uses: 
+To calculate the u- and v-components of forward motion, $F_{u}$ and $F_{v}$, the function uses: 
 
 $$
-V_{F,u} = \left|\overrightarrow{V_{F}}\right| cos(\theta)
+F_{u} = \left|\overrightarrow{F}\right| cos(\theta_F)
 $$
 
 $$
-V_{F,v} = \left|\overrightarrow{V_{F}}\right| sin(\theta)
+F_{v} = \left|\overrightarrow{F}\right| sin(\theta_F)
 $$
 
-where $\theta$ is the direction of the storm movement (0 for due east, 90 for due north, etc.).
+where $\theta_F$ is the direction of the storm movement (0 for due east, 90 for due north, etc.).
 
 ```{r eval = FALSE}
 tcspd_u = tcspd * cos(degrees_to_radians(tcdir))
@@ -358,7 +358,7 @@ tcspd_v = tcspd * sin(degrees_to_radians(tcdir))
 
 Next, there's a function called `remove_forward_speed` that uses the estimated forward speed to adjust wind speed to remove the component from forward motion, based on equation 12 (and accompanying text) from Phadke et al. [-@phadke2003modeling]. 
 
-Because here the code is adjusting the maximum sustained wind to remove the component from forward speed, we can assume that we are adjusting wind speed at the radius of maximum winds and for winds blowing in the same direction as the direction of the forward motion of the storm. Therefore, the correction term for forward motion is $U = 0.5 * V_F$ [@phadke2003modeling], or half the total forward speed of the storm. This correction factor is subtracted from the maximum sustained wind speed to remove the forward component, and because we assume that the maximum winds are blowing in the same direction as the direction of the storm's forward motion, this correction term is directly subtracted from the magnitude of the wind speed (rather than breaking into u- and v-components for a vector addition).
+Because here the code is adjusting the maximum sustained wind to remove the component from forward speed, we can assume that we are adjusting wind speed at the radius of maximum winds and for winds blowing in the same direction as the direction of the forward motion of the storm. Therefore, the correction term for forward motion is $U = 0.5F$ [@phadke2003modeling], or half the total forward speed of the storm. This correction factor is subtracted from the maximum sustained wind speed to remove the forward component, and because we assume that the maximum winds are blowing in the same direction as the direction of the storm's forward motion, this correction term is directly subtracted from the magnitude of the wind speed (rather than breaking into u- and v-components for a vector addition).
 
 If $V_{max}$ after removing the forward storm motion is ever negative, the `remove_forward_speed` function resets the value to 0 m / s.
 
@@ -562,6 +562,8 @@ stormwindmodel::will3_right
 stormwindmodel::will3_deriv_func
 stormwindmodel::solve_for_xi
 ```
+
+While the Newton-Raphson method can sometimes perform poorly in finding global maxima, in this case the function for which we are trying to find the root is well-behaved. Across tropical storms from 1988 to 2015, the method never failed to converge, and identified roots were consistent across storms (typically roots are for $\xi$ of 0.6--0.65). We also tested using the `optim` function in the `stats` R package and found similar estimated roots but slower convergence times than when using the Newton-Raphson method.
 
 Now an equation from the Willoughby et al. 2006 paper can be used to calculate $R_1$ [@willoughby2006parametric]:
 
@@ -800,7 +802,7 @@ $$
 Over land, the inflow angle should be about 20 degrees more than it is over water. Therefore, after calculating the inflow angle from the equation above, the function adds 20 degrees to the value since all modeled locations are over land. The final calculation, then, is:
 
 $$
-swd = gwd + \beta + 20
+\theta_S = \theta_G + \beta + 20
 $$
 
 Here is the function for this step:
@@ -814,14 +816,14 @@ add_inflow
 Next, to add back in the storm's forward motion at each grid point, the code reverses the earlier step that used the Phadke correction factor [equation 12, @phadke2003modeling]. The package calculates a constant correction factor (`correction_factor`), as a function of `r`, radius from the storm center to the grid point, and $R_{max}$, radius from storm center to maximum winds. 
 
 $$
-U(r) = \frac{R_{max}r}{R_{max}^2 + r^2}V_F
+U(r) = \frac{R_{max}r}{R_{max}^2 + r^2}F
 $$
 where:
 
 - $U(r)$: Phadke correction factor at a radius $r$ from the storm's center
 - $r$: Radius from the storm's center (km)
 - $R_{max}$: Radius of maximum winds (km)
-- $V_F$: Forward speed of the storm (m / s)
+- $F$: Forward speed of the storm (m / s)
 
 Both the u- and v-components of forward speed are corrected with this correction factor, then these components are added to the u- and v-components of tangential surface wind. These u- and v-components are then used to calculate the magnitude of total wind associated with the storm at the grid point:
 
