@@ -66,7 +66,7 @@ head(county_points)
 #> 6  01011 32.11633 -85.70119
 ```
 
-This package uses the wind model developed by Willoughby et al. (2006) for modeling wind speed at each grid location. Full details on how this model is fit are provided in the "Details" vignetted of the `stormwindmodel` package.
+This package uses the wind model developed by Willoughby et al. (2006) for modeling wind speed at each grid location. Full details on how this model is fit are provided in the "Details" vignette of the `stormwindmodel` package or online [here](https://github.com/geanders/stormwindmodel/tree/master/Details_README).
 
 Basic example
 -------------
