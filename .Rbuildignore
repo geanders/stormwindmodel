@@ -7,3 +7,4 @@
 ^data-raw$
 ^old_code/*$
 ^\.travis\.yml$
+^exploring_data/*$
