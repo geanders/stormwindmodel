@@ -5,7 +5,7 @@ bibliography: vignettes/bibliography.bib
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-[![Travis-CI Build Status](https://travis-ci.org/NA/NA.svg?branch=master)](https://travis-ci.org/NA/NA)
+[![Travis-CI Build Status](https://api.travis-ci.org/geanders/stormwindmodel.svg?branch=master)](https://travis-ci.org/geanders/stormwindmodel)
 
 ```{r, echo = FALSE}
 knitr::opts_chunk$set(
