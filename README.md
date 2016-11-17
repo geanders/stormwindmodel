@@ -1,6 +1,6 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
-[![Travis-CI Build Status](https://travis-ci.org/NA/NA.svg?branch=master)](https://travis-ci.org/NA/NA)
+[![Travis-CI Build Status](https://api.travis-ci.org/geanders/stormwindmodel.svg?branch=master)](https://travis-ci.org/geanders/stormwindmodel)
 
 Overview
 --------
@@ -157,36 +157,36 @@ hurr_tracks %>%
   knitr::kable()
 ```
 
-| year | storms                                                                                                                                                                                                    |
-|:-----|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 1988 | Alberto, Beryl, Chris, Debby, Ernesto, Notnamed, Florence, Gilbert, Helene, Isaac, Joan, Keith                                                                                                            |
-| 1989 | Allison, Barry, Chantal, Dean, Erin, Felix, Gabrielle, Hugo, Iris, Jerry, Karen                                                                                                                           |
-| 1990 | Arthur, Bertha, Cesar, Diana, Edouard, Fran, Gustav, Hortense, Isidore, Josephine, Klaus, Lili, Marco, Nana                                                                                               |
-| 1991 | Ana, Bob, Claudette, Danny, Erika, Fabian, Grace, Notnamed                                                                                                                                                |
-| 1992 | Subtrop1, Andrew, Bonnie, Charley, Danielle, Earl, Frances                                                                                                                                                |
-| 1993 | Arlene, Bret, Cindy, Dennis, Emily, Floyd, Gert, Harvey                                                                                                                                                   |
-| 1994 | Alberto, Beryl, Chris, Debby, Ernesto, Florence, Gordon                                                                                                                                                   |
-| 1995 | Allison, Barry, Chantal, Dean, Erin, Felix, Gabrielle, Humberto, Iris, Jerry, Karen, Luis, Marilyn, Noel, Opal, Pablo, Roxanne, Sebastien, Tanya                                                          |
-| 1996 | Arthur, Bertha, Cesar, Dolly, Edouard, Fran, Gustav, Hortense, Isidore, Josephine, Kyle, Lili, Marco                                                                                                      |
-| 1997 | Subtrop, Ana, Bill, Claudette, Danny, Erika, Fabian, Grace                                                                                                                                                |
-| 1998 | Alex, Bonnie, Charley, Danielle, Earl, Frances, Georges, Hermine, Ivan, Jeanne, Karl, Lisa, Mitch, Nicole                                                                                                 |
-| 1999 | Arlene, Bret, Cindy, Dennis, Emily, Floyd, Gert, Harvey, Irene, Jose, Katrina, Lenny                                                                                                                      |
-| 2000 | Alberto, Beryl, Chris, Debby, Ernesto, Florence, Gordon, Helene, Isaac, Joyce, Keith, Leslie, Michael, Nadine, Subtrop                                                                                    |
-| 2001 | Allison, Barry, Chantal, Dean, Erin, Felix, Gabrielle, Humberto, Iris, Jerry, Karen, Lorenzo, Michelle, Noel, Olga                                                                                        |
-| 2002 | Arthur, Bertha, Cristobal, Dolly, Edouard, Fay, Gustav, Hanna, Isidore, Josephine, Kyle, Lili                                                                                                             |
-| 2003 | Ana, Bill, Claudette, Danny, Erika, Fabian, Grace, Henri, Isabel, Juan, Kate, Larry, Mindy, Nicholas, Odette, Peter                                                                                       |
-| 2004 | Alex, Bonnie, Charley, Danielle, Earl, Frances, Gaston, Hermine, Ivan, Jeanne, Karl, Lisa, Matthew, Nicole, Otto                                                                                          |
-| 2005 | Arlene, Bret, Cindy, Dennis, Emily, Franklin, Gert, Harvey, Irene, Jose, Katrina, Lee, Maria, Nate, Ophelia, Philippe, Rita, Stan, Subtrop, Tammy, Vince, Wilma, Alpha, Beta, Gamma, Delta, Epsilon, Zeta |
-| 2006 | Zeta, Alberto, Notnamed, Beryl, Chris, Debby, Ernesto, Florence, Gordon, Helene, Isaac                                                                                                                    |
-| 2007 | Andrea, Barry, Chantal, Dean, Erin, Felix, Gabrielle, Humberto, Ingrid, Jerry, Karen, Lorenzo, Melissa, Noel, Olga                                                                                        |
-| 2008 | Arthur, Bertha, Cristobal, Dolly, Edouard, Fay, Gustav, Hanna, Ike, Josephine, Kyle, Laura, Marco, Nana, Omar, Paloma                                                                                     |
-| 2009 | Ana, Bill, Claudette, Danny, Erika, Fred, Grace, Henri, Ida                                                                                                                                               |
-| 2010 | Alex, Bonnie, Colin, Danielle, Earl, Fiona, Gaston, Hermine, Igor, Julia, Karl, Lisa, Matthew, Nicole, Otto, Paula, Richard, Shary, Tomas                                                                 |
-| 2011 | Arlene, Bret, Cindy, Don, Emily, Franklin, Gert, Harvey, Irene, Jose, Katia, Unnamed, Lee, Maria, Nate, Ophelia, Philippe, Rina, Sean                                                                     |
-| 2012 | Alberto, Beryl, Chris, Debby, Ernesto, Florence, Helene, Gordon, Isaac, Joyce, Kirk, Leslie, Michael, Nadine, Oscar, Patty, Rafael, Sandy, Tony                                                           |
-| 2013 | Andrea, Barry, Chantal, Dorian, Erin, Fernand, Gabrielle, Td08, Humberto, Ingrid, Jerry, Karen, Lorenzo, Melissa, Unnamed                                                                                 |
-| 2014 | Arthur, Td02, Bertha, Cristobal, Dolly, Edouard, Fay, Gonzalo, Hanna                                                                                                                                      |
-| 2015 | Ana, Bill, Claudette, Danny, Erika, Fred, Grace, Henri, Td09, Ida, Joaquin, Kate                                                                                                                          |
+| year | storms                                                                      |
+|:-----|:----------------------------------------------------------------------------|
+| 1988 | Alberto, Beryl, Chris, Florence, Gilbert, Keith                             |
+| 1989 | Allison, Chantal, Hugo, Jerry                                               |
+| 1990 | Bertha, Marco                                                               |
+| 1991 | Ana, Bob, Fabian, Notnamed                                                  |
+| 1992 | Andrew, Danielle, Earl                                                      |
+| 1993 | Arlene, Emily                                                               |
+| 1994 | Alberto, Beryl, Gordon                                                      |
+| 1995 | Allison, Dean, Erin, Gabrielle, Jerry, Opal                                 |
+| 1996 | Arthur, Bertha, Edouard, Fran, Josephine                                    |
+| 1997 | Subtrop, Ana, Danny                                                         |
+| 1998 | Bonnie, Charley, Earl, Frances, Georges, Hermine, Mitch                     |
+| 1999 | Bret, Dennis, Floyd, Harvey, Irene                                          |
+| 2000 | Beryl, Gordon, Helene, Leslie                                               |
+| 2001 | Allison, Barry, Gabrielle, Michelle                                         |
+| 2002 | Arthur, Bertha, Cristobal, Edouard, Fay, Gustav, Hanna, Isidore, Kyle, Lili |
+| 2003 | Bill, Claudette, Erika, Grace, Henri, Isabel                                |
+| 2004 | Alex, Bonnie, Charley, Frances, Gaston, Hermine, Ivan, Jeanne, Matthew      |
+| 2005 | Arlene, Cindy, Dennis, Emily, Katrina, Ophelia, Rita, Tammy, Wilma          |
+| 2006 | Alberto, Beryl, Chris, Ernesto                                              |
+| 2007 | Andrea, Barry, Erin, Gabrielle, Humberto, Noel                              |
+| 2008 | Cristobal, Dolly, Edouard, Fay, Gustav, Hanna, Ike, Kyle, Paloma            |
+| 2009 | Claudette, Ida                                                              |
+| 2010 | Alex, Bonnie, Earl, Hermine, Nicole, Paula                                  |
+| 2011 | Bret, Don, Emily, Irene, Lee                                                |
+| 2012 | Alberto, Beryl, Debby, Isaac, Sandy                                         |
+| 2013 | Andrea, Dorian, Karen                                                       |
+| 2014 | Arthur                                                                      |
+| 2015 | Ana, Bill, Claudette                                                        |
 
 References
 ==========
