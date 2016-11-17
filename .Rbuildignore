@@ -8,3 +8,4 @@
 ^old_code/*$
 ^\.travis\.yml$
 ^exploring_data/*$
+^Details_README/*$
