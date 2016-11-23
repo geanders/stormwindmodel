@@ -23,13 +23,20 @@ Authors@R: c(person("Brooke", "Anderson",
                     role = c("ctb")),
              person("Michael", "Guo",
                     email = "michaelzgao@gmail.com",
+                    role = c("ctb")),
+             person("Lei", "Ming",
+                    email = "lei.meng@wmu.edu",
+                    role = c("ctb")),
+             person("Laiyin", "Zhu",
+                    email = "laiyin.zhu@wmich.edu",
                     role = c("ctb")))
 Description: This package allows you to input tracking data for a hurricane
     or other tropical storm, along with a data frame of grid points at which
     to model wind speeds, and functions in this package will calculate wind
-    speeds at each point based on wind model equations. This work was supported
-    in part by grants from the National Institute of Environmental Health
-    Sciences (R00ES022631) and the National Science Foundation (1331399).
+    speeds at each point based on wind model equations. This work was supported 
+    in part by grants from the National Institute of Environmental Health 
+    Sciences (R00ES022631), the National Science Foundation (1331399), and the 
+    Department of Energy (DE-FG02-08ER64644).
 URL: https://github.com/geanders/stormwindmodel
 BugReports: https://github.com/geanders/stormwindmodel/issues
 License: GPL-2
