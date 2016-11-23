@@ -3,12 +3,27 @@ Type: Package
 Title: Model Tropical Cyclone Wind Speeds
 Version: 0.0.0.9000
 Date: 2016-10-21
-Author: G. Brooke Anderson,
-    Andrea Schumacher (andrea.schumacher@colostate.edu),
-    Seth Guikema,
-    Joshua M. Ferreri,
-    Steven Quiring
-Maintainer: G. Brooke Anderson <brooke.anderson@colostate.edu>
+Authors@R: c(person("Brooke", "Anderson", 
+                    email = "brooke.anderson@colostate.edu",
+                    role = c("aut", "cre")),
+             person("Andrea", "Schumacher",
+                    email = "andrea.schumacher@colostate.edu",
+                    role = c("aut")),
+             person("Seth", "Guikema",
+                    email = "sguikema@umich.edu",
+                    role = c("aut")),
+             person("Steven", "Quiring",
+                    email = "quiring.10@osu.edu",
+                    role = c("aut")),
+             person("Joshua", "Ferreri",
+                    email = "joshua.m.ferreri@gmail.com",
+                    role = c("aut")),
+             person("Andrea", "Staid",
+                    email = "astaid@gmail.com",
+                    role = c("ctb")),
+             person("Michael", "Guo",
+                    email = "michaelzgao@gmail.com",
+                    role = c("ctb")))
 Description: This package allows you to input tracking data for a hurricane
     or other tropical storm, along with a data frame of grid points at which
     to model wind speeds, and functions in this package will calculate wind
@@ -23,10 +38,8 @@ Imports:
     choroplethrMaps (>= 1.0.0),
     dplyr (>= 0.5.0),
     ggplot2 (>= 2.1.0),
-    Hmisc (>= 4.0.0),
     lubridate (>= 1.6.0),
     plyr (>= 1.8.4),
-    survival (>= 2.40.1),
     weathermetrics (>= 1.2.2)
 LazyData: TRUE
 RoxygenNote: 5.0.1
