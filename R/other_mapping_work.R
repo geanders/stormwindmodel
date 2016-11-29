@@ -23,13 +23,21 @@ floyd <- floyd %>%
 us_counties <- us_counties %>%
   left_join(floyd, by = "fips")
 
-
-get_map(c(-86.5, 36.5), zoom = 4, source = "google") %>%
-  ggmap() +
+ggplot() +
+  borders("state", colour = "black", fill = "white") +
   geom_polygon(data = us_counties,
                aes(x = long, y = lat, group = group, fill = vmax_sust),
                color = NA, alpha = 0.8) +
   scale_fill_viridis() +
+  theme_void()
+
+
+get_map(c(-86.5, 36.5), zoom = 4, source = "google", maptype = "satellite") %>%
+  ggmap() +
+  geom_polygon(data = us_counties,
+               aes(x = long, y = lat, group = group, fill = vmax_sust),
+               color = NA, alpha = 0.8) +
+  scale_fill_viridis(option = "A") +
   theme_void()
 
 library(leaflet)
@@ -41,16 +49,20 @@ us_counties <- counties(state = c("NC", "VA", "SC", "TN", "KY", "DC",
                                   "IN", "MI", "NY", "NJ", "MA", "VT",
                                   "NH", "ME", "CT", "RI"), cb = TRUE)
 county_winds <- geo_join(us_counties, floyd, by_sp = "GEOID", by_df = "gridid")
-pal <- colorNumeric("Blues", domain = range(county_winds$vmax_sust), na.color = "#808080")
+county_winds <- county_winds[county_winds$vmax_sust > 10, ]
+# pal <- colorNumeric("Blues", domain = range(county_winds$vmax_sust), na.color = "#808080")
+pal <- colorNumeric(viridis(6), domain = range(county_winds$vmax_sust), na.color = "#808080")
 
-county_popup <- paste0("<b>", county_winds@data$NAMELSAD, "</b>", "<br/>",
+county_popup <- paste0("<b>County: </b>", county_winds@data$NAME, "<br/>",
                        "<b>FIPS: </b>", county_winds@data$GEOID, "<br/>",
-                       "<b>Max. sustained wind (m / s): </b>", county_winds@data$vmax_sust, "<br/>",
-                       "<b>Max. gust wind (m / s): </b>", county_winds@data$vmax_gust, "<br/>")
+                       "<b>Max. sustained wind: </b>",
+                       round(county_winds@data$vmax_sust, 1), " m/s <br/>",
+                       "<b>Max. gust wind: </b>",
+                       round(county_winds@data$vmax_gust, 1), " m/s <br/>")
 
 leaflet() %>%
   addTiles() %>%
-  addPolygons(data = us_counties,
+  addPolygons(data = county_winds,
               color = ~ pal(county_winds$vmax_sust),
               fillColor = ~ pal(county_winds$vmax_sust),
               fillOpacity = 0.6,
