@@ -24,7 +24,17 @@ us_counties <- us_counties %>%
   left_join(floyd, by = "fips")
 
 ggplot() +
-  borders("state", colour = "black", fill = "white") +
+  borders("state", regions = c("virginia", "north carolina", "south carolina",
+                               "georgia", "florida", "alabama", "kentucky",
+                               "tennessee", "maryland", "west virginia",
+                               "district of columbia", "pennsylvania",
+                               "new jersey", "delaware", "mississippi",
+                               "louisiana", "texas", "oklahoma", "arkansas",
+                               "new york", "connecticut", "rhode island",
+                               "massachucetts", "new hampshire", "vermont",
+                               "maine", "kansas", "missouri", "iowa", "michigan",
+                               "illinois", "ohio"),
+          colour = "black", fill = "white") +
   geom_polygon(data = us_counties,
                aes(x = long, y = lat, group = group, fill = vmax_sust),
                color = NA, alpha = 0.8) +
@@ -32,7 +42,7 @@ ggplot() +
   theme_void()
 
 
-get_map(c(-86.5, 36.5), zoom = 4, source = "google", maptype = "satellite") %>%
+get_map(c(-86.5, 36.5), zoom = 4, source = "google", maptype = "roadmap") %>%
   ggmap() +
   geom_polygon(data = us_counties,
                aes(x = long, y = lat, group = group, fill = vmax_sust),
