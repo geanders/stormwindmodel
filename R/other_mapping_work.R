@@ -1,7 +1,9 @@
 library(dplyr)
 library(tidyr)
-library(ggplot)
+library(ggplot2)
 library(viridis)
+library(maps)
+library(ggmap)
 
 data(county.fips)
 county.fips <- county.fips %>%
@@ -14,14 +16,15 @@ us_counties <- map_data("county") %>%
   unite(polyname, region, subregion, sep = ",") %>%
   left_join(county.fips, by = "polyname")
 
-floyd <- get_grid_winds(hurr_track = katrina_tracks, grid_df = county_points)
+floyd <- get_grid_winds(hurr_track = stormwindmodel::katrina_tracks, grid_df = county_points)
 floyd <- floyd %>%
   mutate(fips = as.integer(gridid))
 
 us_counties <- us_counties %>%
   left_join(floyd, by = "fips")
 
-get_map("Asheville, NC", zoom = 4, source = "stamen") %>%
+
+get_map(c(-86.5, 36.5), zoom = 4, source = "google") %>%
   ggmap() +
   geom_polygon(data = us_counties,
                aes(x = long, y = lat, group = group, fill = vmax_sust),
