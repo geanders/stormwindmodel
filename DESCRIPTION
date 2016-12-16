@@ -18,7 +18,7 @@ Description: This package allows you to input tracking data for a hurricane
 URL: https://github.com/geanders/stormwindmodel
 BugReports: https://github.com/geanders/stormwindmodel/issues
 License: GPL-2
-Imports: 
+Imports:
     choroplethr (>= 3.5.2),
     choroplethrMaps (>= 1.0.0),
     dplyr (>= 0.5.0),
@@ -27,7 +27,8 @@ Imports:
     lubridate (>= 1.6.0),
     plyr (>= 1.8.4),
     survival (>= 2.40.1),
-    weathermetrics (>= 1.2.2)
+    weathermetrics (>= 1.2.2),
+    Rcpp
 LazyData: TRUE
 RoxygenNote: 5.0.1
 Depends:
@@ -40,3 +41,4 @@ Suggests:
     rmarkdown (>= 1.1.0),
     tidyr (>= 0.6.0)
 VignetteBuilder: knitr
+LinkingTo: Rcpp
