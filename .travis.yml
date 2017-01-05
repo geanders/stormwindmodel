@@ -7,5 +7,3 @@ cache: packages
 r_github_packages:
   - cran/survival
   - dkahle/ggmap
-  - geanders/hurricaneexposure
-  - geanders/hurricaneexposuredata
