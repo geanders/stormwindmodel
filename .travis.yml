@@ -4,7 +4,6 @@ sudo: true
 warnings_are_errors: true
 dist: trusty
 cache: packages
-script: ./travis-tool.sh run_tests
 
 r_github_packages:
   - cran/survival
