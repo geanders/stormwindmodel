@@ -2,7 +2,7 @@ Package: stormwindmodel
 Type: Package
 Title: Model Tropical Cyclone Wind Speeds
 Version: 0.0.0.9000
-Date: 2016-10-21
+Date: 2017-01-04
 Authors@R: c(person("Brooke", "Anderson", 
                     email = "brooke.anderson@colostate.edu",
                     role = c("aut", "cre")),
