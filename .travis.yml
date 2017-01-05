@@ -1,18 +1,16 @@
 # R for travis: see documentation at https://docs.travis-ci.com/user/languages/r
-language: R
-sudo: required
+language: r
+sudo: true
+warnings_are_errors: true
 dist: trusty
 cache: packages
 script: ./travis-tool.sh run_tests
 
-install_github:
+r_github_packages:
   - cran/survival
   - dkahle/ggmap
 
-before_script:
-  - sudo apt-get --yes --force-yes update -qq
-  - sudo apt-get install -y gdal-bin libgdal-dev libgdal1-dev netcdf-bin libproj-dev libv8-dev
-  - curl -OL http://raw.github.com/craigcitro/r-travis/master/scripts/travis-tool.sh
-  - chmod 755 ./travis-tool.sh
-  - ./travis-tool.sh bootstrap
-  - ./travis-tool.sh install_deps
+r_binary_packages:
+  - rgdal
+  - sp
+  - rgeos
