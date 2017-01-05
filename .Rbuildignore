@@ -9,3 +9,4 @@
 ^\.travis\.yml$
 ^exploring_data/*$
 ^Details_README/*$
+^devel_scripts/*$

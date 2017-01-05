@@ -5,3 +5,4 @@ writing/*
 inst/doc
 vignettes/stormwindmodel_cache
 vignettes/stormwindmodel_cache/*
+devel_scripts/*
