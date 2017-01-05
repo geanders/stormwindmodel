@@ -1,15 +1,15 @@
 # R for travis: see documentation at https://docs.travis-ci.com/user/languages/r
-
 language: R
 sudo: false
 cache: packages
-
 r_github_packages:
   - cran/survival
   - dkahle/ggmap
-
 addons:
   apt:
     packages:
+      - aptitude
+  aptitude:
+    package:
       - libgdal-dev
       - libproj-dev
