@@ -3,6 +3,7 @@ language: R
 sudo: required
 dist: trusty
 cache: packages
+script: ./travis-tool.sh run_tests
 
 install_github:
   - cran/survival
