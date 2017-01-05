@@ -57,6 +57,10 @@ Suggests:
     ggthemes (>= 3.2.0),
     gridExtra (>= 2.2.1),
     knitr (>= 1.14.0),
+    rgeos (>= 0.3.21),
     rmarkdown (>= 1.1.0),
-    tidyr (>= 0.6.0)
+    sp (>= 1.2.3),
+    tidyr (>= 0.6.0),
+    tigris (>= 0.3.3),
+    viridis (>= 0.3.4)
 VignetteBuilder: knitr
