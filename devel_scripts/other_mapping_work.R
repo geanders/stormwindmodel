@@ -38,8 +38,9 @@ ggplot() +
   geom_polygon(data = us_counties,
                aes(x = long, y = lat, group = group, fill = vmax_sust),
                color = NA, alpha = 0.8) +
-  scale_fill_viridis() +
-  theme_void()
+  scale_fill_viridis(option = "A") +
+  theme_void() +
+  coord_map()
 
 
 get_map(c(-86.5, 36.5), zoom = 4, source = "google", maptype = "roadmap") %>%
