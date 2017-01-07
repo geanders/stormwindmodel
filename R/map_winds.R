@@ -3,13 +3,12 @@
 #' @param grid_winds A dataframe that is the output of
 #'    \code{\link{get_grid_winds}}.
 #' @param value A character string giving the value to plot. Possible options
-#'    are "max_gust" (maximum gust wind speeds) and "max_sust" (maximum
+#'    are "vmax_gust" (maximum gust wind speeds) and "vmax_sust" (maximum
 #'    sustained wind speeds).
 #' @param break_point An numeric value giving the value of the "value"
 #'    parameter to break at for a binary map showing exposure versus no exposure.
 #' @param wind_metric A character vector with the wind metric to use for the map.
-#'    Possible values include \code{"knots"}, \code{"mph"}, \code{"ftps"} (ft / s),
-#'    \code{"kmph"} (km / hr), and \code{"mps"} (m / s, the default).
+#'    Possible values are \code{"knots"} and \code{"mps"} (m / s, the default).
 #'
 #' @return This function returns a map of the "ggplot" class, plotting
 #'    exposure to hurricane winds by county for the eastern half of the United
@@ -18,10 +17,12 @@
 #' @examples
 #' \donttest{
 #' data("katrina_tracks")
-#' data("county_point")
+#' data("county_points")
 #' grid_winds_katrina <- get_grid_winds(hurr_track = katrina_tracks,
 #'                                      grid_df = county_points)
 #' map_wind(grid_winds_katrina)
+#' map_wind(grid_winds_katrina, wind_metric = "knots")
+#' map_wind(grid_winds_katrina, value = "vmax_gust")
 #' map_wind(grid_winds_katrina, break_point = 20)
 #' }
 #'
@@ -30,9 +31,6 @@
 #' @export
 map_wind <- function(grid_winds, value = "vmax_sust", break_point = NULL,
                      wind_metric = "mps"){
-  # if(!(value %in% c("vmax_gust", "vmax_sust"))){
-  #   stop("`value` must be either `vmax_gust` or `vsust_gust`.")
-  # }
 
   grid_winds$value <- grid_winds[ , value]
   if(wind_metric != "mps"){
@@ -45,7 +43,7 @@ map_wind <- function(grid_winds, value = "vmax_sust", break_point = NULL,
     cut_values <- cut(grid_winds$value,
                       breaks = c(0, break_point, max(grid_winds$value)),
                       include.lowest = TRUE)
-    grid_winds$value <- as.numeric(cut_values)
+    grid_winds$value <- cut_values
     num_colors <- 2
   } else {
     if(wind_metric == "mps"){
@@ -63,7 +61,7 @@ map_wind <- function(grid_winds, value = "vmax_sust", break_point = NULL,
       breaks <- c(breaks, max(grid_winds$value))
     }
 
-    exposure_palette <- c("#f7f7f7", exposure_palette, "#1a1a1a")
+    exposure_palette <- c("#ffffff", exposure_palette, "#1a1a1a")
 
     grid_winds <- grid_winds %>%
       dplyr::mutate_(value = ~ cut(value, breaks = breaks,
@@ -71,25 +69,40 @@ map_wind <- function(grid_winds, value = "vmax_sust", break_point = NULL,
   }
 
   map_data <- dplyr::mutate_(grid_winds,
-                             region = ~ as.numeric(gridid)) %>%
-    dplyr::select_(~ region, ~ value)
+                             fips = ~ as.numeric(gridid)) %>%
+    dplyr::select_(~ fips, ~ value)
 
-  eastern_states <- c("alabama", "arkansas",
-                      "connecticut", "delaware",
-                      "district of columbia", "florida",
-                      "georgia", "illinois", "indiana",
-                      "iowa", "kansas", "kentucky", "louisiana",
-                      "maine", "maryland", "massachusetts",
-                      "michigan", "mississippi",
-                      "missouri", "new hampshire", "new jersey",
-                      "new york", "north carolina", "ohio",
-                      "oklahoma", "pennsylvania", "rhode island",
-                      "south carolina", "tennessee", "texas",
-                      "vermont", "virginia", "west virginia",
-                      "wisconsin")
+  county.fips <- maps::county.fips %>%
+    dplyr::mutate_(polyname = ~ as.character(polyname)) %>%
+    dplyr::mutate(polyname = stringr::str_replace(polyname, ":.+", ""))
+  us_counties <- ggplot2::map_data("county") %>%
+    dplyr::filter_(~ !(region %in% c("arizona", "california", "colorado", "idaho",
+                           "montana", "nebraska", "nevada", "new mexico",
+                           "north dakota", "oregon", "south dakota",
+                           "utah", "washington", "wyoming", "minnesota"))) %>%
+    tidyr::unite_(col = "polyname", from = c("region", "subregion"),
+                  sep = ",") %>%
+    dplyr::left_join(county.fips, by = "polyname") %>%
+    dplyr::left_join(map_data, by = "fips")
 
-  out <- choroplethr::CountyChoropleth$new(map_data)
-  out$set_zoom(eastern_states)
+  out <- ggplot2::ggplot() +
+    ggplot2::geom_polygon(data = us_counties,
+                 ggplot2::aes_(x = ~ long, y = ~ lat, group = ~ group,
+                               fill = ~ value),
+                 color = "lightgray", size = 0.2) +
+    ggplot2::borders("state", regions = c("virginia", "north carolina", "south carolina",
+                                 "georgia", "florida", "alabama", "kentucky",
+                                 "tennessee", "maryland", "west virginia",
+                                 "district of columbia", "pennsylvania",
+                                 "new jersey", "delaware", "mississippi",
+                                 "louisiana", "texas", "oklahoma", "arkansas",
+                                 "new york", "connecticut", "rhode island",
+                                 "massachusetts", "new hampshire", "vermont",
+                                 "maine", "kansas", "missouri", "iowa", "michigan",
+                                 "illinois", "ohio", "wisconsin", "indiana"),
+            colour = "black", fill = NA, size = 0.2, alpha = 0.5) +
+    ggplot2::theme_void() +
+    ggplot2::coord_map()
 
   exposure_legend <- paste0("Wind speed (",
                             ifelse(wind_metric == "mps", "m / s",
@@ -97,15 +110,15 @@ map_wind <- function(grid_winds, value = "vmax_sust", break_point = NULL,
                             ")")
 
   if(!is.null(break_point)){
-    out$set_num_colors(num_colors = num_colors)
-    out$ggplot_scale <- ggplot2::scale_fill_manual(name = exposure_legend,
-                                                   values = c("white", "blue"),
-                                                   labels = levels(cut_values))
+    out <- out + ggplot2::scale_fill_manual(name = exposure_legend,
+                                            values = c("white", "#DE2D26"),
+                                            labels = levels(cut_values))
   } else{
-    out$ggplot_scale <- ggplot2::scale_fill_manual(name = exposure_legend,
-                                                   values = exposure_palette)
+    out <- out + ggplot2::scale_fill_manual(name = exposure_legend,
+                                            values = exposure_palette)
   }
-  return(out$render())
+
+  return(out)
 }
 
 #' Plot Atlantic basin hurricane tracks

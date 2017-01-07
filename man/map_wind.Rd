@@ -12,15 +12,14 @@ map_wind(grid_winds, value = "vmax_sust", break_point = NULL,
 \code{\link{get_grid_winds}}.}
 
 \item{value}{A character string giving the value to plot. Possible options
-are "max_gust" (maximum gust wind speeds) and "max_sust" (maximum
+are "vmax_gust" (maximum gust wind speeds) and "vmax_sust" (maximum
 sustained wind speeds).}
 
 \item{break_point}{An numeric value giving the value of the "value"
 parameter to break at for a binary map showing exposure versus no exposure.}
 
 \item{wind_metric}{A character vector with the wind metric to use for the map.
-Possible values include \code{"knots"}, \code{"mph"}, \code{"ftps"} (ft / s),
-\code{"kmph"} (km / hr), and \code{"mps"} (m / s, the default).}
+Possible values are \code{"knots"} and \code{"mps"} (m / s, the default).}
 }
 \value{
 This function returns a map of the "ggplot" class, plotting
@@ -33,10 +32,12 @@ Map wind exposure at the county level
 \examples{
 \donttest{
 data("katrina_tracks")
-data("county_point")
+data("county_points")
 grid_winds_katrina <- get_grid_winds(hurr_track = katrina_tracks,
                                      grid_df = county_points)
 map_wind(grid_winds_katrina)
+map_wind(grid_winds_katrina, wind_metric = "knots")
+map_wind(grid_winds_katrina, value = "vmax_gust")
 map_wind(grid_winds_katrina, break_point = 20)
 }
 
