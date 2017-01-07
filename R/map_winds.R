@@ -74,7 +74,7 @@ map_wind <- function(grid_winds, value = "vmax_sust", break_point = NULL,
 
   county.fips <- maps::county.fips %>%
     dplyr::mutate_(polyname = ~ as.character(polyname)) %>%
-    dplyr::mutate(polyname = stringr::str_replace(polyname, ":.+", ""))
+    dplyr::mutate_(polyname = ~ stringr::str_replace(polyname, ":.+", ""))
   us_counties <- ggplot2::map_data("county") %>%
     dplyr::filter_(~ !(region %in% c("arizona", "california", "colorado", "idaho",
                            "montana", "nebraska", "nevada", "new mexico",
@@ -133,9 +133,6 @@ map_wind <- function(grid_winds, value = "vmax_sust", break_point = NULL,
 #' @param plot_object NULL or the name of a ggplot object to use as the
 #'    underlying plot object. If NULL, the function will generate a new
 #'    map of the eastern US states using `default_map`.
-#' @param padding Numerical value giving the number of degrees to add to the
-#'    outer limits of the plot object (or default map if `plot_object` is
-#'    left as NULL) when cropping hurricane tracks.
 #' @param plot_points TRUE / FALSE indicator of whether to include points,
 #'    as well as lines, when plotting the hurricane tracks.
 #' @param alpha Numerical value designating the amount of transparency to
@@ -151,6 +148,7 @@ map_wind <- function(grid_winds, value = "vmax_sust", break_point = NULL,
 #' @examples \dontrun{
 #' library(ggplot2)
 #' data("county_points")
+#' data("floyd_tracks")
 #' grid_winds_floyd <- get_grid_winds(hurr_track = floyd_tracks,
 #'                                    grid_df = county_points)
 #' floyd_map <- map_wind(grid_winds_floyd, value = "vmax_sust",
@@ -161,19 +159,17 @@ map_wind <- function(grid_winds, value = "vmax_sust", break_point = NULL,
 #'
 #' @importFrom dplyr %>%
 #' @export
-add_storm_track <- function(storm_tracks, plot_object, padding = 2,
+add_storm_track <- function(storm_tracks, plot_object,
                        plot_points = FALSE, alpha = 1,
                        color = "firebrick"){
 
   map_data <- plot_object$data
-  map_dim <- apply(map_data[ , c("long", "lat")], MARGIN = 2,
-                   function(x) range(x) + c(-1, 1) * padding)
   tracks <- storm_tracks %>%
     dplyr::select_(~ latitude, ~ longitude, ~ date) %>%
-    dplyr::filter_(~ longitude > map_dim[1, 1] &
-                     longitude < map_dim[2, 1] &
-                     latitude > map_dim[1, 2] &
-                     latitude < map_dim[2, 2]) %>%
+    dplyr::filter_(~ longitude > -106.65 &
+                     longitude < -67.01 &
+                     latitude > 25.13 &
+                     latitude < 47.48) %>%
     dplyr::mutate_(date = ~ lubridate::ymd_hm(date))
 
   if(nrow(tracks) >= 3){
