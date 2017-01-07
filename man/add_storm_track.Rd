@@ -4,8 +4,8 @@
 \alias{add_storm_track}
 \title{Plot Atlantic basin hurricane tracks}
 \usage{
-add_storm_track(storm_tracks, plot_object, padding = 2, plot_points = FALSE,
-  alpha = 1, color = "firebrick")
+add_storm_track(storm_tracks, plot_object, plot_points = FALSE, alpha = 1,
+  color = "firebrick")
 }
 \arguments{
 \item{storm_tracks}{Character vector with the names of all storms to plot.
@@ -15,10 +15,6 @@ This parameter must use the unique storm identifiers from the
 \item{plot_object}{NULL or the name of a ggplot object to use as the
 underlying plot object. If NULL, the function will generate a new
 map of the eastern US states using `default_map`.}
-
-\item{padding}{Numerical value giving the number of degrees to add to the
-outer limits of the plot object (or default map if `plot_object` is
-left as NULL) when cropping hurricane tracks.}
 
 \item{plot_points}{TRUE / FALSE indicator of whether to include points,
 as well as lines, when plotting the hurricane tracks.}
@@ -42,6 +38,7 @@ Plot the tracks of any selected storms in the hurricane tracking
 \dontrun{
 library(ggplot2)
 data("county_points")
+data("floyd_tracks")
 grid_winds_floyd <- get_grid_winds(hurr_track = floyd_tracks,
                                    grid_df = county_points)
 floyd_map <- map_wind(grid_winds_floyd, value = "vmax_sust",
