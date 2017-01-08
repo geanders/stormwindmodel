@@ -65,9 +65,13 @@ The main function of this package is `get_grid_winds`. It inputs storm tracks fo
 
 To get modeled winds for Hurricane Floyd at U.S. county centers, you can run: 
 
-```{r}
+```{r eval = FALSE, echo = c(1:2)}
 floyd_winds <- get_grid_winds(hurr_track = floyd_tracks,
                               grid_df = county_points)
+save(floyd_winds, file = "data/floyd_winds.Rdata")
+```
+```{r echo = c(2:4)}
+load("data/floyd_winds.Rdata")
 floyd_winds %>%
   dplyr::select(gridid, vmax_gust, vmax_sust, gust_dur, sust_dur) %>%
   slice(1:6)
@@ -141,9 +145,13 @@ get_map(location = new_orleans_bbox + c(-0.1, -0.1, 0.1, 0.1), source = "stamen"
 
 Since the `new_orleans_tract_centers` is now in the appropriate format, you can input it directly into `get_grid_winds` to model the winds from Hurricane Katrina at each census tract center: 
 
-```{r}
+```{r eval = FALSE, echo = c(1:2)}
 new_orleans_tracts_katrina <- get_grid_winds(hurr_track = katrina_tracks, 
                                              grid_df = new_orleans_tract_centers)
+save(new_orleans_tracts_katrina, file = "data/new_orleans.Rdata")
+```
+```{r echo = c(2)}
+load("data/new_orleans.Rdata")
 head(new_orleans_tracts_katrina)
 ```
 
