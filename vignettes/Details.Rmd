@@ -238,14 +238,18 @@ gridExtra::grid.arrange(b, c, ncol = 2)
 
 Next, this imputed track is input to a function that adds inputs and model parameters for each observation that are required for the model later used to estimate wind speed at each grid point [@willoughby2006parametric]. This process is done using the `add_wind_radii` function. For the Hurricane Floyd example, here is an example of running the code and the first three and last three line of output: 
 
-```{r}
+```{r eval = c(3:4), echo = c(1, 4)}
 with_wind_radii <- add_wind_radii(full_track = full_track)
+save(with_wind_radii, file = "data/with_wind_radii.RData")
+load("data/with_wind_radii.RData")
 with_wind_radii %>% slice(c(1:3, (n()-3):n()))
 ```
 
+```{r eval = FALSE}
 Here is an example of Hurricane Floyd tracks, with estimated $R_{max}$ and $V_{max,G}$ shown by point size and color, respectively:
+```
 
-```{r echo = FALSE, warning = FALSE, fig.align = "center", fig.width = 4, fig.height = 4}
+```{r echo = FALSE, warning = FALSE, fig.align = "center", fig.width = 4, fig.height = 4, eval = FALSE}
 a + geom_point(data = with_wind_radii,
                aes(x = -tclon, y = tclat, size = Rmax, color = vmax_gl),
                alpha = 0.2) + 
@@ -860,17 +864,18 @@ gustspeed = windspeed * 1.49
 
 ## Putting everything together
 
-There's a wrapper function called `get_grid_winds` that puts everything together. As inputs, it takes the storm tracks and the grid point locations. It outputs a dataframe like this: 
+There's a wrapper function called `get_grid_winds` that puts everything together. As inputs, it takes the storm tracks and the grid point locations. Here is what the start of that dataset looks like: 
 
-```{r cache = TRUE}
+```{r, eval = FALSE}
 data("katrina_tracks")
 grid_winds_katrina <- get_grid_winds(hurr_track = katrina_tracks,
                                      grid_df = county_points)
 ```
 
-Here is what the start of that dataset looks like: 
 
-```{r}
+```{r cache = TRUE, echo = c(3), eval = c(2:3)}
+save(grid_winds_katrina, file = "data/grid_winds_katrina.Rdata")
+load("data/grid_winds_katrina.Rdata")
 head(grid_winds_katrina)
 ```
 
