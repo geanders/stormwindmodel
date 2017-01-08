@@ -16,7 +16,6 @@ library(ggplot2)
 library(dplyr)
 library(tidyr)
 library(gridExtra)
-library(ggthemes)
 ```
 
 ## Overview of wind modeling process
@@ -765,7 +764,7 @@ rf_example <- data.frame(r = 0:800,
                            wind_gl_aa = 1, cdist = 0:800))
 ggplot(rf_example, aes(x = r, y = rf)) + 
   geom_line() + 
-  theme_minimal() + 
+  theme_classic() + 
   xlab("Radius (km)") + 
   ylab("Reduction factor") + 
   ylim(c(0.5, 0.9))

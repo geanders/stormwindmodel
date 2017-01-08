@@ -154,10 +154,6 @@ with_wind_radii %>% slice(c(1:3, (n()-3):n()))
     ## 6 14.34481 85.56939 382.5832 0.4256548 0.00000000 71.45388 96.45388
     ## 7       NA       NA       NA        NA         NA       NA       NA
 
-Here is an example of Hurricane Floyd tracks, with estimated *R*<sub>*m**a**x*</sub> and *V*<sub>*m**a**x*, *G*</sub> shown by point size and color, respectively:
-
-<img src="README_files/figure-markdown_github/unnamed-chunk-7-1.png" style="display: block; margin: auto;" />
-
 The last line of observations has some missing values, because you need points after the current point to calculate forward speed and bearing of the storm, so these values cannot be calculated for the last observation.
 
 Here is the full code for the `add_wind_radii` function:
@@ -442,7 +438,7 @@ ggplot(landmask, aes(x = longitude - 360, y = latitude, color = land)) +
   scale_shape_discrete("Track over land")
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-17-1.png)
+![](README_files/figure-markdown_github/unnamed-chunk-18-1.png)
 
 In the `add_wind_radii` function, there is code to check whether the point is over land or water and apply the proper reduction factor:
 
@@ -767,7 +763,7 @@ ggplot(grid_wind, aes(x = date, y = windspeed)) +
   ylab("Modeled surface wind (m / s)")
 ```
 
-<img src="README_files/figure-markdown_github/unnamed-chunk-29-1.png" style="display: block; margin: auto;" />
+<img src="README_files/figure-markdown_github/unnamed-chunk-30-1.png" style="display: block; margin: auto;" />
 
 You can also apply this function across all grid points for all storm observations to create a large dataset with the estimated wind speed at each county at each observation point. For example, you could run this for Floyd and then plot winds at particular time "snap shots" using the following code:
 
@@ -783,7 +779,7 @@ county_winds %>%
   map_wind(value = "windspeed")
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-30-1.png)
+![](README_files/figure-markdown_github/unnamed-chunk-31-1.png)
 
 After calculating the grid wind time series for a grid point, you can input the time series for a grid point into `summarize_grid_wind` to generate overall storm summaries for the grid point. This functions calculate wind characteristics at each grid point (or county center location) for every storm observation. These characteristics are:
 
@@ -967,13 +963,13 @@ rf_example <- data.frame(r = 0:800,
                            wind_gl_aa = 1, cdist = 0:800))
 ggplot(rf_example, aes(x = r, y = rf)) + 
   geom_line() + 
-  theme_minimal() + 
+  theme_classic() + 
   xlab("Radius (km)") + 
   ylab("Reduction factor") + 
   ylim(c(0.5, 0.9))
 ```
 
-<img src="README_files/figure-markdown_github/unnamed-chunk-37-1.png" style="display: block; margin: auto;" />
+<img src="README_files/figure-markdown_github/unnamed-chunk-38-1.png" style="display: block; margin: auto;" />
 
 ### Calculate the direction of gradient winds at each location
 
@@ -1186,7 +1182,7 @@ katrina_winds <- map_wind(grid_winds_katrina, value = "vmax_gust") +
 add_storm_track(katrina_tracks, plot_object = katrina_winds)
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-48-1.png)
+![](README_files/figure-markdown_github/unnamed-chunk-49-1.png)
 
 ``` r
 katrina_winds <- map_wind(grid_winds_katrina, value = "vmax_sust") + 
@@ -1194,7 +1190,7 @@ katrina_winds <- map_wind(grid_winds_katrina, value = "vmax_sust") +
 add_storm_track(katrina_tracks, plot_object = katrina_winds)
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-49-1.png)
+![](README_files/figure-markdown_github/unnamed-chunk-50-1.png)
 
 ``` r
 # Show in knots
@@ -1204,7 +1200,7 @@ katrina_winds <- map_wind(grid_winds_katrina, value = "vmax_gust",
 add_storm_track(katrina_tracks, plot_object = katrina_winds)
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-50-1.png)
+![](README_files/figure-markdown_github/unnamed-chunk-51-1.png)
 
 ``` r
 katrina_winds <- map_wind(grid_winds_katrina, value = "vmax_sust",
@@ -1213,7 +1209,7 @@ katrina_winds <- map_wind(grid_winds_katrina, value = "vmax_sust",
 add_storm_track(katrina_tracks, plot_object = katrina_winds)
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-51-1.png)
+![](README_files/figure-markdown_github/unnamed-chunk-52-1.png)
 
 ``` r
 # Sustained winds of 20 m / s or more
@@ -1222,7 +1218,7 @@ katrina_winds <- map_wind(grid_winds_katrina, value = "vmax_sust",
 add_storm_track(katrina_tracks, plot_object = katrina_winds)
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-52-1.png)
+![](README_files/figure-markdown_github/unnamed-chunk-53-1.png)
 
 ``` r
 # Sustained winds of 34 knots or more
@@ -1231,7 +1227,7 @@ katrina_winds <- map_wind(grid_winds_katrina, value = "vmax_sust",
 add_storm_track(katrina_tracks, plot_object = katrina_winds)
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-53-1.png)
+![](README_files/figure-markdown_github/unnamed-chunk-54-1.png)
 
 ``` r
 # Sustained winds of 50 knots or more
@@ -1240,7 +1236,7 @@ katrina_winds <- map_wind(grid_winds_katrina, value = "vmax_sust",
 add_storm_track(katrina_tracks, plot_object = katrina_winds)
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-54-1.png)
+![](README_files/figure-markdown_github/unnamed-chunk-55-1.png)
 
 ``` r
 # Sustained winds of 64 knots or more
@@ -1249,7 +1245,7 @@ katrina_winds <- map_wind(grid_winds_katrina, value = "vmax_sust",
 add_storm_track(katrina_tracks, plot_object = katrina_winds)
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-55-1.png)
+![](README_files/figure-markdown_github/unnamed-chunk-56-1.png)
 
 References
 ==========
