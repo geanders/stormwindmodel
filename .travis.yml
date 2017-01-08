@@ -10,6 +10,8 @@ r_github_packages:
   - dkahle/ggmap
 
 r_binary_packages:
+  - bindrcpp
   - rgdal
   - sp
   - rgeos
+
