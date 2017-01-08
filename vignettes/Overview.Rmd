@@ -126,12 +126,16 @@ head(new_orleans_tract_centers)
 
 Here is a map of the census tracts with the center point of each (note that an area over water is also included):
 
-```{r message = FALSE, warning = FALSE, fig.width = 6, fig.height = 6}
+```{r message = FALSE, warning = FALSE}
 library(ggplot2)
 library(ggmap)
 library(sp)
 
 new_orleans_bbox <- bbox(new_orleans)
+```
+
+```{r message = FALSE, warning = FALSE, fig.width = 6, fig.height = 6, eval = FALSE, echo = c(2:10)}
+png(filename = "figures/new_orleans1.png", height = 400, width = 400)
 get_map(location = new_orleans_bbox + c(-0.1, -0.1, 0.1, 0.1), source = "stamen") %>%
   ggmap() + 
   geom_polygon(data = fortify(new_orleans), 
@@ -141,7 +145,13 @@ get_map(location = new_orleans_bbox + c(-0.1, -0.1, 0.1, 0.1), source = "stamen"
   geom_point(data = new_orleans_tract_centers,
              aes(x = glon, y = glat, group = NULL), 
              color = "red", size = 1, alpha = 0.5)
+dev.off()
 ```
+
+```{r echo = FALSE, fig.width = 6, fig.height = 6}
+knitr::include_graphics("figures/new_orleans1.png")
+```
+
 
 Since the `new_orleans_tract_centers` is now in the appropriate format, you can input it directly into `get_grid_winds` to model the winds from Hurricane Katrina at each census tract center: 
 
@@ -163,7 +173,9 @@ library(viridis)
 new_orleans <- new_orleans %>% 
   fortify(region = "TRACTCE") %>%
   left_join(new_orleans_tracts_katrina, by = c("id" = "gridid"))
-
+```
+```{r eval = FALSE, echo = c(2:9)}
+png("figures/new_orleans2.png", height = 400, width = 500)
 get_map(location = new_orleans_bbox + c(-0.1, -0.1, 0.1, 0.1), source = "stamen") %>%
   ggmap() + 
   geom_polygon(data = new_orleans, 
@@ -172,7 +184,12 @@ get_map(location = new_orleans_bbox + c(-0.1, -0.1, 0.1, 0.1), source = "stamen"
                color = "black", alpha = 0.7, size = 0.2) + 
   scale_fill_viridis(name = "Maximum\nsustained\nwind (m / s)") + 
   theme_void() 
+dev.off()
 ```
+```{r echo = FALSE, fig.width= 7, fig.height = 5}
+knitr::include_graphics("figures/new_orleans2.png")
+```
+
 
 There are also functions in this package that you can use to create a time series of modeled wind throughout the storm at a specific grid point. For example, here is code to calculate modeled wind throughout Hurricane Floyd at the population mean center of Dare County, NC (FIPS: 37055): 
 
