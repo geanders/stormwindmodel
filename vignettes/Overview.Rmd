@@ -152,6 +152,7 @@ dev.off()
 knitr::include_graphics("figures/new_orleans1.png")
 ```
 
+(As a note, to get this code to work correctly yourself, you may need to install the development version of the `ggmap` package from GitHub. You can do that with the command `devtools::install_github("dkahle/ggmap")`. You will need to have the `devtools` package installed on your computer.)
 
 Since the `new_orleans_tract_centers` is now in the appropriate format, you can input it directly into `get_grid_winds` to model the winds from Hurricane Katrina at each census tract center: 
 
