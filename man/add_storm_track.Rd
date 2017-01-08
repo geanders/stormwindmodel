@@ -8,13 +8,15 @@ add_storm_track(storm_tracks, plot_object, plot_points = FALSE, alpha = 1,
   color = "firebrick")
 }
 \arguments{
-\item{storm_tracks}{Character vector with the names of all storms to plot.
-This parameter must use the unique storm identifiers from the
-`storm_id` column of the `hurr_tracks` dataframe.}
+\item{storm_tracks}{A data frame with best tracks data for the storm
+track you would like to add. See the example \code{\link{floyd_tracks}}
+data for an example of the required format. This dataset must
+include columns for \code{date} (date-time of the track observation),
+\code{latitude}, and \code{longitude}.}
 
 \item{plot_object}{NULL or the name of a ggplot object to use as the
-underlying plot object. If NULL, the function will generate a new
-map of the eastern US states using `default_map`.}
+underlying plot object (e.g., the output from a call to
+\code{\link{map_wind}})}
 
 \item{plot_points}{TRUE / FALSE indicator of whether to include points,
 as well as lines, when plotting the hurricane tracks.}
@@ -25,14 +27,13 @@ use for plotting tracks.}
 \item{color}{Character string giving the color to use to plot the tracks.}
 }
 \value{
-Returns a ggplot object with plotting data for the storm tracks
-   of the selected storms. This object can be printed directly or added
+A ggplot object that includes a line with the track of a given
+   tropical storm. This object can be printed directly or added
    on to with other ggplot commands.
 }
 \description{
-Plot the tracks of any selected storms in the hurricane tracking
-   dataset for the Atlantic basin. This function allows you to
-   plot a new map or add the tracks to an existing ggplot object.
+Plot the tracks of a selected tropical storm to a map of modeled wind
+speed.
 }
 \examples{
 \dontrun{

@@ -1,16 +1,26 @@
 #' Map wind exposure at the county level
 #'
-#' @param grid_winds A dataframe that is the output of
-#'    \code{\link{get_grid_winds}}.
+#' Inputs a dataframe with modeled winds for each eastern U.S. county and
+#' maps these modeled winds.
+#'
+#' @param grid_winds A dataframe that is the output of running
+#'    \code{\link{get_grid_winds}} using eastern U.S. county centers as the
+#'    grid point locations for modeling the winds.
 #' @param value A character string giving the value to plot. Possible options
-#'    are "vmax_gust" (maximum gust wind speeds) and "vmax_sust" (maximum
-#'    sustained wind speeds).
-#' @param break_point An numeric value giving the value of the "value"
-#'    parameter to break at for a binary map showing exposure versus no exposure.
+#'    are \code{"vmax_gust"} (maximum gust wind speeds) and
+#'    \code{"vmax_sust"} (maximum sustained wind speeds).
+#' @param break_point An numeric value giving the value of the \code{value} parameter
+#'    (e.g.,maximum gust wind speeds or maximum sustained wind speeds)
+#'    at which to break for a binary map showing exposure versus no exposure.
+#'    The default for this parameter is \code{NULL}, which returns a map with
+#'    continuous wind speed values. If the \code{break_point} argument is set
+#'    to a numeric value, the function will return a map where counties are given
+#'    binary classifications of "exposed" or "not exposed" based on whether
+#'    modeleded wind speed for the county is above or below this break point.
 #' @param wind_metric A character vector with the wind metric to use for the map.
 #'    Possible values are \code{"knots"} and \code{"mps"} (m / s, the default).
 #'
-#' @return This function returns a map of the "ggplot" class, plotting
+#' @return This function returns a map of the \code{ggplot} class, plotting
 #'    exposure to hurricane winds by county for the eastern half of the United
 #'    States.
 #'
@@ -123,24 +133,25 @@ map_wind <- function(grid_winds, value = "vmax_sust", break_point = NULL,
 
 #' Plot Atlantic basin hurricane tracks
 #'
-#' Plot the tracks of any selected storms in the hurricane tracking
-#'    dataset for the Atlantic basin. This function allows you to
-#'    plot a new map or add the tracks to an existing ggplot object.
+#' Plot the tracks of a selected tropical storm to a map of modeled wind
+#' speed.
 #'
-#' @param storm_tracks Character vector with the names of all storms to plot.
-#'    This parameter must use the unique storm identifiers from the
-#'    `storm_id` column of the `hurr_tracks` dataframe.
+#' @param storm_tracks A data frame with best tracks data for the storm
+#'    track you would like to add. See the example \code{\link{floyd_tracks}}
+#'    data for an example of the required format. This dataset must
+#'    include columns for \code{date} (date-time of the track observation),
+#'    \code{latitude}, and \code{longitude}.
 #' @param plot_object NULL or the name of a ggplot object to use as the
-#'    underlying plot object. If NULL, the function will generate a new
-#'    map of the eastern US states using `default_map`.
+#'    underlying plot object (e.g., the output from a call to
+#'    \code{\link{map_wind}})
 #' @param plot_points TRUE / FALSE indicator of whether to include points,
 #'    as well as lines, when plotting the hurricane tracks.
 #' @param alpha Numerical value designating the amount of transparency to
 #'    use for plotting tracks.
 #' @param color Character string giving the color to use to plot the tracks.
 #'
-#' @return Returns a ggplot object with plotting data for the storm tracks
-#'    of the selected storms. This object can be printed directly or added
+#' @return A ggplot object that includes a line with the track of a given
+#'    tropical storm. This object can be printed directly or added
 #'    on to with other ggplot commands.
 #'
 #' @export
@@ -205,7 +216,9 @@ add_storm_track <- function(storm_tracks, plot_object,
 #' splines use degrees of freedom equal to the number of original observations
 #' divided by two.
 #'
-#' @param track A dataframe with hurricane track data for a single storm
+#' @param track A dataframe with hurricane track data for a single storm. See
+#'    the \code{\link{floyd_tracks}} dataset that comes with the package for
+#'    an example of the required format for this dataframe.
 #' @param tint A numeric vector giving the time interval to impute to, in units
 #'    of hours (e.g., 0.25, the default, interpolates to 15 minute-intervals).
 #'

@@ -17,7 +17,7 @@ A logical vector of whether the storm is over land (TRUE) or water
 }
 \description{
 Determines if the storm is over land or water at its observed location. This
-function finds the closest grid point in the \code{landmask} dataframe, then
+function finds the closest grid point in the \code{\link{landmask}} dataframe, then
 checks if that grid point is over land or water.
 }
 

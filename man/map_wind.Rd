@@ -8,26 +8,34 @@ map_wind(grid_winds, value = "vmax_sust", break_point = NULL,
   wind_metric = "mps")
 }
 \arguments{
-\item{grid_winds}{A dataframe that is the output of
-\code{\link{get_grid_winds}}.}
+\item{grid_winds}{A dataframe that is the output of running
+\code{\link{get_grid_winds}} using eastern U.S. county centers as the
+grid point locations for modeling the winds.}
 
 \item{value}{A character string giving the value to plot. Possible options
-are "vmax_gust" (maximum gust wind speeds) and "vmax_sust" (maximum
-sustained wind speeds).}
+are \code{"vmax_gust"} (maximum gust wind speeds) and
+\code{"vmax_sust"} (maximum sustained wind speeds).}
 
-\item{break_point}{An numeric value giving the value of the "value"
-parameter to break at for a binary map showing exposure versus no exposure.}
+\item{break_point}{An numeric value giving the value of the \code{value} parameter
+(e.g.,maximum gust wind speeds or maximum sustained wind speeds)
+at which to break for a binary map showing exposure versus no exposure.
+The default for this parameter is \code{NULL}, which returns a map with
+continuous wind speed values. If the \code{break_point} argument is set
+to a numeric value, the function will return a map where counties are given
+binary classifications of "exposed" or "not exposed" based on whether
+modeleded wind speed for the county is above or below this break point.}
 
 \item{wind_metric}{A character vector with the wind metric to use for the map.
 Possible values are \code{"knots"} and \code{"mps"} (m / s, the default).}
 }
 \value{
-This function returns a map of the "ggplot" class, plotting
+This function returns a map of the \code{ggplot} class, plotting
    exposure to hurricane winds by county for the eastern half of the United
    States.
 }
 \description{
-Map wind exposure at the county level
+Inputs a dataframe with modeled winds for each eastern U.S. county and
+maps these modeled winds.
 }
 \examples{
 \donttest{

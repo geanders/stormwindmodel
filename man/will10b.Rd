@@ -13,11 +13,11 @@ gradient wind speed, in meters per second}
 \item{tclat}{Numeric vector of the absolute value of latitude, in degrees.}
 }
 \value{
-A numeric vector for n, a parameter needed for the Willoughby wind
+A numeric vector for \eqn{n}, a parameter needed for the Willoughby wind
    model.
 }
 \description{
-Calculates n, a parameter for the Willoughby model, using equation 10b
+Calculates \eqn{n}, a parameter for the Willoughby model, using equation 10b
 (Willoughby et al. 2006).
 }
 \details{

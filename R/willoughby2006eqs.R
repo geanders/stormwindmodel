@@ -6,7 +6,7 @@
 #'    gradient wind speed, in meters per second
 #' @param Rmax Numeric vector of the radius at which the maximum wind occurs,
 #'    in kilometers
-#' @param n Numeric vector of ...
+#' @inheritParams will3_right
 #'
 #' @export
 will1a <- function(vmax_gl, r, Rmax, n){
@@ -128,12 +128,14 @@ will1 <- function(cdist, Rmax, R1, R2, vmax_gl, n, A, X1, X2 = 25){
 
 #' Willoughby et al. (2006), Equation 2
 #'
+#' Calculates equation 2 from Willoughby et al. (2006).
+#'
 #' @param R1 Numeric vector of radius at start of transition zone, in
 #'    kilometers
 #' @inheritParams will1a
 #'
-#' @return w Numeric vector of the weighting parameter for Willoughby's wind
-#'    profile equations.
+#' @return A numeric vector of the weighting parameter for Willoughby's wind
+#'    profile equations (\eqn{w}).
 #'
 #' @export
 will2 <- function(r, R1){
@@ -160,6 +162,7 @@ will2 <- function(r, R1){
 #' @param A A numeric vector of one of the parameters of the Willoughby model.
 #' @param X1 A numeric vector of one of the parameters of the Willoughby model.
 #' @param Rmax A numeric vector giving the radius to maximum winds (in kilometers)
+#'    for the tropical storm.
 #' @inheritParams will1a
 #'
 #' @return A numeric vector with the value for the right-hand side of Eqn. 3 in
@@ -217,18 +220,18 @@ will3_deriv_func <- function(xi, eq3_right){
 #' Numerically solve Willoughby Eqn. 3 for xi
 #'
 #' This function uses the Newton-Raphson method to solve equation 3 (the
-#' dual-exponential profile version) for \eqn{\xi} in Willoughby et al. (2006).   This value of \eqn{xi} can
-#' THis value of \eqn{\xi} can then be used to determine \eqn{R_1}{R1} for that
+#' dual-exponential profile version) for \eqn{\xi} in Willoughby et al. (2006).
+#' This value of \eqn{\xi} can then be used to determine \eqn{R_1}{R1} for that
 #' storm observation.
 #'
-#' @param xi0 A numeric value giving the starting guess for \eqn{xi}
+#' @param xi0 A numeric value giving the starting guess for \eqn{\xi}
 #' @param eps The convergence threshold for determining if the algorithm has
 #'    converged.
 #' @param itmax The maximum number of iterations to try before deciding that
 #'    the algorithm did not converge.
 #' @inheritParams will3_deriv_func
 #'
-#' @note If this algorithm does not converge, it returns a missing value for
+#' @note If this algorithm does not converge, the function returns a missing value for
 #'    \eqn{\xi}.
 #'
 #' @references
@@ -267,7 +270,7 @@ solve_for_xi <- function(xi0 = 0.5, eq3_right, eps = 10e-4, itmax = 100){
 
 #' Calculate radius to start of transition region
 #'
-#' Once you've solved for \eqn{\xi}, use this value and the estimated
+#' Once you've solved for \eqn{\xi}, this function uses this value and the estimated
 #' \eqn{R_{max}}{Rmax} to determine \eqn{R1}, the radius from the storm center to the start of
 #' the transition region.
 #'
@@ -378,13 +381,13 @@ will10a <- function(vmax_gl, tclat){
 
 #' Calculate n for the Willoughby model
 #'
-#' Calculates n, a parameter for the Willoughby model, using equation 10b
+#' Calculates \eqn{n}, a parameter for the Willoughby model, using equation 10b
 #' (Willoughby et al. 2006).
 #'
 #' @inheritParams will1a
 #' @inheritParams will7a
 #'
-#' @return A numeric vector for n, a parameter needed for the Willoughby wind
+#' @return A numeric vector for \eqn{n}, a parameter needed for the Willoughby wind
 #'    model.
 #'
 #' @details This function is calculating the equation:
@@ -412,7 +415,7 @@ will10b <- function(vmax_gl, tclat){
 
 #' Calculate A for Willoughby model
 #'
-#' Calculates A, a paramter for the Willoughby wind model, using equation 10c
+#' Calculates \eqn{A}, a paramter for the Willoughby wind model, using equation 10c
 #' (Willoughby et al. 2006).
 #'
 #' @inheritParams will1a
@@ -421,7 +424,7 @@ will10b <- function(vmax_gl, tclat){
 #' @return A numeric vector that is a parameter required for the Willoughby
 #'    model.
 #'
-#' @details This function calculates A using (equation 10c, Willoughby et al.
+#' @details This function calculates \eqn{A} using equation 10c (Willoughby et al.
 #'    2006):
 #'
 #'    \deqn{A = 0.0696 + 0.0049 V_{max,G} - 0.0064 \phi}{

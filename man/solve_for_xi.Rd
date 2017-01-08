@@ -7,7 +7,7 @@
 solve_for_xi(xi0 = 0.5, eq3_right, eps = 0.001, itmax = 100)
 }
 \arguments{
-\item{xi0}{A numeric value giving the starting guess for \eqn{xi}}
+\item{xi0}{A numeric value giving the starting guess for \eqn{\xi}}
 
 \item{eq3_right}{A numerical value with the right-hand side of Willoughby
 et al. (2006), Eqn. 3, the dual-exponential version. This value is
@@ -22,12 +22,12 @@ the algorithm did not converge.}
 }
 \description{
 This function uses the Newton-Raphson method to solve equation 3 (the
-dual-exponential profile version) for \eqn{\xi} in Willoughby et al. (2006).   This value of \eqn{xi} can
-THis value of \eqn{\xi} can then be used to determine \eqn{R_1}{R1} for that
+dual-exponential profile version) for \eqn{\xi} in Willoughby et al. (2006).
+This value of \eqn{\xi} can then be used to determine \eqn{R_1}{R1} for that
 storm observation.
 }
 \note{
-If this algorithm does not converge, it returns a missing value for
+If this algorithm does not converge, the function returns a missing value for
    \eqn{\xi}.
 }
 \references{

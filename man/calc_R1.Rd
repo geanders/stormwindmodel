@@ -18,7 +18,7 @@ A numeric vector with the estimated value of \eqn{R_1}, a parameter
    required for the Willoughby wind model.
 }
 \description{
-Once you've solved for \eqn{\xi}, use this value and the estimated
+Once you've solved for \eqn{\xi}, this function uses this value and the estimated
 \eqn{R_{max}}{Rmax} to determine \eqn{R1}, the radius from the storm center to the start of
 the transition region.
 }

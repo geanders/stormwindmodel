@@ -11,9 +11,10 @@ add_inflow(gwd, cdist, Rmax)
 in degrees. Due east is 0 degrees, due north 90 degrees, etc.}
 
 \item{cdist}{A numeric vector giving radius (in kilometers) from the storm
-center to a location.}
+center to the location being modeled.}
 
-\item{Rmax}{A numeric vector giving the radius to maximum winds (in kilometers)}
+\item{Rmax}{A numeric vector giving the radius to maximum winds (in kilometers)
+for the tropical storm.}
 }
 \value{
 Numeric vector with the gradient wind direction (in degrees),
@@ -29,6 +30,10 @@ over water.
 }
 \details{
 This function uses equations 11a-c from Phadke et al. (2003).
+}
+\note{
+This function is only appropriate for modeling wind speeds for locations
+that are over land.
 }
 \examples{
 add_inflow(gwd = 160, cdist = 100, Rmax = 20)

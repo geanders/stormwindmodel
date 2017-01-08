@@ -7,7 +7,9 @@
 interp_track(track, tint = 0.25)
 }
 \arguments{
-\item{track}{A dataframe with hurricane track data for a single storm}
+\item{track}{A dataframe with hurricane track data for a single storm. See
+the \code{\link{floyd_tracks}} dataset that comes with the package for
+an example of the required format for this dataframe.}
 
 \item{tint}{A numeric vector giving the time interval to impute to, in units
 of hours (e.g., 0.25, the default, interpolates to 15 minute-intervals).}
