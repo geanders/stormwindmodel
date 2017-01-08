@@ -216,7 +216,7 @@ full_track %>% slice(1:3)
 
 Here is an example of interpolating Hurricane Floyd's tracks to 15-minute and 2-hour intervals
 
-```{r message = FALSE, warning = FALSE, echo = FALSE, fig.align = "center", fig.width = 8, fig.height = 4}
+```{r message = FALSE, warning = FALSE, fig.align = "center", fig.width = 8, fig.height = 4}
 floyd_15_min <- create_full_track(floyd_tracks)
 floyd_2_hrs <- create_full_track(floyd_tracks, tint = 2)
 
@@ -244,7 +244,7 @@ load("data/with_wind_radii.RData")
 with_wind_radii %>% slice(c(1:3, (n()-3):n()))
 ```
 
-```{r eval = FALSE}
+```{r eval = FALSE, echo = FALSE}
 Here is an example of Hurricane Floyd tracks, with estimated $R_{max}$ and $V_{max,G}$ shown by point size and color, respectively:
 ```
 
@@ -633,7 +633,7 @@ Here is a plot of modeled sustained surface winds in Dare County by time:
 ```{r warning = FALSE, fig.width = 6, fig.align = "center"}
 ggplot(grid_wind, aes(x = date, y = windspeed)) + 
   geom_line() + 
-  xlab("Observation time") + 
+  xlab("Observation time (UTC)") + 
   ylab("Modeled surface wind (m / s)")
 ```
 
