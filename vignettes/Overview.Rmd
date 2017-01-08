@@ -224,7 +224,7 @@ floyd_map <- map_wind(floyd_winds)
 add_storm_track(floyd_tracks, plot_object = floyd_map)
 ```
 
-You can also choose whether to map sustained or gust winds (`value`, which can take "vmax_gust" or "vmax_sust"), as well as the unit to use for wind speed (`wind_metric`, which can take values of: ). 
+You can also choose whether to map sustained or gust winds (`value`, which can take "vmax_gust" or "vmax_sust"), as well as the unit to use for wind speed (`wind_metric`, which can take values of "mps" [the default] or "knots"). 
 
 ```{r fig.width = 8}
 map_wind(floyd_winds, value = "vmax_gust", wind_metric = "knots")
