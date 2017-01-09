@@ -1,6 +1,6 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
-[![Travis-CI Build Status](https://api.travis-ci.org/geanders/stormwindmodel.svg?branch=master)](https://travis-ci.org/geanders/stormwindmodel)
+[![Travis-CI Build Status](https://api.travis-ci.org/geanders/stormwindmodel.svg?branch=master)](https://travis-ci.org/geanders/stormwindmodel) [![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/stormwindmodel)](https://cran.r-project.org/package=stormwindmodel)
 
 Overview
 --------
