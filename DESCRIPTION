@@ -34,7 +34,7 @@ Description: Allows users to input tracking data for a hurricane
     or other tropical storm, along with a data frame of grid points at which
     to model wind speeds. Functions in this package will then calculate wind
     speeds at each point based on wind model equations. This modeling framework
-    is currenlty set up to model winds for North American locations with 
+    is currently set up to model winds for North American locations with 
     Atlantic basin storms. This work was supported 
     in part by grants from the National Institute of Environmental Health 
     Sciences (R00ES022631), the National Science Foundation (1331399), and the 
