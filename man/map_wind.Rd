@@ -38,7 +38,7 @@ Inputs a dataframe with modeled winds for each eastern U.S. county and
 maps these modeled winds.
 }
 \examples{
-\donttest{
+\dontrun{
 data("katrina_tracks")
 data("county_points")
 grid_winds_katrina <- get_grid_winds(hurr_track = katrina_tracks,

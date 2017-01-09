@@ -25,7 +25,7 @@
 #'    States.
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' data("katrina_tracks")
 #' data("county_points")
 #' grid_winds_katrina <- get_grid_winds(hurr_track = katrina_tracks,
