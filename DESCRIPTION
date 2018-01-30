@@ -48,6 +48,7 @@ Imports:
     lubridate (>= 1.7.1),
     maps (>= 3.2.0),
     plyr (>= 1.8.4),
+    Rcpp (>= 0.12.15),
     stringr (>= 1.2.0.9000),
     tidyr (>= 0.7.2),
     weathermetrics (>= 1.2.2)
@@ -65,3 +66,4 @@ Suggests:
     tigris (>= 0.5.3),
     viridis (>= 0.4.0)
 VignetteBuilder: knitr
+LinkingTo: Rcpp
