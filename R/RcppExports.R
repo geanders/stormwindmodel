@@ -28,11 +28,11 @@
 #'    tropical cyclone winds and waves for emergency management. Ocean
 #'    Engineering 30(4):553-578.
 degrees_to_radians_Cpp <- function(degrees) {
-    .Call('stormwindmodel_degrees_to_radians_Cpp', PACKAGE = 'stormwindmodel', degrees)
+    .Call('_stormwindmodel_degrees_to_radians_Cpp', PACKAGE = 'stormwindmodel', degrees)
 }
 
 add_forward_speed_Cpp <- function(wind_sfc_sym, tcspd_u, tcspd_v, swd, cdist, Rmax) {
-    .Call('stormwindmodel_add_forward_speed_Cpp', PACKAGE = 'stormwindmodel', wind_sfc_sym, tcspd_u, tcspd_v, swd, cdist, Rmax)
+    .Call('_stormwindmodel_add_forward_speed_Cpp', PACKAGE = 'stormwindmodel', wind_sfc_sym, tcspd_u, tcspd_v, swd, cdist, Rmax)
 }
 
 #' Add inflow angle (C++ version)
@@ -68,7 +68,7 @@ add_forward_speed_Cpp <- function(wind_sfc_sym, tcspd_u, tcspd_v, swd, cdist, Rm
 #'
 #' @export
 add_inflow_Cpp <- function(gwd, cdist, Rmax) {
-    .Call('stormwindmodel_add_inflow_Cpp', PACKAGE = 'stormwindmodel', gwd, cdist, Rmax)
+    .Call('_stormwindmodel_add_inflow_Cpp', PACKAGE = 'stormwindmodel', gwd, cdist, Rmax)
 }
 
 #' Calculate bearing from one location to another (C++ version)
@@ -111,15 +111,15 @@ add_inflow_Cpp <- function(gwd, cdist, Rmax) {
 #'
 #' @export
 degrees_to_radians_Cpp1 <- function(degrees) {
-    .Call('stormwindmodel_degrees_to_radians_Cpp1', PACKAGE = 'stormwindmodel', degrees)
+    .Call('_stormwindmodel_degrees_to_radians_Cpp1', PACKAGE = 'stormwindmodel', degrees)
 }
 
 radians_to_degrees_Cpp1 <- function(radians) {
-    .Call('stormwindmodel_radians_to_degrees_Cpp1', PACKAGE = 'stormwindmodel', radians)
+    .Call('_stormwindmodel_radians_to_degrees_Cpp1', PACKAGE = 'stormwindmodel', radians)
 }
 
 calc_bearing_Cpp <- function(tclat_1, tclon_1, tclat_2, tclon_2) {
-    .Call('stormwindmodel_calc_bearing_Cpp', PACKAGE = 'stormwindmodel', tclat_1, tclon_1, tclat_2, tclon_2)
+    .Call('_stormwindmodel_calc_bearing_Cpp', PACKAGE = 'stormwindmodel', tclat_1, tclon_1, tclat_2, tclon_2)
 }
 
 #' Calculate surface wind speed from gradient (C++ version)
@@ -151,7 +151,7 @@ calc_bearing_Cpp <- function(tclat_1, tclon_1, tclat_2, tclon_2) {
 #'
 #' @export
 gradient_to_surface_Cpp <- function(wind_gl_aa, cdist) {
-    .Call('stormwindmodel_gradient_to_surface_Cpp', PACKAGE = 'stormwindmodel', wind_gl_aa, cdist)
+    .Call('_stormwindmodel_gradient_to_surface_Cpp', PACKAGE = 'stormwindmodel', wind_gl_aa, cdist)
 }
 
 #' Calculate distance between two locations (C++ version)
@@ -194,11 +194,11 @@ gradient_to_surface_Cpp <- function(wind_gl_aa, cdist) {
 #'
 #' @export
 degrees_to_radians_Cpp2 <- function(degrees) {
-    .Call('stormwindmodel_degrees_to_radians_Cpp2', PACKAGE = 'stormwindmodel', degrees)
+    .Call('_stormwindmodel_degrees_to_radians_Cpp2', PACKAGE = 'stormwindmodel', degrees)
 }
 
 latlon_to_km_Cpp <- function(tclat_1, tclon_1, tclat_2, tclon_2, Rearth = 6378.14) {
-    .Call('stormwindmodel_latlon_to_km_Cpp', PACKAGE = 'stormwindmodel', tclat_1, tclon_1, tclat_2, tclon_2, Rearth)
+    .Call('_stormwindmodel_latlon_to_km_Cpp', PACKAGE = 'stormwindmodel', tclat_1, tclon_1, tclat_2, tclon_2, Rearth)
 }
 
 #' Model wind speed at a grid point for a storm track observation (C++ version)
@@ -287,10 +287,10 @@ latlon_to_km_Cpp <- function(tclat_1, tclon_1, tclat_2, tclon_2, Rearth = 6378.1
 #'
 #' @export
 will1_Cpp <- function(cdist, Rmax, R1, R2, vmax_gl, n, A, X1, X2 = 25) {
-    .Call('stormwindmodel_will1_Cpp', PACKAGE = 'stormwindmodel', cdist, Rmax, R1, R2, vmax_gl, n, A, X1, X2)
+    .Call('_stormwindmodel_will1_Cpp', PACKAGE = 'stormwindmodel', cdist, Rmax, R1, R2, vmax_gl, n, A, X1, X2)
 }
 
 # Register entry points for exported C++ functions
 methods::setLoadAction(function(ns) {
-    .Call('stormwindmodel_RcppExport_registerCCallable', PACKAGE = 'stormwindmodel')
+    .Call('_stormwindmodel_RcppExport_registerCCallable', PACKAGE = 'stormwindmodel')
 })

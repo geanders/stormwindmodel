@@ -10,7 +10,7 @@ using namespace Rcpp;
 
 // degrees_to_radians_Cpp
 NumericVector degrees_to_radians_Cpp(NumericVector degrees);
-static SEXP stormwindmodel_degrees_to_radians_Cpp_try(SEXP degreesSEXP) {
+static SEXP _stormwindmodel_degrees_to_radians_Cpp_try(SEXP degreesSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< NumericVector >::type degrees(degreesSEXP);
@@ -18,11 +18,11 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP_RETURN_ERROR
 }
-RcppExport SEXP stormwindmodel_degrees_to_radians_Cpp(SEXP degreesSEXP) {
+RcppExport SEXP _stormwindmodel_degrees_to_radians_Cpp(SEXP degreesSEXP) {
     SEXP rcpp_result_gen;
     {
         Rcpp::RNGScope rcpp_rngScope_gen;
-        rcpp_result_gen = PROTECT(stormwindmodel_degrees_to_radians_Cpp_try(degreesSEXP));
+        rcpp_result_gen = PROTECT(_stormwindmodel_degrees_to_radians_Cpp_try(degreesSEXP));
     }
     Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
     if (rcpp_isInterrupt_gen) {
@@ -40,7 +40,7 @@ RcppExport SEXP stormwindmodel_degrees_to_radians_Cpp(SEXP degreesSEXP) {
 }
 // add_forward_speed_Cpp
 NumericVector add_forward_speed_Cpp(NumericVector wind_sfc_sym, NumericVector tcspd_u, NumericVector tcspd_v, NumericVector swd, NumericVector cdist, NumericVector Rmax);
-static SEXP stormwindmodel_add_forward_speed_Cpp_try(SEXP wind_sfc_symSEXP, SEXP tcspd_uSEXP, SEXP tcspd_vSEXP, SEXP swdSEXP, SEXP cdistSEXP, SEXP RmaxSEXP) {
+static SEXP _stormwindmodel_add_forward_speed_Cpp_try(SEXP wind_sfc_symSEXP, SEXP tcspd_uSEXP, SEXP tcspd_vSEXP, SEXP swdSEXP, SEXP cdistSEXP, SEXP RmaxSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< NumericVector >::type wind_sfc_sym(wind_sfc_symSEXP);
@@ -53,11 +53,11 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP_RETURN_ERROR
 }
-RcppExport SEXP stormwindmodel_add_forward_speed_Cpp(SEXP wind_sfc_symSEXP, SEXP tcspd_uSEXP, SEXP tcspd_vSEXP, SEXP swdSEXP, SEXP cdistSEXP, SEXP RmaxSEXP) {
+RcppExport SEXP _stormwindmodel_add_forward_speed_Cpp(SEXP wind_sfc_symSEXP, SEXP tcspd_uSEXP, SEXP tcspd_vSEXP, SEXP swdSEXP, SEXP cdistSEXP, SEXP RmaxSEXP) {
     SEXP rcpp_result_gen;
     {
         Rcpp::RNGScope rcpp_rngScope_gen;
-        rcpp_result_gen = PROTECT(stormwindmodel_add_forward_speed_Cpp_try(wind_sfc_symSEXP, tcspd_uSEXP, tcspd_vSEXP, swdSEXP, cdistSEXP, RmaxSEXP));
+        rcpp_result_gen = PROTECT(_stormwindmodel_add_forward_speed_Cpp_try(wind_sfc_symSEXP, tcspd_uSEXP, tcspd_vSEXP, swdSEXP, cdistSEXP, RmaxSEXP));
     }
     Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
     if (rcpp_isInterrupt_gen) {
@@ -75,7 +75,7 @@ RcppExport SEXP stormwindmodel_add_forward_speed_Cpp(SEXP wind_sfc_symSEXP, SEXP
 }
 // add_inflow_Cpp
 NumericVector add_inflow_Cpp(NumericVector gwd, NumericVector cdist, NumericVector Rmax);
-static SEXP stormwindmodel_add_inflow_Cpp_try(SEXP gwdSEXP, SEXP cdistSEXP, SEXP RmaxSEXP) {
+static SEXP _stormwindmodel_add_inflow_Cpp_try(SEXP gwdSEXP, SEXP cdistSEXP, SEXP RmaxSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< NumericVector >::type gwd(gwdSEXP);
@@ -85,11 +85,11 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP_RETURN_ERROR
 }
-RcppExport SEXP stormwindmodel_add_inflow_Cpp(SEXP gwdSEXP, SEXP cdistSEXP, SEXP RmaxSEXP) {
+RcppExport SEXP _stormwindmodel_add_inflow_Cpp(SEXP gwdSEXP, SEXP cdistSEXP, SEXP RmaxSEXP) {
     SEXP rcpp_result_gen;
     {
         Rcpp::RNGScope rcpp_rngScope_gen;
-        rcpp_result_gen = PROTECT(stormwindmodel_add_inflow_Cpp_try(gwdSEXP, cdistSEXP, RmaxSEXP));
+        rcpp_result_gen = PROTECT(_stormwindmodel_add_inflow_Cpp_try(gwdSEXP, cdistSEXP, RmaxSEXP));
     }
     Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
     if (rcpp_isInterrupt_gen) {
@@ -107,7 +107,7 @@ RcppExport SEXP stormwindmodel_add_inflow_Cpp(SEXP gwdSEXP, SEXP cdistSEXP, SEXP
 }
 // degrees_to_radians_Cpp1
 NumericVector degrees_to_radians_Cpp1(NumericVector degrees);
-static SEXP stormwindmodel_degrees_to_radians_Cpp1_try(SEXP degreesSEXP) {
+static SEXP _stormwindmodel_degrees_to_radians_Cpp1_try(SEXP degreesSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< NumericVector >::type degrees(degreesSEXP);
@@ -115,11 +115,11 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP_RETURN_ERROR
 }
-RcppExport SEXP stormwindmodel_degrees_to_radians_Cpp1(SEXP degreesSEXP) {
+RcppExport SEXP _stormwindmodel_degrees_to_radians_Cpp1(SEXP degreesSEXP) {
     SEXP rcpp_result_gen;
     {
         Rcpp::RNGScope rcpp_rngScope_gen;
-        rcpp_result_gen = PROTECT(stormwindmodel_degrees_to_radians_Cpp1_try(degreesSEXP));
+        rcpp_result_gen = PROTECT(_stormwindmodel_degrees_to_radians_Cpp1_try(degreesSEXP));
     }
     Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
     if (rcpp_isInterrupt_gen) {
@@ -137,7 +137,7 @@ RcppExport SEXP stormwindmodel_degrees_to_radians_Cpp1(SEXP degreesSEXP) {
 }
 // radians_to_degrees_Cpp1
 NumericVector radians_to_degrees_Cpp1(NumericVector radians);
-static SEXP stormwindmodel_radians_to_degrees_Cpp1_try(SEXP radiansSEXP) {
+static SEXP _stormwindmodel_radians_to_degrees_Cpp1_try(SEXP radiansSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< NumericVector >::type radians(radiansSEXP);
@@ -145,11 +145,11 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP_RETURN_ERROR
 }
-RcppExport SEXP stormwindmodel_radians_to_degrees_Cpp1(SEXP radiansSEXP) {
+RcppExport SEXP _stormwindmodel_radians_to_degrees_Cpp1(SEXP radiansSEXP) {
     SEXP rcpp_result_gen;
     {
         Rcpp::RNGScope rcpp_rngScope_gen;
-        rcpp_result_gen = PROTECT(stormwindmodel_radians_to_degrees_Cpp1_try(radiansSEXP));
+        rcpp_result_gen = PROTECT(_stormwindmodel_radians_to_degrees_Cpp1_try(radiansSEXP));
     }
     Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
     if (rcpp_isInterrupt_gen) {
@@ -167,7 +167,7 @@ RcppExport SEXP stormwindmodel_radians_to_degrees_Cpp1(SEXP radiansSEXP) {
 }
 // calc_bearing_Cpp
 NumericVector calc_bearing_Cpp(NumericVector tclat_1, NumericVector tclon_1, NumericVector tclat_2, NumericVector tclon_2);
-static SEXP stormwindmodel_calc_bearing_Cpp_try(SEXP tclat_1SEXP, SEXP tclon_1SEXP, SEXP tclat_2SEXP, SEXP tclon_2SEXP) {
+static SEXP _stormwindmodel_calc_bearing_Cpp_try(SEXP tclat_1SEXP, SEXP tclon_1SEXP, SEXP tclat_2SEXP, SEXP tclon_2SEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< NumericVector >::type tclat_1(tclat_1SEXP);
@@ -178,11 +178,11 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP_RETURN_ERROR
 }
-RcppExport SEXP stormwindmodel_calc_bearing_Cpp(SEXP tclat_1SEXP, SEXP tclon_1SEXP, SEXP tclat_2SEXP, SEXP tclon_2SEXP) {
+RcppExport SEXP _stormwindmodel_calc_bearing_Cpp(SEXP tclat_1SEXP, SEXP tclon_1SEXP, SEXP tclat_2SEXP, SEXP tclon_2SEXP) {
     SEXP rcpp_result_gen;
     {
         Rcpp::RNGScope rcpp_rngScope_gen;
-        rcpp_result_gen = PROTECT(stormwindmodel_calc_bearing_Cpp_try(tclat_1SEXP, tclon_1SEXP, tclat_2SEXP, tclon_2SEXP));
+        rcpp_result_gen = PROTECT(_stormwindmodel_calc_bearing_Cpp_try(tclat_1SEXP, tclon_1SEXP, tclat_2SEXP, tclon_2SEXP));
     }
     Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
     if (rcpp_isInterrupt_gen) {
@@ -200,7 +200,7 @@ RcppExport SEXP stormwindmodel_calc_bearing_Cpp(SEXP tclat_1SEXP, SEXP tclon_1SE
 }
 // gradient_to_surface_Cpp
 double gradient_to_surface_Cpp(double wind_gl_aa, double cdist);
-static SEXP stormwindmodel_gradient_to_surface_Cpp_try(SEXP wind_gl_aaSEXP, SEXP cdistSEXP) {
+static SEXP _stormwindmodel_gradient_to_surface_Cpp_try(SEXP wind_gl_aaSEXP, SEXP cdistSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< double >::type wind_gl_aa(wind_gl_aaSEXP);
@@ -209,11 +209,11 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP_RETURN_ERROR
 }
-RcppExport SEXP stormwindmodel_gradient_to_surface_Cpp(SEXP wind_gl_aaSEXP, SEXP cdistSEXP) {
+RcppExport SEXP _stormwindmodel_gradient_to_surface_Cpp(SEXP wind_gl_aaSEXP, SEXP cdistSEXP) {
     SEXP rcpp_result_gen;
     {
         Rcpp::RNGScope rcpp_rngScope_gen;
-        rcpp_result_gen = PROTECT(stormwindmodel_gradient_to_surface_Cpp_try(wind_gl_aaSEXP, cdistSEXP));
+        rcpp_result_gen = PROTECT(_stormwindmodel_gradient_to_surface_Cpp_try(wind_gl_aaSEXP, cdistSEXP));
     }
     Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
     if (rcpp_isInterrupt_gen) {
@@ -231,7 +231,7 @@ RcppExport SEXP stormwindmodel_gradient_to_surface_Cpp(SEXP wind_gl_aaSEXP, SEXP
 }
 // degrees_to_radians_Cpp2
 NumericVector degrees_to_radians_Cpp2(NumericVector degrees);
-static SEXP stormwindmodel_degrees_to_radians_Cpp2_try(SEXP degreesSEXP) {
+static SEXP _stormwindmodel_degrees_to_radians_Cpp2_try(SEXP degreesSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< NumericVector >::type degrees(degreesSEXP);
@@ -239,11 +239,11 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP_RETURN_ERROR
 }
-RcppExport SEXP stormwindmodel_degrees_to_radians_Cpp2(SEXP degreesSEXP) {
+RcppExport SEXP _stormwindmodel_degrees_to_radians_Cpp2(SEXP degreesSEXP) {
     SEXP rcpp_result_gen;
     {
         Rcpp::RNGScope rcpp_rngScope_gen;
-        rcpp_result_gen = PROTECT(stormwindmodel_degrees_to_radians_Cpp2_try(degreesSEXP));
+        rcpp_result_gen = PROTECT(_stormwindmodel_degrees_to_radians_Cpp2_try(degreesSEXP));
     }
     Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
     if (rcpp_isInterrupt_gen) {
@@ -261,7 +261,7 @@ RcppExport SEXP stormwindmodel_degrees_to_radians_Cpp2(SEXP degreesSEXP) {
 }
 // latlon_to_km_Cpp
 NumericVector latlon_to_km_Cpp(NumericVector tclat_1, NumericVector tclon_1, NumericVector tclat_2, NumericVector tclon_2, NumericVector Rearth);
-static SEXP stormwindmodel_latlon_to_km_Cpp_try(SEXP tclat_1SEXP, SEXP tclon_1SEXP, SEXP tclat_2SEXP, SEXP tclon_2SEXP, SEXP RearthSEXP) {
+static SEXP _stormwindmodel_latlon_to_km_Cpp_try(SEXP tclat_1SEXP, SEXP tclon_1SEXP, SEXP tclat_2SEXP, SEXP tclon_2SEXP, SEXP RearthSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< NumericVector >::type tclat_1(tclat_1SEXP);
@@ -273,11 +273,11 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP_RETURN_ERROR
 }
-RcppExport SEXP stormwindmodel_latlon_to_km_Cpp(SEXP tclat_1SEXP, SEXP tclon_1SEXP, SEXP tclat_2SEXP, SEXP tclon_2SEXP, SEXP RearthSEXP) {
+RcppExport SEXP _stormwindmodel_latlon_to_km_Cpp(SEXP tclat_1SEXP, SEXP tclon_1SEXP, SEXP tclat_2SEXP, SEXP tclon_2SEXP, SEXP RearthSEXP) {
     SEXP rcpp_result_gen;
     {
         Rcpp::RNGScope rcpp_rngScope_gen;
-        rcpp_result_gen = PROTECT(stormwindmodel_latlon_to_km_Cpp_try(tclat_1SEXP, tclon_1SEXP, tclat_2SEXP, tclon_2SEXP, RearthSEXP));
+        rcpp_result_gen = PROTECT(_stormwindmodel_latlon_to_km_Cpp_try(tclat_1SEXP, tclon_1SEXP, tclat_2SEXP, tclon_2SEXP, RearthSEXP));
     }
     Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
     if (rcpp_isInterrupt_gen) {
@@ -295,7 +295,7 @@ RcppExport SEXP stormwindmodel_latlon_to_km_Cpp(SEXP tclat_1SEXP, SEXP tclon_1SE
 }
 // will1_Cpp
 double will1_Cpp(double cdist, double Rmax, double R1, double R2, double vmax_gl, double n, double A, double X1, double X2);
-static SEXP stormwindmodel_will1_Cpp_try(SEXP cdistSEXP, SEXP RmaxSEXP, SEXP R1SEXP, SEXP R2SEXP, SEXP vmax_glSEXP, SEXP nSEXP, SEXP ASEXP, SEXP X1SEXP, SEXP X2SEXP) {
+static SEXP _stormwindmodel_will1_Cpp_try(SEXP cdistSEXP, SEXP RmaxSEXP, SEXP R1SEXP, SEXP R2SEXP, SEXP vmax_glSEXP, SEXP nSEXP, SEXP ASEXP, SEXP X1SEXP, SEXP X2SEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< double >::type cdist(cdistSEXP);
@@ -311,11 +311,11 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP_RETURN_ERROR
 }
-RcppExport SEXP stormwindmodel_will1_Cpp(SEXP cdistSEXP, SEXP RmaxSEXP, SEXP R1SEXP, SEXP R2SEXP, SEXP vmax_glSEXP, SEXP nSEXP, SEXP ASEXP, SEXP X1SEXP, SEXP X2SEXP) {
+RcppExport SEXP _stormwindmodel_will1_Cpp(SEXP cdistSEXP, SEXP RmaxSEXP, SEXP R1SEXP, SEXP R2SEXP, SEXP vmax_glSEXP, SEXP nSEXP, SEXP ASEXP, SEXP X1SEXP, SEXP X2SEXP) {
     SEXP rcpp_result_gen;
     {
         Rcpp::RNGScope rcpp_rngScope_gen;
-        rcpp_result_gen = PROTECT(stormwindmodel_will1_Cpp_try(cdistSEXP, RmaxSEXP, R1SEXP, R2SEXP, vmax_glSEXP, nSEXP, ASEXP, X1SEXP, X2SEXP));
+        rcpp_result_gen = PROTECT(_stormwindmodel_will1_Cpp_try(cdistSEXP, RmaxSEXP, R1SEXP, R2SEXP, vmax_glSEXP, nSEXP, ASEXP, X1SEXP, X2SEXP));
     }
     Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
     if (rcpp_isInterrupt_gen) {
@@ -333,7 +333,7 @@ RcppExport SEXP stormwindmodel_will1_Cpp(SEXP cdistSEXP, SEXP RmaxSEXP, SEXP R1S
 }
 
 // validate (ensure exported C++ functions exist before calling them)
-static int stormwindmodel_RcppExport_validate(const char* sig) { 
+static int _stormwindmodel_RcppExport_validate(const char* sig) { 
     static std::set<std::string> signatures;
     if (signatures.empty()) {
         signatures.insert("NumericVector(*degrees_to_radians_Cpp)(NumericVector)");
@@ -351,17 +351,37 @@ static int stormwindmodel_RcppExport_validate(const char* sig) {
 }
 
 // registerCCallable (register entry points for exported C++ functions)
-RcppExport SEXP stormwindmodel_RcppExport_registerCCallable() { 
-    R_RegisterCCallable("stormwindmodel", "stormwindmodel_degrees_to_radians_Cpp", (DL_FUNC)stormwindmodel_degrees_to_radians_Cpp_try);
-    R_RegisterCCallable("stormwindmodel", "stormwindmodel_add_forward_speed_Cpp", (DL_FUNC)stormwindmodel_add_forward_speed_Cpp_try);
-    R_RegisterCCallable("stormwindmodel", "stormwindmodel_add_inflow_Cpp", (DL_FUNC)stormwindmodel_add_inflow_Cpp_try);
-    R_RegisterCCallable("stormwindmodel", "stormwindmodel_degrees_to_radians_Cpp1", (DL_FUNC)stormwindmodel_degrees_to_radians_Cpp1_try);
-    R_RegisterCCallable("stormwindmodel", "stormwindmodel_radians_to_degrees_Cpp1", (DL_FUNC)stormwindmodel_radians_to_degrees_Cpp1_try);
-    R_RegisterCCallable("stormwindmodel", "stormwindmodel_calc_bearing_Cpp", (DL_FUNC)stormwindmodel_calc_bearing_Cpp_try);
-    R_RegisterCCallable("stormwindmodel", "stormwindmodel_gradient_to_surface_Cpp", (DL_FUNC)stormwindmodel_gradient_to_surface_Cpp_try);
-    R_RegisterCCallable("stormwindmodel", "stormwindmodel_degrees_to_radians_Cpp2", (DL_FUNC)stormwindmodel_degrees_to_radians_Cpp2_try);
-    R_RegisterCCallable("stormwindmodel", "stormwindmodel_latlon_to_km_Cpp", (DL_FUNC)stormwindmodel_latlon_to_km_Cpp_try);
-    R_RegisterCCallable("stormwindmodel", "stormwindmodel_will1_Cpp", (DL_FUNC)stormwindmodel_will1_Cpp_try);
-    R_RegisterCCallable("stormwindmodel", "stormwindmodel_RcppExport_validate", (DL_FUNC)stormwindmodel_RcppExport_validate);
+RcppExport SEXP _stormwindmodel_RcppExport_registerCCallable() { 
+    R_RegisterCCallable("stormwindmodel", "_stormwindmodel_degrees_to_radians_Cpp", (DL_FUNC)_stormwindmodel_degrees_to_radians_Cpp_try);
+    R_RegisterCCallable("stormwindmodel", "_stormwindmodel_add_forward_speed_Cpp", (DL_FUNC)_stormwindmodel_add_forward_speed_Cpp_try);
+    R_RegisterCCallable("stormwindmodel", "_stormwindmodel_add_inflow_Cpp", (DL_FUNC)_stormwindmodel_add_inflow_Cpp_try);
+    R_RegisterCCallable("stormwindmodel", "_stormwindmodel_degrees_to_radians_Cpp1", (DL_FUNC)_stormwindmodel_degrees_to_radians_Cpp1_try);
+    R_RegisterCCallable("stormwindmodel", "_stormwindmodel_radians_to_degrees_Cpp1", (DL_FUNC)_stormwindmodel_radians_to_degrees_Cpp1_try);
+    R_RegisterCCallable("stormwindmodel", "_stormwindmodel_calc_bearing_Cpp", (DL_FUNC)_stormwindmodel_calc_bearing_Cpp_try);
+    R_RegisterCCallable("stormwindmodel", "_stormwindmodel_gradient_to_surface_Cpp", (DL_FUNC)_stormwindmodel_gradient_to_surface_Cpp_try);
+    R_RegisterCCallable("stormwindmodel", "_stormwindmodel_degrees_to_radians_Cpp2", (DL_FUNC)_stormwindmodel_degrees_to_radians_Cpp2_try);
+    R_RegisterCCallable("stormwindmodel", "_stormwindmodel_latlon_to_km_Cpp", (DL_FUNC)_stormwindmodel_latlon_to_km_Cpp_try);
+    R_RegisterCCallable("stormwindmodel", "_stormwindmodel_will1_Cpp", (DL_FUNC)_stormwindmodel_will1_Cpp_try);
+    R_RegisterCCallable("stormwindmodel", "_stormwindmodel_RcppExport_validate", (DL_FUNC)_stormwindmodel_RcppExport_validate);
     return R_NilValue;
+}
+
+static const R_CallMethodDef CallEntries[] = {
+    {"_stormwindmodel_degrees_to_radians_Cpp", (DL_FUNC) &_stormwindmodel_degrees_to_radians_Cpp, 1},
+    {"_stormwindmodel_add_forward_speed_Cpp", (DL_FUNC) &_stormwindmodel_add_forward_speed_Cpp, 6},
+    {"_stormwindmodel_add_inflow_Cpp", (DL_FUNC) &_stormwindmodel_add_inflow_Cpp, 3},
+    {"_stormwindmodel_degrees_to_radians_Cpp1", (DL_FUNC) &_stormwindmodel_degrees_to_radians_Cpp1, 1},
+    {"_stormwindmodel_radians_to_degrees_Cpp1", (DL_FUNC) &_stormwindmodel_radians_to_degrees_Cpp1, 1},
+    {"_stormwindmodel_calc_bearing_Cpp", (DL_FUNC) &_stormwindmodel_calc_bearing_Cpp, 4},
+    {"_stormwindmodel_gradient_to_surface_Cpp", (DL_FUNC) &_stormwindmodel_gradient_to_surface_Cpp, 2},
+    {"_stormwindmodel_degrees_to_radians_Cpp2", (DL_FUNC) &_stormwindmodel_degrees_to_radians_Cpp2, 1},
+    {"_stormwindmodel_latlon_to_km_Cpp", (DL_FUNC) &_stormwindmodel_latlon_to_km_Cpp, 5},
+    {"_stormwindmodel_will1_Cpp", (DL_FUNC) &_stormwindmodel_will1_Cpp, 9},
+    {"_stormwindmodel_RcppExport_registerCCallable", (DL_FUNC) &_stormwindmodel_RcppExport_registerCCallable, 0},
+    {NULL, NULL, 0}
+};
+
+RcppExport void R_init_stormwindmodel(DllInfo *dll) {
+    R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
+    R_useDynamicSymbols(dll, FALSE);
 }

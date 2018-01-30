@@ -16,7 +16,7 @@ namespace stormwindmodel {
             require("stormwindmodel", Rcpp::Named("quietly") = true);
             typedef int(*Ptr_validate)(const char*);
             static Ptr_validate p_validate = (Ptr_validate)
-                R_GetCCallable("stormwindmodel", "stormwindmodel_RcppExport_validate");
+                R_GetCCallable("stormwindmodel", "_stormwindmodel_RcppExport_validate");
             if (!p_validate(sig)) {
                 throw Rcpp::function_not_exported(
                     "C++ function with signature '" + std::string(sig) + "' not found in stormwindmodel");
@@ -29,17 +29,17 @@ namespace stormwindmodel {
         static Ptr_degrees_to_radians_Cpp p_degrees_to_radians_Cpp = NULL;
         if (p_degrees_to_radians_Cpp == NULL) {
             validateSignature("NumericVector(*degrees_to_radians_Cpp)(NumericVector)");
-            p_degrees_to_radians_Cpp = (Ptr_degrees_to_radians_Cpp)R_GetCCallable("stormwindmodel", "stormwindmodel_degrees_to_radians_Cpp");
+            p_degrees_to_radians_Cpp = (Ptr_degrees_to_radians_Cpp)R_GetCCallable("stormwindmodel", "_stormwindmodel_degrees_to_radians_Cpp");
         }
         RObject rcpp_result_gen;
         {
             RNGScope RCPP_rngScope_gen;
-            rcpp_result_gen = p_degrees_to_radians_Cpp(Rcpp::wrap(degrees));
+            rcpp_result_gen = p_degrees_to_radians_Cpp(Shield<SEXP>(Rcpp::wrap(degrees)));
         }
         if (rcpp_result_gen.inherits("interrupted-error"))
             throw Rcpp::internal::InterruptedException();
         if (rcpp_result_gen.inherits("try-error"))
-            throw Rcpp::exception(as<std::string>(rcpp_result_gen).c_str());
+            throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
         return Rcpp::as<NumericVector >(rcpp_result_gen);
     }
 
@@ -48,17 +48,17 @@ namespace stormwindmodel {
         static Ptr_add_forward_speed_Cpp p_add_forward_speed_Cpp = NULL;
         if (p_add_forward_speed_Cpp == NULL) {
             validateSignature("NumericVector(*add_forward_speed_Cpp)(NumericVector,NumericVector,NumericVector,NumericVector,NumericVector,NumericVector)");
-            p_add_forward_speed_Cpp = (Ptr_add_forward_speed_Cpp)R_GetCCallable("stormwindmodel", "stormwindmodel_add_forward_speed_Cpp");
+            p_add_forward_speed_Cpp = (Ptr_add_forward_speed_Cpp)R_GetCCallable("stormwindmodel", "_stormwindmodel_add_forward_speed_Cpp");
         }
         RObject rcpp_result_gen;
         {
             RNGScope RCPP_rngScope_gen;
-            rcpp_result_gen = p_add_forward_speed_Cpp(Rcpp::wrap(wind_sfc_sym), Rcpp::wrap(tcspd_u), Rcpp::wrap(tcspd_v), Rcpp::wrap(swd), Rcpp::wrap(cdist), Rcpp::wrap(Rmax));
+            rcpp_result_gen = p_add_forward_speed_Cpp(Shield<SEXP>(Rcpp::wrap(wind_sfc_sym)), Shield<SEXP>(Rcpp::wrap(tcspd_u)), Shield<SEXP>(Rcpp::wrap(tcspd_v)), Shield<SEXP>(Rcpp::wrap(swd)), Shield<SEXP>(Rcpp::wrap(cdist)), Shield<SEXP>(Rcpp::wrap(Rmax)));
         }
         if (rcpp_result_gen.inherits("interrupted-error"))
             throw Rcpp::internal::InterruptedException();
         if (rcpp_result_gen.inherits("try-error"))
-            throw Rcpp::exception(as<std::string>(rcpp_result_gen).c_str());
+            throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
         return Rcpp::as<NumericVector >(rcpp_result_gen);
     }
 
@@ -67,17 +67,17 @@ namespace stormwindmodel {
         static Ptr_add_inflow_Cpp p_add_inflow_Cpp = NULL;
         if (p_add_inflow_Cpp == NULL) {
             validateSignature("NumericVector(*add_inflow_Cpp)(NumericVector,NumericVector,NumericVector)");
-            p_add_inflow_Cpp = (Ptr_add_inflow_Cpp)R_GetCCallable("stormwindmodel", "stormwindmodel_add_inflow_Cpp");
+            p_add_inflow_Cpp = (Ptr_add_inflow_Cpp)R_GetCCallable("stormwindmodel", "_stormwindmodel_add_inflow_Cpp");
         }
         RObject rcpp_result_gen;
         {
             RNGScope RCPP_rngScope_gen;
-            rcpp_result_gen = p_add_inflow_Cpp(Rcpp::wrap(gwd), Rcpp::wrap(cdist), Rcpp::wrap(Rmax));
+            rcpp_result_gen = p_add_inflow_Cpp(Shield<SEXP>(Rcpp::wrap(gwd)), Shield<SEXP>(Rcpp::wrap(cdist)), Shield<SEXP>(Rcpp::wrap(Rmax)));
         }
         if (rcpp_result_gen.inherits("interrupted-error"))
             throw Rcpp::internal::InterruptedException();
         if (rcpp_result_gen.inherits("try-error"))
-            throw Rcpp::exception(as<std::string>(rcpp_result_gen).c_str());
+            throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
         return Rcpp::as<NumericVector >(rcpp_result_gen);
     }
 
@@ -86,17 +86,17 @@ namespace stormwindmodel {
         static Ptr_degrees_to_radians_Cpp1 p_degrees_to_radians_Cpp1 = NULL;
         if (p_degrees_to_radians_Cpp1 == NULL) {
             validateSignature("NumericVector(*degrees_to_radians_Cpp1)(NumericVector)");
-            p_degrees_to_radians_Cpp1 = (Ptr_degrees_to_radians_Cpp1)R_GetCCallable("stormwindmodel", "stormwindmodel_degrees_to_radians_Cpp1");
+            p_degrees_to_radians_Cpp1 = (Ptr_degrees_to_radians_Cpp1)R_GetCCallable("stormwindmodel", "_stormwindmodel_degrees_to_radians_Cpp1");
         }
         RObject rcpp_result_gen;
         {
             RNGScope RCPP_rngScope_gen;
-            rcpp_result_gen = p_degrees_to_radians_Cpp1(Rcpp::wrap(degrees));
+            rcpp_result_gen = p_degrees_to_radians_Cpp1(Shield<SEXP>(Rcpp::wrap(degrees)));
         }
         if (rcpp_result_gen.inherits("interrupted-error"))
             throw Rcpp::internal::InterruptedException();
         if (rcpp_result_gen.inherits("try-error"))
-            throw Rcpp::exception(as<std::string>(rcpp_result_gen).c_str());
+            throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
         return Rcpp::as<NumericVector >(rcpp_result_gen);
     }
 
@@ -105,17 +105,17 @@ namespace stormwindmodel {
         static Ptr_radians_to_degrees_Cpp1 p_radians_to_degrees_Cpp1 = NULL;
         if (p_radians_to_degrees_Cpp1 == NULL) {
             validateSignature("NumericVector(*radians_to_degrees_Cpp1)(NumericVector)");
-            p_radians_to_degrees_Cpp1 = (Ptr_radians_to_degrees_Cpp1)R_GetCCallable("stormwindmodel", "stormwindmodel_radians_to_degrees_Cpp1");
+            p_radians_to_degrees_Cpp1 = (Ptr_radians_to_degrees_Cpp1)R_GetCCallable("stormwindmodel", "_stormwindmodel_radians_to_degrees_Cpp1");
         }
         RObject rcpp_result_gen;
         {
             RNGScope RCPP_rngScope_gen;
-            rcpp_result_gen = p_radians_to_degrees_Cpp1(Rcpp::wrap(radians));
+            rcpp_result_gen = p_radians_to_degrees_Cpp1(Shield<SEXP>(Rcpp::wrap(radians)));
         }
         if (rcpp_result_gen.inherits("interrupted-error"))
             throw Rcpp::internal::InterruptedException();
         if (rcpp_result_gen.inherits("try-error"))
-            throw Rcpp::exception(as<std::string>(rcpp_result_gen).c_str());
+            throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
         return Rcpp::as<NumericVector >(rcpp_result_gen);
     }
 
@@ -124,17 +124,17 @@ namespace stormwindmodel {
         static Ptr_calc_bearing_Cpp p_calc_bearing_Cpp = NULL;
         if (p_calc_bearing_Cpp == NULL) {
             validateSignature("NumericVector(*calc_bearing_Cpp)(NumericVector,NumericVector,NumericVector,NumericVector)");
-            p_calc_bearing_Cpp = (Ptr_calc_bearing_Cpp)R_GetCCallable("stormwindmodel", "stormwindmodel_calc_bearing_Cpp");
+            p_calc_bearing_Cpp = (Ptr_calc_bearing_Cpp)R_GetCCallable("stormwindmodel", "_stormwindmodel_calc_bearing_Cpp");
         }
         RObject rcpp_result_gen;
         {
             RNGScope RCPP_rngScope_gen;
-            rcpp_result_gen = p_calc_bearing_Cpp(Rcpp::wrap(tclat_1), Rcpp::wrap(tclon_1), Rcpp::wrap(tclat_2), Rcpp::wrap(tclon_2));
+            rcpp_result_gen = p_calc_bearing_Cpp(Shield<SEXP>(Rcpp::wrap(tclat_1)), Shield<SEXP>(Rcpp::wrap(tclon_1)), Shield<SEXP>(Rcpp::wrap(tclat_2)), Shield<SEXP>(Rcpp::wrap(tclon_2)));
         }
         if (rcpp_result_gen.inherits("interrupted-error"))
             throw Rcpp::internal::InterruptedException();
         if (rcpp_result_gen.inherits("try-error"))
-            throw Rcpp::exception(as<std::string>(rcpp_result_gen).c_str());
+            throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
         return Rcpp::as<NumericVector >(rcpp_result_gen);
     }
 
@@ -143,17 +143,17 @@ namespace stormwindmodel {
         static Ptr_gradient_to_surface_Cpp p_gradient_to_surface_Cpp = NULL;
         if (p_gradient_to_surface_Cpp == NULL) {
             validateSignature("double(*gradient_to_surface_Cpp)(double,double)");
-            p_gradient_to_surface_Cpp = (Ptr_gradient_to_surface_Cpp)R_GetCCallable("stormwindmodel", "stormwindmodel_gradient_to_surface_Cpp");
+            p_gradient_to_surface_Cpp = (Ptr_gradient_to_surface_Cpp)R_GetCCallable("stormwindmodel", "_stormwindmodel_gradient_to_surface_Cpp");
         }
         RObject rcpp_result_gen;
         {
             RNGScope RCPP_rngScope_gen;
-            rcpp_result_gen = p_gradient_to_surface_Cpp(Rcpp::wrap(wind_gl_aa), Rcpp::wrap(cdist));
+            rcpp_result_gen = p_gradient_to_surface_Cpp(Shield<SEXP>(Rcpp::wrap(wind_gl_aa)), Shield<SEXP>(Rcpp::wrap(cdist)));
         }
         if (rcpp_result_gen.inherits("interrupted-error"))
             throw Rcpp::internal::InterruptedException();
         if (rcpp_result_gen.inherits("try-error"))
-            throw Rcpp::exception(as<std::string>(rcpp_result_gen).c_str());
+            throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
         return Rcpp::as<double >(rcpp_result_gen);
     }
 
@@ -162,17 +162,17 @@ namespace stormwindmodel {
         static Ptr_degrees_to_radians_Cpp2 p_degrees_to_radians_Cpp2 = NULL;
         if (p_degrees_to_radians_Cpp2 == NULL) {
             validateSignature("NumericVector(*degrees_to_radians_Cpp2)(NumericVector)");
-            p_degrees_to_radians_Cpp2 = (Ptr_degrees_to_radians_Cpp2)R_GetCCallable("stormwindmodel", "stormwindmodel_degrees_to_radians_Cpp2");
+            p_degrees_to_radians_Cpp2 = (Ptr_degrees_to_radians_Cpp2)R_GetCCallable("stormwindmodel", "_stormwindmodel_degrees_to_radians_Cpp2");
         }
         RObject rcpp_result_gen;
         {
             RNGScope RCPP_rngScope_gen;
-            rcpp_result_gen = p_degrees_to_radians_Cpp2(Rcpp::wrap(degrees));
+            rcpp_result_gen = p_degrees_to_radians_Cpp2(Shield<SEXP>(Rcpp::wrap(degrees)));
         }
         if (rcpp_result_gen.inherits("interrupted-error"))
             throw Rcpp::internal::InterruptedException();
         if (rcpp_result_gen.inherits("try-error"))
-            throw Rcpp::exception(as<std::string>(rcpp_result_gen).c_str());
+            throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
         return Rcpp::as<NumericVector >(rcpp_result_gen);
     }
 
@@ -181,17 +181,17 @@ namespace stormwindmodel {
         static Ptr_latlon_to_km_Cpp p_latlon_to_km_Cpp = NULL;
         if (p_latlon_to_km_Cpp == NULL) {
             validateSignature("NumericVector(*latlon_to_km_Cpp)(NumericVector,NumericVector,NumericVector,NumericVector,NumericVector)");
-            p_latlon_to_km_Cpp = (Ptr_latlon_to_km_Cpp)R_GetCCallable("stormwindmodel", "stormwindmodel_latlon_to_km_Cpp");
+            p_latlon_to_km_Cpp = (Ptr_latlon_to_km_Cpp)R_GetCCallable("stormwindmodel", "_stormwindmodel_latlon_to_km_Cpp");
         }
         RObject rcpp_result_gen;
         {
             RNGScope RCPP_rngScope_gen;
-            rcpp_result_gen = p_latlon_to_km_Cpp(Rcpp::wrap(tclat_1), Rcpp::wrap(tclon_1), Rcpp::wrap(tclat_2), Rcpp::wrap(tclon_2), Rcpp::wrap(Rearth));
+            rcpp_result_gen = p_latlon_to_km_Cpp(Shield<SEXP>(Rcpp::wrap(tclat_1)), Shield<SEXP>(Rcpp::wrap(tclon_1)), Shield<SEXP>(Rcpp::wrap(tclat_2)), Shield<SEXP>(Rcpp::wrap(tclon_2)), Shield<SEXP>(Rcpp::wrap(Rearth)));
         }
         if (rcpp_result_gen.inherits("interrupted-error"))
             throw Rcpp::internal::InterruptedException();
         if (rcpp_result_gen.inherits("try-error"))
-            throw Rcpp::exception(as<std::string>(rcpp_result_gen).c_str());
+            throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
         return Rcpp::as<NumericVector >(rcpp_result_gen);
     }
 
@@ -200,17 +200,17 @@ namespace stormwindmodel {
         static Ptr_will1_Cpp p_will1_Cpp = NULL;
         if (p_will1_Cpp == NULL) {
             validateSignature("double(*will1_Cpp)(double,double,double,double,double,double,double,double,double)");
-            p_will1_Cpp = (Ptr_will1_Cpp)R_GetCCallable("stormwindmodel", "stormwindmodel_will1_Cpp");
+            p_will1_Cpp = (Ptr_will1_Cpp)R_GetCCallable("stormwindmodel", "_stormwindmodel_will1_Cpp");
         }
         RObject rcpp_result_gen;
         {
             RNGScope RCPP_rngScope_gen;
-            rcpp_result_gen = p_will1_Cpp(Rcpp::wrap(cdist), Rcpp::wrap(Rmax), Rcpp::wrap(R1), Rcpp::wrap(R2), Rcpp::wrap(vmax_gl), Rcpp::wrap(n), Rcpp::wrap(A), Rcpp::wrap(X1), Rcpp::wrap(X2));
+            rcpp_result_gen = p_will1_Cpp(Shield<SEXP>(Rcpp::wrap(cdist)), Shield<SEXP>(Rcpp::wrap(Rmax)), Shield<SEXP>(Rcpp::wrap(R1)), Shield<SEXP>(Rcpp::wrap(R2)), Shield<SEXP>(Rcpp::wrap(vmax_gl)), Shield<SEXP>(Rcpp::wrap(n)), Shield<SEXP>(Rcpp::wrap(A)), Shield<SEXP>(Rcpp::wrap(X1)), Shield<SEXP>(Rcpp::wrap(X2)));
         }
         if (rcpp_result_gen.inherits("interrupted-error"))
             throw Rcpp::internal::InterruptedException();
         if (rcpp_result_gen.inherits("try-error"))
-            throw Rcpp::exception(as<std::string>(rcpp_result_gen).c_str());
+            throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
         return Rcpp::as<double >(rcpp_result_gen);
     }
 
