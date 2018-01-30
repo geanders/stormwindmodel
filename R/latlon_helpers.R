@@ -69,7 +69,8 @@ latlon_to_km <- function(tclat_1, tclon_1, tclat_2, tclon_2, Rearth = 6378.14){
 #'    the two observations, in meters per second.
 #'
 #' @export
-calc_forward_speed <- function(tclat_1, tclon_1, time_1, tclat_2, tclon_2, time_2){
+calc_forward_speed <- function(tclat_1, tclon_1, time_1,
+                               tclat_2, tclon_2, time_2){
   dist <- latlon_to_km(tclat_1, tclon_1, tclat_2, tclon_2) * 1000
   time <- as.numeric(difftime(time_2, time_1, units = "secs"))
   tcspd <- dist / time
@@ -122,7 +123,8 @@ calc_bearing <- function(tclat_1, tclon_1, tclat_2, tclon_2){
   tclon_2 <- degrees_to_radians(-tclon_2)
 
   S <- cos(tclat_2) * sin(tclon_1 - tclon_2)
-  C <- cos(tclat_1) * sin(tclat_2) - sin(tclat_1) * cos(tclat_2) * cos(tclon_1 - tclon_2)
+  C <- cos(tclat_1) * sin(tclat_2) - sin(tclat_1) *
+    cos(tclat_2) * cos(tclon_1 - tclon_2)
 
   theta_rad <- atan2(S, C)
   theta <- radians_to_degrees(theta_rad) + 90

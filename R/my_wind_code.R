@@ -147,8 +147,10 @@ calc_grid_wind <- function(grid_point = stormwindmodel::county_points[1, ],
                                      Rmax = Rmax),
                       # Add back in storm forward motion component
                       windspeed = ~ add_forward_speed(wind_sfc_sym,
-                                                      tcspd_u, tcspd_v,
-                                                      swd, cdist, Rmax)) %>%
+                                                      tcspd_u,
+                                                      tcspd_v,
+                                                      swd, cdist,
+                                                      Rmax)) %>%
           dplyr::select_(~ date, ~ windspeed)
         return(grid_wind)
 }
@@ -325,4 +327,3 @@ get_grid_winds <- function(hurr_track = stormwindmodel::floyd_tracks,
 
         return(grid_winds)
 }
-

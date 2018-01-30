@@ -42,32 +42,32 @@
 map_wind <- function(grid_winds, value = "vmax_sust", break_point = NULL,
                      wind_metric = "mps"){
 
-  grid_winds$value <- grid_winds[ , value]
-  if(wind_metric != "mps"){
+  grid_winds$value <- grid_winds[, value]
+  if (wind_metric != "mps"){
     grid_winds$value <- weathermetrics::convert_wind_speed(grid_winds$value,
                                                            old_metric = "mps",
                                                            new_metric = wind_metric)
   }
 
-  if(!is.null(break_point)){
+  if (!is.null(break_point)){
     cut_values <- cut(grid_winds$value,
                       breaks = c(0, break_point, max(grid_winds$value)),
                       include.lowest = TRUE)
     grid_winds$value <- cut_values
     num_colors <- 2
   } else {
-    if(wind_metric == "mps"){
+    if (wind_metric == "mps"){
       breaks <- c(0, seq(15, 45, 5))
       exposure_palette <- c("#FEE5D9", "#FCBBA1", "#FC9272", "#FB6A4A",
                             "#DE2D26", "#A50F15")
-    } else if(wind_metric == "knots"){
+    } else if (wind_metric == "knots"){
       breaks <- c(0, 34, 50, 64, 100)
       exposure_palette <- c("#FEE0D2", "#FC9272", "#DE2D26")
     }
     palette_name <- "Reds"
 
     # Adjust for right outliers
-    if(max(grid_winds$value) > max(breaks)){
+    if (max(grid_winds$value) > max(breaks)){
       breaks <- c(breaks, max(grid_winds$value))
     }
 
@@ -86,10 +86,14 @@ map_wind <- function(grid_winds, value = "vmax_sust", break_point = NULL,
     dplyr::mutate_(polyname = ~ as.character(polyname)) %>%
     dplyr::mutate_(polyname = ~ stringr::str_replace(polyname, ":.+", ""))
   us_counties <- ggplot2::map_data("county") %>%
-    dplyr::filter_(~ !(region %in% c("arizona", "california", "colorado", "idaho",
-                           "montana", "nebraska", "nevada", "new mexico",
-                           "north dakota", "oregon", "south dakota",
-                           "utah", "washington", "wyoming", "minnesota"))) %>%
+    dplyr::filter_(~ !(region %in% c("arizona", "california",
+                                     "colorado", "idaho",
+                                     "montana", "nebraska",
+                                     "nevada", "new mexico",
+                                     "north dakota", "oregon",
+                                     "south dakota", "utah",
+                                     "washington", "wyoming",
+                                     "minnesota"))) %>%
     tidyr::unite_(col = "polyname", from = c("region", "subregion"),
                   sep = ",") %>%
     dplyr::left_join(county.fips, by = "polyname") %>%
@@ -119,7 +123,7 @@ map_wind <- function(grid_winds, value = "vmax_sust", break_point = NULL,
                                    wind_metric),
                             ")")
 
-  if(!is.null(break_point)){
+  if (!is.null(break_point)){
     out <- out + ggplot2::scale_fill_manual(name = exposure_legend,
                                             values = c("white", "#DE2D26"),
                                             labels = levels(cut_values))
@@ -183,9 +187,9 @@ add_storm_track <- function(storm_tracks, plot_object,
                      latitude < 47.48) %>%
     dplyr::mutate_(date = ~ lubridate::ymd_hm(date))
 
-  if(nrow(tracks) >= 3){
+  if (nrow(tracks) >= 3){
     full_tracks <- interp_track(tracks)
-  } else{
+  } else {
     full_tracks <- tracks
   }
 
@@ -197,7 +201,7 @@ add_storm_track <- function(storm_tracks, plot_object,
                        alpha = alpha,
                        color = color)
 
-  if(plot_points){
+  if (plot_points){
     out <- out + ggplot2::geom_point(data = tracks,
                                      ggplot2::aes_(x = ~ longitude,
                                                    y = ~ latitude,

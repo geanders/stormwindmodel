@@ -101,15 +101,16 @@ will1a <- function(vmax_gl, r, Rmax, n){
 #' @export
 will1 <- function(cdist, Rmax, R1, R2, vmax_gl, n, A, X1, X2 = 25){
 
-  if(is.na(Rmax) || is.na(vmax_gl) ||
+  if (is.na(Rmax) || is.na(vmax_gl) ||
      is.na(n) || is.na(A) || is.na(X1)){
     return(NA)
   } else {
 
     Vi <- vmax_gl * (cdist / Rmax) ^ n
-    Vo <- vmax_gl * ((1 - A) * exp((Rmax - cdist)/X1) + A * exp((Rmax - cdist) / X2))
+    Vo <- vmax_gl * ( (1 - A) * exp( (Rmax - cdist) / X1) +
+                       A * exp( (Rmax - cdist) / X2))
 
-    if(cdist < R1){
+    if (cdist < R1){
       wind_gl_aa <- Vi
     } else if (cdist > R2){
       wind_gl_aa <- Vo
@@ -139,9 +140,9 @@ will1 <- function(cdist, Rmax, R1, R2, vmax_gl, n, A, X1, X2 = 25){
 #'
 #' @export
 will2 <- function(r, R1){
-  xi = (r - R1) / 25
+  xi <- (r - R1) / 25
 
-  if(xi <= 0){
+  if (xi <= 0){
       w <- 0
       } else if (xi >= 1){
         w <- 1
@@ -177,8 +178,8 @@ will2 <- function(r, R1){
 #'
 #' @export
 will3_right <- function(n, A, X1, Rmax){
-  eq3_right <- (n * ((1 - A) * X1 + 25 * A)) /
-      (n * ((1 - A) * X1 + 25 * A) + Rmax)
+  eq3_right <- (n * ( (1 - A) * X1 + 25 * A)) /
+      (n * ( (1 - A) * X1 + 25 * A) + Rmax)
   return(eq3_right)
 }
 
@@ -213,7 +214,7 @@ will3_deriv_func <- function(xi, eq3_right){
     420 * 6 * xi ^ 5 + 126 * 5 * xi ^ 4
   func <- 70 * xi ^ 9 - 315 * xi ^ 8 + 540 * xi ^ 7 - 420 * xi ^ 6 +
     126 * xi ^ 5 - eq3_right
-  deriv_func <-c(deriv, func)
+  deriv_func <- c(deriv, func)
   return(deriv_func)
 }
 
@@ -249,17 +250,19 @@ will3_deriv_func <- function(xi, eq3_right){
 #'
 #' @export
 solve_for_xi <- function(xi0 = 0.5, eq3_right, eps = 10e-4, itmax = 100){
-  if(is.na(eq3_right)){
+  if (is.na(eq3_right)){
     return(NA)
   } else{
     i <- 1
     xi <- xi0
-    while(i <= itmax){
+    while (i <= itmax){
       deriv_func <- will3_deriv_func(xi, eq3_right)
-      if(abs(deriv_func[2]) <= eps){ break }
+      if (abs(deriv_func[2]) <= eps){
+        break
+        }
       xi <- xi - deriv_func[2] / deriv_func[1]
     }
-    if(i < itmax){
+    if (i < itmax){
       return(xi)
     } else{
       warning("Newton-Raphson did not converge.")

@@ -44,7 +44,7 @@
 #' @export
 calc_gradient_speed <- function(vmax_sfc_sym, over_land){
   reduction_factor <- 0.9
-  if(over_land){
+  if (over_land){
     reduction_factor <- reduction_factor * 0.8
   }
   vmax_gl <- vmax_sfc_sym / reduction_factor
@@ -144,12 +144,12 @@ remove_forward_speed <- function(vmax, tcspd){
 #'
 #' @export
 gradient_to_surface <- function(wind_gl_aa, cdist){
-  if(cdist <= 100){
+  if (cdist <= 100){
     reduction_factor <- 0.9
-  } else if(cdist >= 700){
+  } else if (cdist >= 700){
     reduction_factor <- 0.75
   } else {
-    reduction_factor <- 0.90 - (cdist - 100) * (0.15/ 600)
+    reduction_factor <- 0.90 - (cdist - 100) * (0.15 / 600)
   }
   # Since all counties are over land, reduction factor should
   # be 20% lower than if it were over water

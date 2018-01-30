@@ -36,16 +36,16 @@
 #'
 #' @export
 add_inflow <- function(gwd, cdist, Rmax){
-  if(is.na(gwd) | is.na(cdist) | is.na(Rmax)){
+  if (is.na(gwd) | is.na(cdist) | is.na(Rmax)){
     return(NA)
   }
 
   # Calculate inflow angle over water based on radius of location from storm
   # center in comparison to radius of maximum winds (Phadke et al. 2003)
-  if(cdist < Rmax){
+  if (cdist < Rmax){
     inflow_angle <- 10 + (1 + (cdist / Rmax))
-  } else if(Rmax <= cdist & cdist < 1.2 * Rmax){
-    inflow_angle <- 20 + 25 * ((cdist / Rmax) - 1)
+  } else if (Rmax <= cdist & cdist < 1.2 * Rmax){
+    inflow_angle <- 20 + 25 * ( (cdist / Rmax) - 1)
   } else {
     inflow_angle <- 25
   }
