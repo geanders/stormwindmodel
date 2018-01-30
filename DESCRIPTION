@@ -48,7 +48,7 @@ Imports:
     lubridate (>= 1.7.1),
     maps (>= 3.2.0),
     plyr (>= 1.8.4),
-    stringr (>= 1.2.0),
+    stringr (>= 1.2.0.9000),
     tidyr (>= 0.7.2),
     weathermetrics (>= 1.2.2)
 LazyData: TRUE
