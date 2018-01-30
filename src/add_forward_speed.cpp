@@ -63,8 +63,9 @@ NumericVector add_forward_speed_Cpp(NumericVector wind_sfc_sym, NumericVector tc
 
 
 /*** R
-add_forward_speed(1,1,1,1,1,1)
-add_forward_speed_Cpp(1,1,1,1,1,1)
-microbenchmark::microbenchmark(add_forward_speed(1,1,1,1,1,1),
-                               add_forward_speed_Cpp(1,1,1,1,1,1))
+add_forward_speed(1, 1, 1, 1, 1, 1)
+add_forward_speed_Cpp(1, 1, 1, 1, 1, 1)
+microbenchmark::microbenchmark(add_forward_speed(1, 1, 1, 1, 1, 1),
+                               add_forward_speed_Cpp(1, 1, 1, 1, 1, 1))
+# C++ function around 25 times faster
 */

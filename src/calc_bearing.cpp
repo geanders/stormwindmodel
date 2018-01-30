@@ -85,9 +85,10 @@ NumericVector calc_bearing_Cpp(NumericVector tclat_1, NumericVector tclon_1, Num
 
 
 /*** R
-calc_bearing(7,4,3,15)
-calc_bearing_Cpp(7,4,3,15)
+calc_bearing(7, 4, 3, 15)
+calc_bearing_Cpp(7, 4, 3, 15)
 
-microbenchmark::microbenchmark(calc_bearing(7,4,3,15),
-                               calc_bearing_Cpp(7,4,3,15))
+microbenchmark::microbenchmark(calc_bearing(7, 4, 3, 15),
+                               calc_bearing_Cpp(7, 4, 3, 15))
+# C++ function around 25 times faster
 */
