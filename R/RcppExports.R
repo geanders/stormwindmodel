@@ -154,6 +154,17 @@ gradient_to_surface_Cpp <- function(wind_gl_aa, cdist) {
     .Call('_stormwindmodel_gradient_to_surface_Cpp', PACKAGE = 'stormwindmodel', wind_gl_aa, cdist)
 }
 
+#' Convert from degrees to radians
+#'
+#' Convert an angle from degrees to radians (C++ version)
+#'
+#' @param degrees A numeric vector with measurements in degrees.
+#'
+#' @return A numeric vector with measurement in radians.
+degrees_to_radians_Cpp2 <- function(degrees) {
+    .Call('_stormwindmodel_degrees_to_radians_Cpp2', PACKAGE = 'stormwindmodel', degrees)
+}
+
 #' Calculate distance between two locations (C++ version)
 #'
 #' This function takes latitudes and longitudes for two locations and
@@ -193,10 +204,6 @@ gradient_to_surface_Cpp <- function(wind_gl_aa, cdist) {
 #'    }
 #'
 #' @export
-degrees_to_radians_Cpp2 <- function(degrees) {
-    .Call('_stormwindmodel_degrees_to_radians_Cpp2', PACKAGE = 'stormwindmodel', degrees)
-}
-
 latlon_to_km_Cpp <- function(tclat_1, tclon_1, tclat_2, tclon_2, Rearth = 6378.14) {
     .Call('_stormwindmodel_latlon_to_km_Cpp', PACKAGE = 'stormwindmodel', tclat_1, tclon_1, tclat_2, tclon_2, Rearth)
 }

@@ -4,6 +4,22 @@ using namespace Rcpp;
 
 // [[Rcpp::interfaces(r, cpp)]]
 
+//' Convert from degrees to radians
+//'
+//' Convert an angle from degrees to radians (C++ version)
+//'
+//' @param degrees A numeric vector with measurements in degrees.
+//'
+//' @return A numeric vector with measurement in radians.
+// [[Rcpp::export]]
+NumericVector degrees_to_radians_Cpp2(NumericVector degrees){
+  NumericVector radians(degrees.size());
+  for (int i=0; i < degrees.size(); i++) {
+    radians[i] = degrees[i] * M_PI / 180;
+  }
+  return radians;
+}
+
 //' Calculate distance between two locations (C++ version)
 //'
 //' This function takes latitudes and longitudes for two locations and
@@ -43,15 +59,6 @@ using namespace Rcpp;
 //'    }
 //'
 //' @export
-// [[Rcpp::export]]
-NumericVector degrees_to_radians_Cpp2(NumericVector degrees){
-  NumericVector radians(degrees.size());
-  for (int i=0; i < degrees.size(); i++) {
-    radians[i] = degrees[i] * M_PI / 180;
-  }
-  return radians;
-}
-
 // [[Rcpp::export]]
 NumericVector latlon_to_km_Cpp(NumericVector tclat_1, NumericVector tclon_1,
                                NumericVector tclat_2, NumericVector tclon_2,
