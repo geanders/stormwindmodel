@@ -33,4 +33,3 @@ A numeric vector with the average forward speed of the storm between
 This storm takes two storm locations, and their observations times, and
 calculates the average speed of the storm between the two observations.
 }
-

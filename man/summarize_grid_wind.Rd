@@ -44,4 +44,3 @@ Returns a one-row matrix with wind characteristics for a single
 Summarizes the wind time series for a single grid point, as
 created by \code{calc_grid_wind}.
 }
-

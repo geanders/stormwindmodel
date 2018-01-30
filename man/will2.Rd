@@ -20,4 +20,3 @@ w Numeric vector of the weighting parameter for Willoughby's wind
 \description{
 Willoughby et al. (2006), Equation 2
 }
-

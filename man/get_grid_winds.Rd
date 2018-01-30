@@ -70,4 +70,3 @@ grid_winds <- get_grid_winds(hurr_track = floyd_tracks,
 }
 
 }
-

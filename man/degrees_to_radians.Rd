@@ -15,4 +15,3 @@ A numeric vector with measurement in radians.
 \description{
 Convert an angle from degrees to radians.
 }
-

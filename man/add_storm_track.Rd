@@ -51,4 +51,3 @@ add_storm_track(floyd_tracks, plot_object = floyd_map)
 }
 
 }
-

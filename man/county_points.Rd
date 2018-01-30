@@ -28,4 +28,3 @@ a dataframe from the U.S. Census Bureau, which was pulled from the website
 listed in "Source".
 }
 \keyword{datasets}
-

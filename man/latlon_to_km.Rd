@@ -50,4 +50,3 @@ This function uses the Haversine method with great circle distance
      \item{\eqn{D}}: Distance between the two locations, in kilometers
    }
 }
-
