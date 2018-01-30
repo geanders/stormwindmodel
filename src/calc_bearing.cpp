@@ -6,8 +6,8 @@ using namespace Rcpp;
 // [[Rcpp::interfaces(r, cpp)]]
 
 // [[Rcpp::export]]
-NumericVector radians_to_degrees_Cpp1(NumericVector radians){
-  NumericVector degrees(radians.size());
+Rcpp::NumericVector radians_to_degrees_Cpp1(Rcpp::NumericVector radians){
+  Rcpp::NumericVector degrees(radians.size());
   for (int i = 0; i < radians.size(); i++){
     degrees[i] = radians[i] * 180 / M_PI;
   }
@@ -54,21 +54,26 @@ NumericVector radians_to_degrees_Cpp1(NumericVector radians){
 //'
 //' @export
 // [[Rcpp::export]]
-NumericVector calc_bearing_Cpp(NumericVector tclat_1, NumericVector tclon_1, NumericVector tclat_2,
-                               NumericVector tclon_2){
+Rcpp::NumericVector calc_bearing_Cpp(Rcpp::NumericVector tclat_1,
+                                     Rcpp::NumericVector tclon_1,
+                                     Rcpp::NumericVector tclat_2,
+                                     Rcpp::NumericVector tclon_2){
 
   tclat_1 = degrees_to_radians_Cpp(tclat_1);
   tclon_1 = degrees_to_radians_Cpp(-tclon_1);
   tclat_2 = degrees_to_radians_Cpp(tclat_2);
   tclon_2 = degrees_to_radians_Cpp(-tclon_2);
 
-  NumericVector S(tclat_1.size()), C(tclat_1.size()), theta_rad(tclat_1.size()), theta(tclat_1.size());
+  Rcpp::NumericVector S(tclat_1.size()),
+                      C(tclat_1.size()),
+                      theta_rad(tclat_1.size()),
+                      theta(tclat_1.size());
 
   for (int i = 0; i < tclat_1.size(); i++ ){
 
     S[i] = cos(tclat_2[i]) * sin(tclon_1[i] - tclon_2[i]);
-    C[i] = cos(tclat_1[i]) * sin(tclat_2[i]) - sin(tclat_1[i])
-      * cos(tclat_2[i]) * cos(tclon_1[i] - tclon_2[i]);
+    C[i] = cos(tclat_1[i]) * sin(tclat_2[i]) - sin(tclat_1[i]) *
+      cos(tclat_2[i]) * cos(tclon_1[i] - tclon_2[i]);
 
     theta_rad[i] = atan2(S[i], C[i]);
   }
@@ -80,9 +85,6 @@ NumericVector calc_bearing_Cpp(NumericVector tclat_1, NumericVector tclon_1, Num
 
   return theta;
 }
-
-
-
 
 /*** R
 calc_bearing(7, 4, 3, 15)

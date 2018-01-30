@@ -33,10 +33,18 @@ using namespace Rcpp;
 //'    tropical cyclone winds and waves for emergency management. Ocean
 //'    Engineering 30(4):553-578.
 // [[Rcpp::export]]
-NumericVector add_forward_speed_Cpp(NumericVector wind_sfc_sym, NumericVector tcspd_u, NumericVector tcspd_v,
-                             NumericVector swd, NumericVector cdist, NumericVector Rmax){
-  NumericVector wind_sfc_sym_u(swd.size()), wind_sfc_sym_v(swd.size()), correction_factor(swd.size()),
-  wind_sfc_u(swd.size()), wind_sfc_v(swd.size()), wind_sfc(swd.size());
+Rcpp::NumericVector add_forward_speed_Cpp(Rcpp::NumericVector wind_sfc_sym,
+                                          Rcpp::NumericVector tcspd_u,
+                                          Rcpp::NumericVector tcspd_v,
+                                          Rcpp::NumericVector swd,
+                                          Rcpp::NumericVector cdist,
+                                          Rcpp::NumericVector Rmax){
+  Rcpp::NumericVector wind_sfc_sym_u(swd.size()),
+                      wind_sfc_sym_v(swd.size()),
+                      correction_factor(swd.size()),
+                      wind_sfc_u(swd.size()),
+                      wind_sfc_v(swd.size()),
+                      wind_sfc(swd.size());
   swd = degrees_to_radians_Cpp(swd);
   // Calculate u- and v-components of surface wind speed
   for (int i=0; i < swd.size(); i++) {
