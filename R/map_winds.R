@@ -1,27 +1,38 @@
 #' Map wind exposure at the county level
 #'
-#' @param grid_winds A dataframe that is the output of
-#'    \code{\link{get_grid_winds}}.
-#' @param value A character string giving the value to plot. Possible options
-#'    are "max_gust" (maximum gust wind speeds) and "max_sust" (maximum
-#'    sustained wind speeds).
-#' @param break_point An numeric value giving the value of the "value"
-#'    parameter to break at for a binary map showing exposure versus no exposure.
-#' @param wind_metric A character vector with the wind metric to use for the map.
-#'    Possible values include \code{"knots"}, \code{"mph"}, \code{"ftps"} (ft / s),
-#'    \code{"kmph"} (km / hr), and \code{"mps"} (m / s, the default).
+#' Inputs a dataframe with modeled winds for each eastern U.S. county and
+#' maps these modeled winds.
 #'
-#' @return This function returns a map of the "ggplot" class, plotting
+#' @param grid_winds A dataframe that is the output of running
+#'    \code{\link{get_grid_winds}} using eastern U.S. county centers as the
+#'    grid point locations for modeling the winds.
+#' @param value A character string giving the value to plot. Possible options
+#'    are \code{"vmax_gust"} (maximum gust wind speeds) and
+#'    \code{"vmax_sust"} (maximum sustained wind speeds).
+#' @param break_point An numeric value giving the value of the \code{value} parameter
+#'    (e.g.,maximum gust wind speeds or maximum sustained wind speeds)
+#'    at which to break for a binary map showing exposure versus no exposure.
+#'    The default for this parameter is \code{NULL}, which returns a map with
+#'    continuous wind speed values. If the \code{break_point} argument is set
+#'    to a numeric value, the function will return a map where counties are given
+#'    binary classifications of "exposed" or "not exposed" based on whether
+#'    modeleded wind speed for the county is above or below this break point.
+#' @param wind_metric A character vector with the wind metric to use for the map.
+#'    Possible values are \code{"knots"} and \code{"mps"} (m / s, the default).
+#'
+#' @return This function returns a map of the \code{ggplot} class, plotting
 #'    exposure to hurricane winds by county for the eastern half of the United
 #'    States.
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' data("katrina_tracks")
-#' data("county_point")
+#' data("county_points")
 #' grid_winds_katrina <- get_grid_winds(hurr_track = katrina_tracks,
 #'                                      grid_df = county_points)
 #' map_wind(grid_winds_katrina)
+#' map_wind(grid_winds_katrina, wind_metric = "knots")
+#' map_wind(grid_winds_katrina, value = "vmax_gust")
 #' map_wind(grid_winds_katrina, break_point = 20)
 #' }
 #'
@@ -30,9 +41,6 @@
 #' @export
 map_wind <- function(grid_winds, value = "vmax_sust", break_point = NULL,
                      wind_metric = "mps"){
-  # if(!(value %in% c("vmax_gust", "vmax_sust"))){
-  #   stop("`value` must be either `vmax_gust` or `vsust_gust`.")
-  # }
 
   grid_winds$value <- grid_winds[ , value]
   if(wind_metric != "mps"){
@@ -45,7 +53,7 @@ map_wind <- function(grid_winds, value = "vmax_sust", break_point = NULL,
     cut_values <- cut(grid_winds$value,
                       breaks = c(0, break_point, max(grid_winds$value)),
                       include.lowest = TRUE)
-    grid_winds$value <- as.numeric(cut_values)
+    grid_winds$value <- cut_values
     num_colors <- 2
   } else {
     if(wind_metric == "mps"){
@@ -63,7 +71,7 @@ map_wind <- function(grid_winds, value = "vmax_sust", break_point = NULL,
       breaks <- c(breaks, max(grid_winds$value))
     }
 
-    exposure_palette <- c("#f7f7f7", exposure_palette, "#1a1a1a")
+    exposure_palette <- c("#ffffff", exposure_palette, "#1a1a1a")
 
     grid_winds <- grid_winds %>%
       dplyr::mutate_(value = ~ cut(value, breaks = breaks,
@@ -71,25 +79,40 @@ map_wind <- function(grid_winds, value = "vmax_sust", break_point = NULL,
   }
 
   map_data <- dplyr::mutate_(grid_winds,
-                             region = ~ as.numeric(gridid)) %>%
-    dplyr::select_(~ region, ~ value)
+                             fips = ~ as.numeric(gridid)) %>%
+    dplyr::select_(~ fips, ~ value)
 
-  eastern_states <- c("alabama", "arkansas",
-                      "connecticut", "delaware",
-                      "district of columbia", "florida",
-                      "georgia", "illinois", "indiana",
-                      "iowa", "kansas", "kentucky", "louisiana",
-                      "maine", "maryland", "massachusetts",
-                      "michigan", "mississippi",
-                      "missouri", "new hampshire", "new jersey",
-                      "new york", "north carolina", "ohio",
-                      "oklahoma", "pennsylvania", "rhode island",
-                      "south carolina", "tennessee", "texas",
-                      "vermont", "virginia", "west virginia",
-                      "wisconsin")
+  county.fips <- maps::county.fips %>%
+    dplyr::mutate_(polyname = ~ as.character(polyname)) %>%
+    dplyr::mutate_(polyname = ~ stringr::str_replace(polyname, ":.+", ""))
+  us_counties <- ggplot2::map_data("county") %>%
+    dplyr::filter_(~ !(region %in% c("arizona", "california", "colorado", "idaho",
+                           "montana", "nebraska", "nevada", "new mexico",
+                           "north dakota", "oregon", "south dakota",
+                           "utah", "washington", "wyoming", "minnesota"))) %>%
+    tidyr::unite_(col = "polyname", from = c("region", "subregion"),
+                  sep = ",") %>%
+    dplyr::left_join(county.fips, by = "polyname") %>%
+    dplyr::left_join(map_data, by = "fips")
 
-  out <- choroplethr::CountyChoropleth$new(map_data)
-  out$set_zoom(eastern_states)
+  out <- ggplot2::ggplot() +
+    ggplot2::geom_polygon(data = us_counties,
+                 ggplot2::aes_(x = ~ long, y = ~ lat, group = ~ group,
+                               fill = ~ value),
+                 color = "lightgray", size = 0.2) +
+    ggplot2::borders("state", regions = c("virginia", "north carolina", "south carolina",
+                                 "georgia", "florida", "alabama", "kentucky",
+                                 "tennessee", "maryland", "west virginia",
+                                 "district of columbia", "pennsylvania",
+                                 "new jersey", "delaware", "mississippi",
+                                 "louisiana", "texas", "oklahoma", "arkansas",
+                                 "new york", "connecticut", "rhode island",
+                                 "massachusetts", "new hampshire", "vermont",
+                                 "maine", "kansas", "missouri", "iowa", "michigan",
+                                 "illinois", "ohio", "wisconsin", "indiana"),
+            colour = "black", fill = NA, size = 0.2, alpha = 0.5) +
+    ggplot2::theme_void() +
+    ggplot2::coord_map()
 
   exposure_legend <- paste0("Wind speed (",
                             ifelse(wind_metric == "mps", "m / s",
@@ -97,40 +120,38 @@ map_wind <- function(grid_winds, value = "vmax_sust", break_point = NULL,
                             ")")
 
   if(!is.null(break_point)){
-    out$set_num_colors(num_colors = num_colors)
-    out$ggplot_scale <- ggplot2::scale_fill_manual(name = exposure_legend,
-                                                   values = c("white", "blue"),
-                                                   labels = levels(cut_values))
+    out <- out + ggplot2::scale_fill_manual(name = exposure_legend,
+                                            values = c("white", "#DE2D26"),
+                                            labels = levels(cut_values))
   } else{
-    out$ggplot_scale <- ggplot2::scale_fill_manual(name = exposure_legend,
-                                                   values = exposure_palette)
+    out <- out + ggplot2::scale_fill_manual(name = exposure_legend,
+                                            values = exposure_palette)
   }
-  return(out$render())
+
+  return(out)
 }
 
 #' Plot Atlantic basin hurricane tracks
 #'
-#' Plot the tracks of any selected storms in the hurricane tracking
-#'    dataset for the Atlantic basin. This function allows you to
-#'    plot a new map or add the tracks to an existing ggplot object.
+#' Plot the tracks of a selected tropical storm to a map of modeled wind
+#' speed.
 #'
-#' @param storm_tracks Character vector with the names of all storms to plot.
-#'    This parameter must use the unique storm identifiers from the
-#'    `storm_id` column of the `hurr_tracks` dataframe.
+#' @param storm_tracks A data frame with best tracks data for the storm
+#'    track you would like to add. See the example \code{\link{floyd_tracks}}
+#'    data for an example of the required format. This dataset must
+#'    include columns for \code{date} (date-time of the track observation),
+#'    \code{latitude}, and \code{longitude}.
 #' @param plot_object NULL or the name of a ggplot object to use as the
-#'    underlying plot object. If NULL, the function will generate a new
-#'    map of the eastern US states using `default_map`.
-#' @param padding Numerical value giving the number of degrees to add to the
-#'    outer limits of the plot object (or default map if `plot_object` is
-#'    left as NULL) when cropping hurricane tracks.
+#'    underlying plot object (e.g., the output from a call to
+#'    \code{\link{map_wind}})
 #' @param plot_points TRUE / FALSE indicator of whether to include points,
 #'    as well as lines, when plotting the hurricane tracks.
 #' @param alpha Numerical value designating the amount of transparency to
 #'    use for plotting tracks.
 #' @param color Character string giving the color to use to plot the tracks.
 #'
-#' @return Returns a ggplot object with plotting data for the storm tracks
-#'    of the selected storms. This object can be printed directly or added
+#' @return A ggplot object that includes a line with the track of a given
+#'    tropical storm. This object can be printed directly or added
 #'    on to with other ggplot commands.
 #'
 #' @export
@@ -138,6 +159,7 @@ map_wind <- function(grid_winds, value = "vmax_sust", break_point = NULL,
 #' @examples \dontrun{
 #' library(ggplot2)
 #' data("county_points")
+#' data("floyd_tracks")
 #' grid_winds_floyd <- get_grid_winds(hurr_track = floyd_tracks,
 #'                                    grid_df = county_points)
 #' floyd_map <- map_wind(grid_winds_floyd, value = "vmax_sust",
@@ -148,19 +170,17 @@ map_wind <- function(grid_winds, value = "vmax_sust", break_point = NULL,
 #'
 #' @importFrom dplyr %>%
 #' @export
-add_storm_track <- function(storm_tracks, plot_object, padding = 2,
+add_storm_track <- function(storm_tracks, plot_object,
                        plot_points = FALSE, alpha = 1,
                        color = "firebrick"){
 
   map_data <- plot_object$data
-  map_dim <- apply(map_data[ , c("long", "lat")], MARGIN = 2,
-                   function(x) range(x) + c(-1, 1) * padding)
   tracks <- storm_tracks %>%
     dplyr::select_(~ latitude, ~ longitude, ~ date) %>%
-    dplyr::filter_(~ longitude > map_dim[1, 1] &
-                     longitude < map_dim[2, 1] &
-                     latitude > map_dim[1, 2] &
-                     latitude < map_dim[2, 2]) %>%
+    dplyr::filter_(~ longitude > -106.65 &
+                     longitude < -67.01 &
+                     latitude > 25.13 &
+                     latitude < 47.48) %>%
     dplyr::mutate_(date = ~ lubridate::ymd_hm(date))
 
   if(nrow(tracks) >= 3){
@@ -196,7 +216,9 @@ add_storm_track <- function(storm_tracks, plot_object, padding = 2,
 #' splines use degrees of freedom equal to the number of original observations
 #' divided by two.
 #'
-#' @param track A dataframe with hurricane track data for a single storm
+#' @param track A dataframe with hurricane track data for a single storm. See
+#'    the \code{\link{floyd_tracks}} dataset that comes with the package for
+#'    an example of the required format for this dataframe.
 #' @param tint A numeric vector giving the time interval to impute to, in units
 #'    of hours (e.g., 0.25, the default, interpolates to 15 minute-intervals).
 #'

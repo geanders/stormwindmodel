@@ -58,7 +58,7 @@ latlon_to_km <- function(tclat_1, tclon_1, tclat_2, tclon_2, Rearth = 6378.14){
 
 #' Calculate storm's forward speed
 #'
-#' This storm takes two storm locations, and their observations times, and
+#' This storm takes two storm locations and their observations times and
 #' calculates the average speed of the storm between the two observations.
 #'
 #' @param time_1 A date-time vector giving the time of the first observation.

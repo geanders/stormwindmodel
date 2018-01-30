@@ -10,7 +10,7 @@ gradient_to_surface(wind_gl_aa, cdist)
 \item{wind_gl_aa}{A numerical value with estimated gradient-level wind speed
 (m / s) at a grid point.}
 
-\item{cdist}{A numerical value with radius from storm center to the grid
+\item{cdist}{A numerical value with radius from the storm center to the grid
 point, in kilometers.}
 }
 \value{
@@ -29,6 +29,10 @@ Over water, it is estimated to be 0.9 up to a radius of 100 km,
 a radius of 100 km and 700 km. Points over land should use a reduction
 factor that is 20\% lower. Because all of the counties are over
 land, the function makes this adjustment for all grid points.
+}
+\note{
+This function is only appropriate to use for points that are over
+   land.
 }
 \references{
 Knaff JA, DeMaria M, Molenar DA, Sampson CR, and Seybold MG. 2011. An

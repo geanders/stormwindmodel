@@ -14,12 +14,13 @@ storm. The dataframe must include columns for date-time (year, month, day,
 hour, minute; e.g., "198808051800" for August 5, 1988, 18:00 UTC),
 latitude, longitude, and wind speed (in knots). The column
 names for each of these must be \code{date}, \code{latitude},
-\code{longitude}, and \code{wind}.}
+\code{longitude}, and \code{wind}. See the example \code{\link{floyd_tracks}}
+dataset for an example of the required format.}
 
 \item{grid_df}{A dataframe of locations at which to calculate wind characteristics.
 This dataframe must include columns for latitude and longitude for each
-point, and these columns must be named "glat" and "glon". The latitudes
-and longitudes should be in decimal degrees, with longitudes in the
+point, and these columns must be named \code{glat} and \code{glon}.
+The latitudes and longitudes should be in decimal degrees, with longitudes in the
 Western hemisphere (so, almost all those for Atlantic basin storms)
 expressed as negative values.}
 
@@ -40,16 +41,18 @@ were above this speed at the location.}
 The dataframe of locations input, with the following columns of wind
 characteristics added for each location:
    \itemize{
-     \item{\code{max_gust}: Maximum value of surface-level (10 meters)
-       sustained winds, in meters per second, over the length of the
-       storm at the given location}
-     \item{\code{max_sust}: Maximum value of surface-level (10 meters)
+     \item{\code{vmax_gust}: Maximum value of surface-level (10 meters)
        gust winds, in meters per second, over the length of the
        storm at the given location}
+     \item{\code{vmax_sust}: Maximum value of surface-level (10 meters)
+       sustained winds, in meters per second, over the length of the
+       storm at the given location}
      \item{\code{gust_duration}: Length of time, in minutes, that
-       surface-level sustained winds were above 20 meters per second}
+       surface-level gust winds were above a specified value (default
+       is 20 m / s)}
      \item{\code{sust_duration}: Length of time, in minutes, that
-       surface-level gust winds were above 20 meters per second}
+       surface-level sustained winds were above a specified value (default
+       is 20 m / s)}
    }
 }
 \description{
@@ -60,6 +63,10 @@ either be a regularly-spaced grid or can be the central points of locations,
 like counties or cities. For counties in the eastern half of the United
 States, the \code{county_points} dataset that comes with the package can
 be used as the \code{grid_point} input.
+}
+\note{
+This function can take a few minutes to run, depending on the number
+of locations that are being modeled.
 }
 \examples{
 \dontrun{

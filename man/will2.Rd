@@ -14,9 +14,9 @@ measuring, in kilometers}
 kilometers}
 }
 \value{
-w Numeric vector of the weighting parameter for Willoughby's wind
-   profile equations.
+A numeric vector of the weighting parameter for Willoughby's wind
+   profile equations (\eqn{w}).
 }
 \description{
-Willoughby et al. (2006), Equation 2
+Calculates equation 2 from Willoughby et al. (2006).
 }

@@ -13,7 +13,8 @@ will3_right(n, A, X1, Rmax)
 
 \item{X1}{A numeric vector of one of the parameters of the Willoughby model.}
 
-\item{Rmax}{A numeric vector giving the radius to maximum winds (in kilometers)}
+\item{Rmax}{A numeric vector giving the radius to maximum winds (in kilometers)
+for the tropical storm.}
 }
 \value{
 A numeric vector with the value for the right-hand side of Eqn. 3 in

@@ -19,7 +19,7 @@ in kilometers}
 \item{vmax_gl}{Numeric vector of the tangential wind component of the maximum
 gradient wind speed, in meters per second}
 
-\item{n}{Numeric vector of ...}
+\item{n}{A numeric vector of one of the parameters of the Willoughby model.}
 
 \item{A}{A numeric vector of one of the parameters of the Willoughby model.}
 

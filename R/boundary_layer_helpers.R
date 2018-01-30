@@ -9,7 +9,7 @@
 #' @param gwd A numeric vector giving direction of gradient wind at a location,
 #'    in degrees. Due east is 0 degrees, due north 90 degrees, etc.
 #' @param cdist A numeric vector giving radius (in kilometers) from the storm
-#'    center to a location.
+#'    center to the location being modeled.
 #' @inheritParams will3_right
 #'
 #' @return Numeric vector with the gradient wind direction (in degrees),
@@ -19,6 +19,11 @@
 #' @details
 #'
 #' This function uses equations 11a-c from Phadke et al. (2003).
+#'
+#' @note
+#'
+#' This function is only appropriate for modeling wind speeds for locations
+#' that are over land.
 #'
 #' @references
 #'
@@ -56,8 +61,9 @@ add_inflow <- function(gwd, cdist, Rmax){
 
 #' Adds forward speed component to modeled surface wind
 #'
-#' Adds the storm's forward speed component back into the estimated
-#' surface wind speed at a grid point location.
+#' Adds the storm's forward speed component (i.e., motion asymmetery) back
+#' into the estimated surface wind speed at a grid point location after
+#' rotational winds have been modeled for the location.
 #'
 #' @param wind_sfc_sym A numeric vector with maximum 10-meter 1-minute
 #'    sustained wind with motion asymmetry removed (m / s).
@@ -65,11 +71,12 @@ add_inflow <- function(gwd, cdist, Rmax){
 #'    (m / s).
 #' @param tcspd_v A numeric vector with the tropical cyclone speed, v-component
 #'    (m / s).
-#' @param swd A numeric vector with surface wind direction (degree).
+#' @param swd A numeric vector with surface wind direction (in degrees).
 #' @inheritParams add_inflow
 #' @inheritParams will3_right
 #'
-#' @return A numeric vector giving asymmeric surface windspeed (m / s)
+#' @return A numeric vector giving asymmeric surface windspeed (m / s) at the
+#'    location being modeled.
 #'
 #' @details
 #'

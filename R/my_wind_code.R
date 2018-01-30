@@ -1,13 +1,13 @@
 #' Add Willoughby inputs and parameters
 #'
-#' There are a number of inputs and parameters needed for the Willoughby model
+#' Calculates a number of inputs and parameters needed for the Willoughby model
 #' for each observation of a storm track. This function intakes an inputed storm
 #' track and calculates these parameters for each observation in the storm
 #' tracks.These inputs and parameters are later used to model wind speed
 #' at each grid point for every observation.
 #'
 #' @param full_track A dataframe with interpolated hurricane track data, as
-#'    created by \code{create_full_track}. This dataframe must have the
+#'    created by \code{\link{create_full_track}}. This dataframe must have the
 #'    following columns:
 #'    \itemize{
 #'      \item{\code{date:} Date-time, in POSIXct format and UTC time zone}
@@ -19,13 +19,13 @@
 #'    }
 #'
 #' @return The input dataset, but with columns added for the Willoughby
-#'    parameters for every observations. Columns added include:
+#'    parameters for every observations. Added columns include:
 #'    \itemize{
-#'      \item{\code{tcspd_u, tcspd_v:} The u- and v-components of the forward
-#'      speed of the storm, in meters per second}
 #'      \item{\code{tcdir:} The bearing of the storm, in degrees, with 0 degrees
 #'        indicating the storm is moving due east, 90 degrees indicating the
 #'        storm is moving due north, etc.}
+#'      \item{\code{tcspd_u, tcspd_v:} The u- and v-components of the forward
+#'      speed of the storm, in meters per second}
 #'      \item{\code{vmax_gl:} The maximum gradient-level 1-minute sustained
 #'        wind, in m / s}
 #'      \item{\code{Rmax:} The radius to maximum winds, in kilometers}
@@ -82,18 +82,19 @@ add_wind_radii <- function(full_track = create_full_track()){
 #' Calculate wind speed at grid points
 #'
 #' Uses the Willoughby wind model (Willoughby et al. 2006) to calculate wind
-#' speed at a grid point location. This function calculates wind time series at
+#' speed at a grid point location. This function calculates a wind time series at
 #' just one location.
 #'
-#' @param with_wind_radii A dataframe storm tracks, including inputs and
+#' @param with_wind_radii A dataframe of storm tracks, including inputs and
 #'    parameters for the Willoughby wind model, as created by
-#'    \code{add_wind_radii}.
+#'    \code{\link{add_wind_radii}}.
 #' @param grid_point A one-row dataframe with the grid id, latitude, and
 #'    longitude for a single location for which you want to model winds.
 #' @inheritParams create_full_track
 #'
 #' @return A dataframe with date (\code{date}) and modeled wind speed
-#'    (\code{windspeed}) at the grid point location for all storm observations.
+#'    (\code{windspeed}, in m / s) at the grid point location for all storm
+#'    observations.
 #'
 #' @examples \dontrun{
 #' data("floyd_tracks")
@@ -155,10 +156,10 @@ calc_grid_wind <- function(grid_point = stormwindmodel::county_points[1, ],
 #' Generate wind summaries for grid point
 #'
 #' Summarizes the wind time series for a single grid point, as
-#' created by \code{calc_grid_wind}.
+#' created by \code{\link{calc_grid_wind}}.
 #'
 #' @param grid_wind A dataframe with a time series of modeled wind speeds at
-#'    a location, as created by \code{calc_grid_wind}.
+#'    a location, as created by \code{\link{calc_grid_wind}}.
 #' @param gust_duration_cut The wind speed, in meters per second, to use as a
 #'    cutoff point for determining the duration of gust winds. The function
 #'    will calculate the minutes during the storm when surface-level gust winds
@@ -172,16 +173,18 @@ calc_grid_wind <- function(grid_point = stormwindmodel::county_points[1, ],
 #' @return Returns a one-row matrix with wind characteristics for a single
 #'    location. The wind characteristics given are:
 #'    \itemize{
-#'      \item{\code{max_gust}: Maximum value of surface-level (10 meters)
-#'        sustained winds, in meters per second, over the length of the
-#'        storm at the given location}
-#'      \item{\code{max_sust}: Maximum value of surface-level (10 meters)
+#'      \item{\code{vmax_gust}: Maximum value of surface-level (10 meters)
 #'        gust winds, in meters per second, over the length of the
 #'        storm at the given location}
+#'      \item{\code{vmax_sust}: Maximum value of surface-level (10 meters)
+#'        sustained winds, in meters per second, over the length of the
+#'        storm at the given location}
 #'      \item{\code{gust_duration}: Length of time, in minutes, that
-#'        surface-level sustained winds were above 20 meters per second}
+#'        surface-level gust winds were above a specified value (default is
+#'        20 meters per second)}
 #'      \item{\code{sust_duration}: Length of time, in minutes, that
-#'        surface-level gust winds were above 20 meters per second}
+#'        surface-level sustained winds were above a specified value (default is
+#'        20 meters per second}
 #'    }
 #'
 #' @export
@@ -204,11 +207,12 @@ summarize_grid_wind <- function(grid_wind, tint = 0.25, gust_duration_cut = 20,
 
 #' Calculate and summarize grid winds
 #'
-#' This function combines the `calc_grid_wind` and `summarize_grid_wind`
-#' functions so they can be run jointly in the overall `get_grid_winds`
-#' function. This function calculates wind characteristics at
-#' just one location, and then it is applied to all grid locations in a
-#' higher-level function (\code{get_grid_winds}).
+#' This function combines the \code{\link{calc_grid_wind}} and
+#' \code{\link{summarize_grid_wind}} functions so they can be run jointly in
+#' the overall \code{\link{get_grid_winds}} function. This function calculates
+#' wind characteristics at just one location. Within the package, the function
+#' used within another function (\code{\link{get_grid_winds}}) to model wind speeds at
+#' all grid locations.
 #'
 #' @inheritParams calc_grid_wind
 #' @inheritParams summarize_grid_wind
@@ -216,19 +220,22 @@ summarize_grid_wind <- function(grid_wind, tint = 0.25, gust_duration_cut = 20,
 #' @return Returns a one-row matrix with wind characteristics for a single
 #'    location. The wind characteristics given are:
 #'    \itemize{
-#'      \item{\code{max_gust}: Maximum value of surface-level (10 meters)
-#'        sustained winds, in meters per second, over the length of the
-#'        storm at the given location}
-#'      \item{\code{max_sust}: Maximum value of surface-level (10 meters)
+#'      \item{\code{vmax_gust}: Maximum value of surface-level (10 meters)
 #'        gust winds, in meters per second, over the length of the
 #'        storm at the given location}
+#'      \item{\code{vmax_sust}: Maximum value of surface-level (10 meters)
+#'        sustained winds, in meters per second, over the length of the
+#'        storm at the given location}
 #'      \item{\code{gust_dur}: Length of time, in minutes, that
-#'        surface-level sustained winds were above 20 meters per second}
-#'      \item{\code{sust_durs}: Length of time, in minutes, that
-#'        surface-level gust winds were above 20 meters per second}
+#'        surface-level gust winds were above a specified speed (default is
+#'        20 m / s)}
+#'      \item{\code{sust_dur}: Length of time, in minutes, that
+#'        surface-level sustained winds were above a specified speed (default is
+#'        20 m / s)}
 #'    }
 #'
 #' @examples \dontrun{
+#' library(dplyr)
 #' data(county_points)
 #' data("floyd_tracks")
 #' full_track <- create_full_track(hurr_track = floyd_tracks, tint = 0.25)
@@ -268,25 +275,31 @@ calc_and_summarize_grid_wind <- function(grid_point = stormwindmodel::county_poi
 #' @inheritParams summarize_grid_wind
 #' @param grid_df A dataframe of locations at which to calculate wind characteristics.
 #'    This dataframe must include columns for latitude and longitude for each
-#'    point, and these columns must be named "glat" and "glon". The latitudes
-#'    and longitudes should be in decimal degrees, with longitudes in the
+#'    point, and these columns must be named \code{glat} and \code{glon}.
+#'    The latitudes and longitudes should be in decimal degrees, with longitudes in the
 #'    Western hemisphere (so, almost all those for Atlantic basin storms)
 #'    expressed as negative values.
 #'
 #' @return The dataframe of locations input, with the following columns of wind
 #' characteristics added for each location:
 #'    \itemize{
-#'      \item{\code{max_gust}: Maximum value of surface-level (10 meters)
-#'        sustained winds, in meters per second, over the length of the
-#'        storm at the given location}
-#'      \item{\code{max_sust}: Maximum value of surface-level (10 meters)
+#'      \item{\code{vmax_gust}: Maximum value of surface-level (10 meters)
 #'        gust winds, in meters per second, over the length of the
 #'        storm at the given location}
+#'      \item{\code{vmax_sust}: Maximum value of surface-level (10 meters)
+#'        sustained winds, in meters per second, over the length of the
+#'        storm at the given location}
 #'      \item{\code{gust_duration}: Length of time, in minutes, that
-#'        surface-level sustained winds were above 20 meters per second}
+#'        surface-level gust winds were above a specified value (default
+#'        is 20 m / s)}
 #'      \item{\code{sust_duration}: Length of time, in minutes, that
-#'        surface-level gust winds were above 20 meters per second}
+#'        surface-level sustained winds were above a specified value (default
+#'        is 20 m / s)}
 #'    }
+#'
+#' @note
+#' This function can take a few minutes to run, depending on the number
+#' of locations that are being modeled.
 #'
 #' @examples \dontrun{
 #' data("floyd_tracks")

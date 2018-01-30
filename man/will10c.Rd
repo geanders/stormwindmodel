@@ -17,11 +17,11 @@ A numeric vector that is a parameter required for the Willoughby
    model.
 }
 \description{
-Calculates A, a paramter for the Willoughby wind model, using equation 10c
+Calculates \eqn{A}, a paramter for the Willoughby wind model, using equation 10c
 (Willoughby et al. 2006).
 }
 \details{
-This function calculates A using (equation 10c, Willoughby et al.
+This function calculates \eqn{A} using equation 10c (Willoughby et al.
    2006):
 
    \deqn{A = 0.0696 + 0.0049 V_{max,G} - 0.0064 \phi}{

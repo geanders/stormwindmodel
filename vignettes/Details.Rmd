@@ -5,7 +5,7 @@ date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 bibliography: bibliography.bib
 vignette: >
-  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteIndexEntry{Details of stormwindmodel package}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -16,7 +16,6 @@ library(ggplot2)
 library(dplyr)
 library(tidyr)
 library(gridExtra)
-library(ggthemes)
 ```
 
 ## Overview of wind modeling process
@@ -217,7 +216,7 @@ full_track %>% slice(1:3)
 
 Here is an example of interpolating Hurricane Floyd's tracks to 15-minute and 2-hour intervals
 
-```{r message = FALSE, warning = FALSE, echo = FALSE, fig.align = "center", fig.width = 8, fig.height = 4}
+```{r message = FALSE, warning = FALSE, fig.align = "center", fig.width = 8, fig.height = 4}
 floyd_15_min <- create_full_track(floyd_tracks)
 floyd_2_hrs <- create_full_track(floyd_tracks, tint = 2)
 
@@ -238,14 +237,18 @@ gridExtra::grid.arrange(b, c, ncol = 2)
 
 Next, this imputed track is input to a function that adds inputs and model parameters for each observation that are required for the model later used to estimate wind speed at each grid point [@willoughby2006parametric]. This process is done using the `add_wind_radii` function. For the Hurricane Floyd example, here is an example of running the code and the first three and last three line of output: 
 
-```{r}
+```{r eval = c(3:4), echo = c(1, 4)}
 with_wind_radii <- add_wind_radii(full_track = full_track)
+save(with_wind_radii, file = "data/with_wind_radii.RData")
+load("data/with_wind_radii.RData")
 with_wind_radii %>% slice(c(1:3, (n()-3):n()))
 ```
 
+```{r eval = FALSE, echo = FALSE}
 Here is an example of Hurricane Floyd tracks, with estimated $R_{max}$ and $V_{max,G}$ shown by point size and color, respectively:
+```
 
-```{r echo = FALSE, warning = FALSE, fig.align = "center", fig.width = 4, fig.height = 4}
+```{r echo = FALSE, warning = FALSE, fig.align = "center", fig.width = 4, fig.height = 4, eval = FALSE}
 a + geom_point(data = with_wind_radii,
                aes(x = -tclon, y = tclat, size = Rmax, color = vmax_gl),
                alpha = 0.2) + 
@@ -630,7 +633,7 @@ Here is a plot of modeled sustained surface winds in Dare County by time:
 ```{r warning = FALSE, fig.width = 6, fig.align = "center"}
 ggplot(grid_wind, aes(x = date, y = windspeed)) + 
   geom_line() + 
-  xlab("Observation time") + 
+  xlab("Observation time (UTC)") + 
   ylab("Modeled surface wind (m / s)")
 ```
 
@@ -761,7 +764,7 @@ rf_example <- data.frame(r = 0:800,
                            wind_gl_aa = 1, cdist = 0:800))
 ggplot(rf_example, aes(x = r, y = rf)) + 
   geom_line() + 
-  theme_minimal() + 
+  theme_classic() + 
   xlab("Radius (km)") + 
   ylab("Reduction factor") + 
   ylim(c(0.5, 0.9))
@@ -860,17 +863,18 @@ gustspeed = windspeed * 1.49
 
 ## Putting everything together
 
-There's a wrapper function called `get_grid_winds` that puts everything together. As inputs, it takes the storm tracks and the grid point locations. It outputs a dataframe like this: 
+There's a wrapper function called `get_grid_winds` that puts everything together. As inputs, it takes the storm tracks and the grid point locations. Here is what the start of that dataset looks like: 
 
-```{r cache = TRUE}
+```{r, eval = FALSE}
 data("katrina_tracks")
 grid_winds_katrina <- get_grid_winds(hurr_track = katrina_tracks,
                                      grid_df = county_points)
 ```
 
-Here is what the start of that dataset looks like: 
 
-```{r}
+```{r cache = TRUE, echo = c(3), eval = c(2:3)}
+save(grid_winds_katrina, file = "data/grid_winds_katrina.Rdata")
+load("data/grid_winds_katrina.Rdata")
 head(grid_winds_katrina)
 ```
 

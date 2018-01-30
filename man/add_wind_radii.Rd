@@ -8,7 +8,7 @@ add_wind_radii(full_track = create_full_track())
 }
 \arguments{
 \item{full_track}{A dataframe with interpolated hurricane track data, as
-created by \code{create_full_track}. This dataframe must have the
+created by \code{\link{create_full_track}}. This dataframe must have the
 following columns:
 \itemize{
   \item{\code{date:} Date-time, in POSIXct format and UTC time zone}
@@ -21,13 +21,13 @@ following columns:
 }
 \value{
 The input dataset, but with columns added for the Willoughby
-   parameters for every observations. Columns added include:
+   parameters for every observations. Added columns include:
    \itemize{
-     \item{\code{tcspd_u, tcspd_v:} The u- and v-components of the forward
-     speed of the storm, in meters per second}
      \item{\code{tcdir:} The bearing of the storm, in degrees, with 0 degrees
        indicating the storm is moving due east, 90 degrees indicating the
        storm is moving due north, etc.}
+     \item{\code{tcspd_u, tcspd_v:} The u- and v-components of the forward
+     speed of the storm, in meters per second}
      \item{\code{vmax_gl:} The maximum gradient-level 1-minute sustained
        wind, in m / s}
      \item{\code{Rmax:} The radius to maximum winds, in kilometers}
@@ -36,7 +36,7 @@ The input dataset, but with columns added for the Willoughby
    }
 }
 \description{
-There are a number of inputs and parameters needed for the Willoughby model
+Calculates a number of inputs and parameters needed for the Willoughby model
 for each observation of a storm track. This function intakes an inputed storm
 track and calculates these parameters for each observation in the storm
 tracks.These inputs and parameters are later used to model wind speed

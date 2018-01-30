@@ -16,7 +16,7 @@ measuring, in kilometers}
 \item{Rmax}{Numeric vector of the radius at which the maximum wind occurs,
 in kilometers}
 
-\item{n}{Numeric vector of ...}
+\item{n}{A numeric vector of one of the parameters of the Willoughby model.}
 }
 \description{
 Willoughby et al. (2006), Equation 1(a)

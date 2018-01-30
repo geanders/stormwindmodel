@@ -1,32 +1,55 @@
 Package: stormwindmodel
 Type: Package
 Title: Model Tropical Cyclone Wind Speeds
-Version: 0.0.0.9000
-Date: 2016-10-21
-Author: G. Brooke Anderson,
-    Andrea Schumacher (andrea.schumacher@colostate.edu),
-    Seth Guikema,
-    Joshua M. Ferreri,
-    Steven Quiring
-Maintainer: G. Brooke Anderson <brooke.anderson@colostate.edu>
-Description: This package allows you to input tracking data for a hurricane
+Version: 0.1.0
+Date: 2017-01-08
+Authors@R: c(person("Brooke", "Anderson", 
+                    email = "brooke.anderson@colostate.edu",
+                    role = c("aut", "cre")),
+             person("Andrea", "Schumacher",
+                    email = "andrea.schumacher@colostate.edu",
+                    role = c("aut")),
+             person("Seth", "Guikema",
+                    email = "sguikema@umich.edu",
+                    role = c("aut")),
+             person("Steven", "Quiring",
+                    email = "quiring.10@osu.edu",
+                    role = c("aut")),
+             person("Joshua", "Ferreri",
+                    email = "joshua.m.ferreri@gmail.com",
+                    role = c("aut")),
+             person("Andrea", "Staid",
+                    email = "astaid@gmail.com",
+                    role = c("ctb")),
+             person("Michael", "Guo",
+                    email = "michaelzgao@gmail.com",
+                    role = c("ctb")),
+             person("Lei", "Ming",
+                    email = "lei.meng@wmich.edu",
+                    role = c("ctb")),
+             person("Laiyin", "Zhu",
+                    email = "laiyin.zhu@wmich.edu",
+                    role = c("ctb")))
+Description: Allows users to input tracking data for a hurricane
     or other tropical storm, along with a data frame of grid points at which
-    to model wind speeds, and functions in this package will calculate wind
-    speeds at each point based on wind model equations. This work was supported
-    in part by grants from the National Institute of Environmental Health
-    Sciences (R00ES022631) and the National Science Foundation (1331399).
+    to model wind speeds. Functions in this package will then calculate wind
+    speeds at each point based on wind model equations. This modeling framework
+    is currently set up to model winds for North American locations with 
+    Atlantic basin storms. This work was supported 
+    in part by grants from the National Institute of Environmental Health 
+    Sciences (R00ES022631), the National Science Foundation (1331399), and the 
+    Department of Energy (DE-FG02-08ER64644).
 URL: https://github.com/geanders/stormwindmodel
 BugReports: https://github.com/geanders/stormwindmodel/issues
 License: GPL-2
 Imports:
-    choroplethr (>= 3.5.2),
-    choroplethrMaps (>= 1.0.0),
     dplyr (>= 0.5.0),
     ggplot2 (>= 2.1.0),
-    Hmisc (>= 4.0.0),
     lubridate (>= 1.6.0),
+    maps (>= 3.1.1),
     plyr (>= 1.8.4),
-    survival (>= 2.40.1),
+    stringr (>= 1.1.0),
+    tidyr (>= 0.6.0),
     weathermetrics (>= 1.2.2)
 LazyData: TRUE
 RoxygenNote: 6.0.1
@@ -34,9 +57,11 @@ Depends:
     R (>= 2.10)
 Suggests:
     ggmap (>= 2.6.1),
-    ggthemes (>= 3.2.0),
     gridExtra (>= 2.2.1),
     knitr (>= 1.14.0),
+    rgeos (>= 0.3.21),
     rmarkdown (>= 1.1.0),
-    tidyr (>= 0.6.0)
+    sp (>= 1.2.3),
+    tigris (>= 0.3.3),
+    viridis (>= 0.3.4)
 VignetteBuilder: knitr

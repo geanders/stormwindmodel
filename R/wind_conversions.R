@@ -54,7 +54,7 @@ calc_gradient_speed <- function(vmax_sfc_sym, over_land){
 #' Determine if storm is over land or water
 #'
 #' Determines if the storm is over land or water at its observed location. This
-#' function finds the closest grid point in the \code{landmask} dataframe, then
+#' function finds the closest grid point in the \code{\link{landmask}} dataframe, then
 #' checks if that grid point is over land or water.
 #'
 #' @param tclon Numeric vector of the absolute value of latitude, in degrees.
@@ -119,7 +119,7 @@ remove_forward_speed <- function(vmax, tcspd){
 #'
 #' @param wind_gl_aa A numerical value with estimated gradient-level wind speed
 #'    (m / s) at a grid point.
-#' @param cdist A numerical value with radius from storm center to the grid
+#' @param cdist A numerical value with radius from the storm center to the grid
 #'    point, in kilometers.
 #'
 #' @return A numeric vector with the estimated symmetric surface wind speed at
@@ -131,6 +131,9 @@ remove_forward_speed <- function(vmax, tcspd){
 #' a radius of 100 km and 700 km. Points over land should use a reduction
 #' factor that is 20\% lower. Because all of the counties are over
 #' land, the function makes this adjustment for all grid points.
+#'
+#' @note This function is only appropriate to use for points that are over
+#'    land.
 #'
 #' @references
 #'

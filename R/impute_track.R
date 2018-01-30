@@ -6,7 +6,7 @@
 #' This function also does some reformatting necessary for later functions in
 #' the \code{stormwindmodel} package.
 #'
-#' @details The uses natural cubic splines for interpolation, both for location
+#' @details The function uses natural cubic splines for interpolation, both for location
 #' and for wind speed. Degrees of freedom are based on the number of available
 #' observations for the storm.
 #'
@@ -15,12 +15,13 @@
 #'    hour, minute; e.g., "198808051800" for August 5, 1988, 18:00 UTC),
 #'    latitude, longitude, and wind speed (in knots). The column
 #'    names for each of these must be \code{date}, \code{latitude},
-#'    \code{longitude}, and \code{wind}.
+#'    \code{longitude}, and \code{wind}. See the example \code{\link{floyd_tracks}}
+#'    dataset for an example of the required format.
 #' @param tint Interval (in hours) to which to interpolate the tracks. The
 #'    default is 0.25 (i.e., 15 minutes)
 #'
-#' @return A preprocessed version of the track data, with
-#'    latitude, longitude, and wind speed linearly interpolated between
+#' @return A version of the storm's track data with
+#'    latitude, longitude, and wind speed interpolated between
 #'    observed values. Also, wind speed is converted in this function to m / s
 #'    and the absolute value of the latitude is taken (necessary for further
 #'    wind speed calculations). Finally, the names of some columns are

@@ -11,17 +11,18 @@ calc_grid_wind(grid_point = stormwindmodel::county_points[1, ],
 \item{grid_point}{A one-row dataframe with the grid id, latitude, and
 longitude for a single location for which you want to model winds.}
 
-\item{with_wind_radii}{A dataframe storm tracks, including inputs and
+\item{with_wind_radii}{A dataframe of storm tracks, including inputs and
 parameters for the Willoughby wind model, as created by
-\code{add_wind_radii}.}
+\code{\link{add_wind_radii}}.}
 }
 \value{
 A dataframe with date (\code{date}) and modeled wind speed
-   (\code{windspeed}) at the grid point location for all storm observations.
+   (\code{windspeed}, in m / s) at the grid point location for all storm
+   observations.
 }
 \description{
 Uses the Willoughby wind model (Willoughby et al. 2006) to calculate wind
-speed at a grid point location. This function calculates wind time series at
+speed at a grid point location. This function calculates a wind time series at
 just one location.
 }
 \examples{

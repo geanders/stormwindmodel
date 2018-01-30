@@ -16,19 +16,22 @@ sustained wind with motion asymmetry removed (m / s).}
 \item{tcspd_v}{A numeric vector with the tropical cyclone speed, v-component
 (m / s).}
 
-\item{swd}{A numeric vector with surface wind direction (degree).}
+\item{swd}{A numeric vector with surface wind direction (in degrees).}
 
 \item{cdist}{A numeric vector giving radius (in kilometers) from the storm
-center to a location.}
+center to the location being modeled.}
 
-\item{Rmax}{A numeric vector giving the radius to maximum winds (in kilometers)}
+\item{Rmax}{A numeric vector giving the radius to maximum winds (in kilometers)
+for the tropical storm.}
 }
 \value{
-A numeric vector giving asymmeric surface windspeed (m / s)
+A numeric vector giving asymmeric surface windspeed (m / s) at the
+   location being modeled.
 }
 \description{
-Adds the storm's forward speed component back into the estimated
-surface wind speed at a grid point location.
+Adds the storm's forward speed component (i.e., motion asymmetery) back
+into the estimated surface wind speed at a grid point location after
+rotational winds have been modeled for the location.
 }
 \details{
 This function uses equation 12 from Phadke et al. (2003).
