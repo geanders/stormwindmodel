@@ -10,10 +10,10 @@ test_that("Conversion from degrees to radians works", {
 })
 
 test_that("Cpp conversion from degrees to radians works", {
-  expect_equal(degrees_to_radians_Cpp2(degrees = 180), pi)
-  expect_equal(degrees_to_radians_Cpp2(degrees = -90), -pi / 2)
-  expect_equal(degrees_to_radians_Cpp2(degrees = 0), 0)
-  expect_equal(degrees_to_radians_Cpp2(degrees = 540), pi * 3)
-  expect_equal(degrees_to_radians_Cpp2(degrees = c(180, 0)), c(pi, 0))
-  expect_error(degrees_to_radians_Cpp2("180"))
+  expect_equal(degrees_to_radians_Cpp(degrees = 180), pi)
+  expect_equal(degrees_to_radians_Cpp(degrees = -90), -pi / 2)
+  expect_equal(degrees_to_radians_Cpp(degrees = 0), 0)
+  expect_equal(degrees_to_radians_Cpp(degrees = 540), pi * 3)
+  expect_equal(degrees_to_radians_Cpp(degrees = c(180, 0)), c(pi, 0))
+  expect_error(degrees_to_radians_Cpp("180"))
 })

@@ -27,10 +27,6 @@
 #' Phadke AC, Martino CD, Cheung KF, and Houston SH. 2003. Modeling of
 #'    tropical cyclone winds and waves for emergency management. Ocean
 #'    Engineering 30(4):553-578.
-degrees_to_radians_Cpp <- function(degrees) {
-    .Call('_stormwindmodel_degrees_to_radians_Cpp', PACKAGE = 'stormwindmodel', degrees)
-}
-
 add_forward_speed_Cpp <- function(wind_sfc_sym, tcspd_u, tcspd_v, swd, cdist, Rmax) {
     .Call('_stormwindmodel_add_forward_speed_Cpp', PACKAGE = 'stormwindmodel', wind_sfc_sym, tcspd_u, tcspd_v, swd, cdist, Rmax)
 }
@@ -69,6 +65,10 @@ add_forward_speed_Cpp <- function(wind_sfc_sym, tcspd_u, tcspd_v, swd, cdist, Rm
 #' @export
 add_inflow_Cpp <- function(gwd, cdist, Rmax) {
     .Call('_stormwindmodel_add_inflow_Cpp', PACKAGE = 'stormwindmodel', gwd, cdist, Rmax)
+}
+
+radians_to_degrees_Cpp1 <- function(radians) {
+    .Call('_stormwindmodel_radians_to_degrees_Cpp1', PACKAGE = 'stormwindmodel', radians)
 }
 
 #' Calculate bearing from one location to another (C++ version)
@@ -110,16 +110,19 @@ add_inflow_Cpp <- function(gwd, cdist, Rmax) {
 #'    back within the 0--360 degree range.
 #'
 #' @export
-degrees_to_radians_Cpp1 <- function(degrees) {
-    .Call('_stormwindmodel_degrees_to_radians_Cpp1', PACKAGE = 'stormwindmodel', degrees)
-}
-
-radians_to_degrees_Cpp1 <- function(radians) {
-    .Call('_stormwindmodel_radians_to_degrees_Cpp1', PACKAGE = 'stormwindmodel', radians)
-}
-
 calc_bearing_Cpp <- function(tclat_1, tclon_1, tclat_2, tclon_2) {
     .Call('_stormwindmodel_calc_bearing_Cpp', PACKAGE = 'stormwindmodel', tclat_1, tclon_1, tclat_2, tclon_2)
+}
+
+#' Convert from degrees to radians
+#'
+#' Convert an angle from degrees to radians (C++ version)
+#'
+#' @param degrees A numeric vector with measurements in degrees.
+#'
+#' @return A numeric vector with measurement in radians.
+degrees_to_radians_Cpp <- function(degrees) {
+    .Call('_stormwindmodel_degrees_to_radians_Cpp', PACKAGE = 'stormwindmodel', degrees)
 }
 
 #' Calculate surface wind speed from gradient (C++ version)
@@ -152,17 +155,6 @@ calc_bearing_Cpp <- function(tclat_1, tclon_1, tclat_2, tclon_2) {
 #' @export
 gradient_to_surface_Cpp <- function(wind_gl_aa, cdist) {
     .Call('_stormwindmodel_gradient_to_surface_Cpp', PACKAGE = 'stormwindmodel', wind_gl_aa, cdist)
-}
-
-#' Convert from degrees to radians
-#'
-#' Convert an angle from degrees to radians (C++ version)
-#'
-#' @param degrees A numeric vector with measurements in degrees.
-#'
-#' @return A numeric vector with measurement in radians.
-degrees_to_radians_Cpp2 <- function(degrees) {
-    .Call('_stormwindmodel_degrees_to_radians_Cpp2', PACKAGE = 'stormwindmodel', degrees)
 }
 
 #' Calculate distance between two locations (C++ version)

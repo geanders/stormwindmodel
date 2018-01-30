@@ -1,6 +1,7 @@
 #include <Rcpp.h>
 #include <cmath>
 #include <math.h>
+#include "degrees_to_radians.h"
 using namespace Rcpp;
 
 // [[Rcpp::interfaces(r, cpp)]]
@@ -31,17 +32,6 @@ using namespace Rcpp;
 //' Phadke AC, Martino CD, Cheung KF, and Houston SH. 2003. Modeling of
 //'    tropical cyclone winds and waves for emergency management. Ocean
 //'    Engineering 30(4):553-578.
-// [[Rcpp::export]]
-NumericVector degrees_to_radians_Cpp(NumericVector degrees){
-  NumericVector radians(degrees.size());
-  for (int i=0; i < degrees.size(); i++) {
-    radians[i] = degrees[i] * M_PI / 180;
-  }
-  return radians;
-}
-
-
-
 // [[Rcpp::export]]
 NumericVector add_forward_speed_Cpp(NumericVector wind_sfc_sym, NumericVector tcspd_u, NumericVector tcspd_v,
                              NumericVector swd, NumericVector cdist, NumericVector Rmax){

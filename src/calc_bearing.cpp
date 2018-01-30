@@ -1,9 +1,18 @@
 #include <Rcpp.h>
 #include <cmath>
+#include "degrees_to_radians.h"
 using namespace Rcpp;
 
 // [[Rcpp::interfaces(r, cpp)]]
 
+// [[Rcpp::export]]
+NumericVector radians_to_degrees_Cpp1(NumericVector radians){
+  NumericVector degrees(radians.size());
+  for (int i = 0; i < radians.size(); i++){
+    degrees[i] = radians[i] * 180 / M_PI;
+  }
+  return degrees;
+}
 
 //' Calculate bearing from one location to another (C++ version)
 //'
@@ -45,33 +54,13 @@ using namespace Rcpp;
 //'
 //' @export
 // [[Rcpp::export]]
-NumericVector degrees_to_radians_Cpp1(NumericVector degrees){
-  NumericVector radians(degrees.size());
-  for (int i=0; i < degrees.size(); i++) {
-    radians[i] = degrees[i] * M_PI / 180;
-  }
-  return radians;
-}
-
-
-// [[Rcpp::export]]
-NumericVector radians_to_degrees_Cpp1(NumericVector radians){
-  NumericVector degrees(radians.size());
-  for (int i = 0; i < radians.size(); i++){
-    degrees[i] = radians[i] * 180 / M_PI;
-  }
-  return degrees;
-}
-
-
-// [[Rcpp::export]]
 NumericVector calc_bearing_Cpp(NumericVector tclat_1, NumericVector tclon_1, NumericVector tclat_2,
                                NumericVector tclon_2){
 
-  tclat_1 = degrees_to_radians_Cpp1(tclat_1);
-  tclon_1 = degrees_to_radians_Cpp1(-tclon_1);
-  tclat_2 = degrees_to_radians_Cpp1(tclat_2);
-  tclon_2 = degrees_to_radians_Cpp1(-tclon_2);
+  tclat_1 = degrees_to_radians_Cpp(tclat_1);
+  tclon_1 = degrees_to_radians_Cpp(-tclon_1);
+  tclat_2 = degrees_to_radians_Cpp(tclat_2);
+  tclon_2 = degrees_to_radians_Cpp(-tclon_2);
 
   NumericVector S(tclat_1.size()), C(tclat_1.size()), theta_rad(tclat_1.size()), theta(tclat_1.size());
 

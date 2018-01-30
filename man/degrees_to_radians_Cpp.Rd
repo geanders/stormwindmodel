@@ -2,34 +2,16 @@
 % Please edit documentation in R/RcppExports.R
 \name{degrees_to_radians_Cpp}
 \alias{degrees_to_radians_Cpp}
-\title{Adds forward speed component to modeled surface wind (C++ version)}
+\title{Convert from degrees to radians}
 \usage{
 degrees_to_radians_Cpp(degrees)
 }
 \arguments{
-\item{wind_sfc_sym}{A numeric vector with maximum 10-meter 1-minute
-sustained wind with motion asymmetry removed (m / s).}
-
-\item{tcspd_u}{A numeric vector with the tropical cyclone speed, u-component
-(m / s).}
-
-\item{tcspd_v}{A numeric vector with the tropical cyclone speed, v-component
-(m / s).}
-
-\item{swd}{A numeric vector with surface wind direction (degree).}
+\item{degrees}{A numeric vector with measurements in degrees.}
 }
 \value{
-A numeric vector giving asymmeric surface windspeed (m / s)
+A numeric vector with measurement in radians.
 }
 \description{
-Adds the storm's forward speed component back into the estimated
-surface wind speed at a grid point location.
-}
-\details{
-This function uses equation 12 from Phadke et al. (2003).
-}
-\references{
-Phadke AC, Martino CD, Cheung KF, and Houston SH. 2003. Modeling of
-   tropical cyclone winds and waves for emergency management. Ocean
-   Engineering 30(4):553-578.
+Convert an angle from degrees to radians (C++ version)
 }

@@ -1,24 +1,9 @@
 #include <Rcpp.h>
 #include <cmath>
+#include "degrees_to_radians.h"
 using namespace Rcpp;
 
 // [[Rcpp::interfaces(r, cpp)]]
-
-//' Convert from degrees to radians
-//'
-//' Convert an angle from degrees to radians (C++ version)
-//'
-//' @param degrees A numeric vector with measurements in degrees.
-//'
-//' @return A numeric vector with measurement in radians.
-// [[Rcpp::export]]
-NumericVector degrees_to_radians_Cpp2(NumericVector degrees){
-  NumericVector radians(degrees.size());
-  for (int i=0; i < degrees.size(); i++) {
-    radians[i] = degrees[i] * M_PI / 180;
-  }
-  return radians;
-}
 
 //' Calculate distance between two locations (C++ version)
 //'
@@ -60,17 +45,23 @@ NumericVector degrees_to_radians_Cpp2(NumericVector degrees){
 //'
 //' @export
 // [[Rcpp::export]]
-NumericVector latlon_to_km_Cpp(NumericVector tclat_1, NumericVector tclon_1,
-                               NumericVector tclat_2, NumericVector tclon_2,
-                               NumericVector Rearth = 6378.14){
-  NumericVector delta_L(tclat_1.size()), delta_tclat(tclat_1.size()), hav_L(tclat_1.size()),
-  hav_tclat(tclat_1.size()), hav_gamma(tclat_1.size()), gamma(tclat_1.size()),
-  dist(tclat_1.size());
+Rcpp::NumericVector latlon_to_km_Cpp(Rcpp::NumericVector tclat_1,
+                                     Rcpp::NumericVector tclon_1,
+                                     Rcpp::NumericVector tclat_2,
+                                     Rcpp::NumericVector tclon_2,
+                                     Rcpp::NumericVector Rearth = 6378.14){
+  Rcpp::NumericVector delta_L(tclat_1.size()),
+                      delta_tclat(tclat_1.size()),
+                      hav_L(tclat_1.size()),
+                      hav_tclat(tclat_1.size()),
+                      hav_gamma(tclat_1.size()),
+                      gamma(tclat_1.size()),
+                      dist(tclat_1.size());
 
-  tclat_1 = degrees_to_radians_Cpp2(tclat_1);
-  tclon_1 = degrees_to_radians_Cpp2(tclon_1);
-  tclat_2 = degrees_to_radians_Cpp2(tclat_2);
-  tclon_2 = degrees_to_radians_Cpp2(tclon_2);
+  tclat_1 = degrees_to_radians_Cpp(tclat_1);
+  tclon_1 = degrees_to_radians_Cpp(tclon_1);
+  tclat_2 = degrees_to_radians_Cpp(tclat_2);
+  tclon_2 = degrees_to_radians_Cpp(tclon_2);
 
   for (int i = 0; i < tclat_1.size(); i++){
 
