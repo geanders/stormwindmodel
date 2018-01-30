@@ -64,6 +64,7 @@ Suggests:
     rmarkdown (>= 1.6.0),
     sp (>= 1.2.5),
     tigris (>= 0.5.3),
-    viridis (>= 0.4.0)
+    viridis (>= 0.4.0),
+    testthat
 VignetteBuilder: knitr
 LinkingTo: Rcpp
