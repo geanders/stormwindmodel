@@ -1,6 +1,5 @@
 #include <Rcpp.h>
 #include <cmath>
-#include <math.h>
 using namespace Rcpp;
 
 // [[Rcpp::interfaces(r, cpp)]]
@@ -91,33 +90,44 @@ using namespace Rcpp;
 //'
 //' @export
 // [[Rcpp::export]]
-double will1_Cpp(double cdist, double Rmax, double R1, double R2, double vmax_gl, double n,
-                 double A, double X1, double X2 = 25){
+double will1_Cpp(double cdist,
+                 double Rmax,
+                 double R1,
+                 double R2,
+                 double vmax_gl,
+                 double n,
+                 double A,
+                 double X1,
+                 double X2 = 25){
 
-  if(NumericVector::is_na(Rmax) || NumericVector::is_na(vmax_gl) || NumericVector::is_na(n) ||
-     NumericVector::is_na(A) || NumericVector::is_na(X1)){
+  if (Rcpp::NumericVector :: is_na(Rmax) ||
+     Rcpp::NumericVector :: is_na(vmax_gl) ||
+     Rcpp::NumericVector :: is_na(n) ||
+     Rcpp::NumericVector :: is_na(A) ||
+     Rcpp::NumericVector :: is_na(X1)){
     return -1;
   } else {
 
     double Vi = vmax_gl * pow((cdist / Rmax), n);
-    double Vo = vmax_gl * ((1 - A) * exp((Rmax - cdist)/X1) + A * exp((Rmax - cdist) / X2));
+    double Vo = vmax_gl * ((1 - A) * exp((Rmax - cdist) / X1) +
+                           A * exp((Rmax - cdist) / X2));
     double wind_gl_aa;
 
-    if(cdist < R1){
+    if (cdist < R1){
       wind_gl_aa = Vi;
     } else if (cdist > R2){
       wind_gl_aa = Vo;
     } else {
       double eps = (cdist - R1) / (R2 - R1);
-      double w = 126 * pow(eps, 5) - 420 * pow(eps, 6) + 540 * pow(eps, 7) - 315 * pow(eps, 8)
-        + 70 * pow(eps, 9);
+      double w = 126 * pow(eps, 5) - 420 * pow(eps, 6) + 540 * pow(eps, 7) -
+        315 * pow(eps, 8) + 70 * pow(eps, 9);
       wind_gl_aa = Vi * (1 - w) + Vo * w;
     }
 
     //wind_gl_aa[wind_gl_aa < 0 & !is.na(wind_gl_aa)] <- 0
     if(wind_gl_aa < 0) {
       wind_gl_aa = 0;
-    } else if(NumericVector::is_na(wind_gl_aa)) {
+    } else if (Rcpp::NumericVector :: is_na(wind_gl_aa)) {
       return -1;
     }
 
@@ -125,10 +135,10 @@ double will1_Cpp(double cdist, double Rmax, double R1, double R2, double vmax_gl
   }
 }
 
-
-
 /*** R
-will1(9,1,1,1,1,1,1,5,25)
-will1_Cpp(9,1,1,1,1,1,1,5,25)
-microbenchmark::microbenchmark(will1(9,1,1,1,1,1,1,5,25),will1_Cpp(9,1,1,1,1,1,1,5,25))
+will1(9, 1, 1, 1, 1, 1, 1, 5, 25)
+will1_Cpp(9, 1, 1, 1, 1, 1, 1, 5, 25)
+microbenchmark::microbenchmark(will1(9, 1, 1, 1, 1, 1, 1, 5, 25),
+                               will1_Cpp(9, 1, 1, 1, 1, 1, 1, 5, 25))
+# C++ function about 2.5 times faster
 */

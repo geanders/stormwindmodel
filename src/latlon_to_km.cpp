@@ -79,8 +79,6 @@ Rcpp::NumericVector latlon_to_km_Cpp(Rcpp::NumericVector tclat_1,
   return dist;
 }
 
-
-
 /*** R
 latlon_to_km(1,2,1,1,6378.14)
 latlon_to_km_Cpp(1,2,1,1,6378.14)
