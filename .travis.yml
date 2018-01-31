@@ -9,6 +9,7 @@ r_github_packages:
   - cran/survival
   - cran/bindrcpp
   - cran/ggthemes
+  - cran/tigris
   - dkahle/ggmap
 
 r_binary_packages:
