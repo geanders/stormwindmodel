@@ -1,5 +1,5 @@
 #include <Rcpp.h>
-#include <cmath>
+#include <math.h>
 #include "degrees_to_radians.h"
 using namespace Rcpp;
 

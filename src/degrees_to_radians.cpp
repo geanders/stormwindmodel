@@ -1,5 +1,5 @@
 #include <Rcpp.h>
-#include <cmath>
+#include <math.h>
 using namespace Rcpp;
 
 // [[Rcpp::interfaces(r, cpp)]]
