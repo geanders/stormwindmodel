@@ -27,6 +27,7 @@
 #' Phadke AC, Martino CD, Cheung KF, and Houston SH. 2003. Modeling of
 #'    tropical cyclone winds and waves for emergency management. Ocean
 #'    Engineering 30(4):553-578.
+#' @export
 add_forward_speed_Cpp <- function(wind_sfc_sym, tcspd_u, tcspd_v, swd, cdist, Rmax) {
     .Call('_stormwindmodel_add_forward_speed_Cpp', PACKAGE = 'stormwindmodel', wind_sfc_sym, tcspd_u, tcspd_v, swd, cdist, Rmax)
 }

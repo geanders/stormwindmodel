@@ -1,6 +1,5 @@
 #include <Rcpp.h>
 #include <cmath>
-#include <math.h>
 #include "degrees_to_radians.h"
 using namespace Rcpp;
 
@@ -32,6 +31,7 @@ using namespace Rcpp;
 //' Phadke AC, Martino CD, Cheung KF, and Houston SH. 2003. Modeling of
 //'    tropical cyclone winds and waves for emergency management. Ocean
 //'    Engineering 30(4):553-578.
+//' @export
 // [[Rcpp::export]]
 Rcpp::NumericVector add_forward_speed_Cpp(Rcpp::NumericVector wind_sfc_sym,
                                           Rcpp::NumericVector tcspd_u,
@@ -52,7 +52,8 @@ Rcpp::NumericVector add_forward_speed_Cpp(Rcpp::NumericVector wind_sfc_sym,
     wind_sfc_sym_v[i] = wind_sfc_sym[i] * sin(swd[i]);
 
   // Add back in component from forward motion of the storm
-    correction_factor[i] = (Rmax[i] * cdist[i]) / (pow(Rmax[i],2) + pow(cdist[i],2));
+    correction_factor[i] = (Rmax[i] * cdist[i]) /
+      (pow(Rmax[i],2) + pow(cdist[i],2));
 
   // Add tangential and forward speed components and calculate
   // magnitude of this total wind
@@ -67,8 +68,6 @@ Rcpp::NumericVector add_forward_speed_Cpp(Rcpp::NumericVector wind_sfc_sym,
   }
   return wind_sfc;
 }
-
-
 
 /*** R
 add_forward_speed(1, 1, 1, 1, 1, 1)

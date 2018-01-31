@@ -9,16 +9,16 @@
 using namespace Rcpp;
 
 // add_forward_speed_Cpp
-NumericVector add_forward_speed_Cpp(NumericVector wind_sfc_sym, NumericVector tcspd_u, NumericVector tcspd_v, NumericVector swd, NumericVector cdist, NumericVector Rmax);
+Rcpp::NumericVector add_forward_speed_Cpp(Rcpp::NumericVector wind_sfc_sym, Rcpp::NumericVector tcspd_u, Rcpp::NumericVector tcspd_v, Rcpp::NumericVector swd, Rcpp::NumericVector cdist, Rcpp::NumericVector Rmax);
 static SEXP _stormwindmodel_add_forward_speed_Cpp_try(SEXP wind_sfc_symSEXP, SEXP tcspd_uSEXP, SEXP tcspd_vSEXP, SEXP swdSEXP, SEXP cdistSEXP, SEXP RmaxSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
-    Rcpp::traits::input_parameter< NumericVector >::type wind_sfc_sym(wind_sfc_symSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type tcspd_u(tcspd_uSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type tcspd_v(tcspd_vSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type swd(swdSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type cdist(cdistSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type Rmax(RmaxSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type wind_sfc_sym(wind_sfc_symSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type tcspd_u(tcspd_uSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type tcspd_v(tcspd_vSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type swd(swdSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type cdist(cdistSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type Rmax(RmaxSEXP);
     rcpp_result_gen = Rcpp::wrap(add_forward_speed_Cpp(wind_sfc_sym, tcspd_u, tcspd_v, swd, cdist, Rmax));
     return rcpp_result_gen;
 END_RCPP_RETURN_ERROR
@@ -76,11 +76,11 @@ RcppExport SEXP _stormwindmodel_add_inflow_Cpp(SEXP gwdSEXP, SEXP cdistSEXP, SEX
     return rcpp_result_gen;
 }
 // radians_to_degrees_Cpp1
-NumericVector radians_to_degrees_Cpp1(NumericVector radians);
+Rcpp::NumericVector radians_to_degrees_Cpp1(Rcpp::NumericVector radians);
 static SEXP _stormwindmodel_radians_to_degrees_Cpp1_try(SEXP radiansSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
-    Rcpp::traits::input_parameter< NumericVector >::type radians(radiansSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type radians(radiansSEXP);
     rcpp_result_gen = Rcpp::wrap(radians_to_degrees_Cpp1(radians));
     return rcpp_result_gen;
 END_RCPP_RETURN_ERROR
@@ -106,14 +106,14 @@ RcppExport SEXP _stormwindmodel_radians_to_degrees_Cpp1(SEXP radiansSEXP) {
     return rcpp_result_gen;
 }
 // calc_bearing_Cpp
-NumericVector calc_bearing_Cpp(NumericVector tclat_1, NumericVector tclon_1, NumericVector tclat_2, NumericVector tclon_2);
+Rcpp::NumericVector calc_bearing_Cpp(Rcpp::NumericVector tclat_1, Rcpp::NumericVector tclon_1, Rcpp::NumericVector tclat_2, Rcpp::NumericVector tclon_2);
 static SEXP _stormwindmodel_calc_bearing_Cpp_try(SEXP tclat_1SEXP, SEXP tclon_1SEXP, SEXP tclat_2SEXP, SEXP tclon_2SEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
-    Rcpp::traits::input_parameter< NumericVector >::type tclat_1(tclat_1SEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type tclon_1(tclon_1SEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type tclat_2(tclat_2SEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type tclon_2(tclon_2SEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type tclat_1(tclat_1SEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type tclon_1(tclon_1SEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type tclat_2(tclat_2SEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type tclon_2(tclon_2SEXP);
     rcpp_result_gen = Rcpp::wrap(calc_bearing_Cpp(tclat_1, tclon_1, tclat_2, tclon_2));
     return rcpp_result_gen;
 END_RCPP_RETURN_ERROR
@@ -276,10 +276,10 @@ RcppExport SEXP _stormwindmodel_will1_Cpp(SEXP cdistSEXP, SEXP RmaxSEXP, SEXP R1
 static int _stormwindmodel_RcppExport_validate(const char* sig) { 
     static std::set<std::string> signatures;
     if (signatures.empty()) {
-        signatures.insert("NumericVector(*add_forward_speed_Cpp)(NumericVector,NumericVector,NumericVector,NumericVector,NumericVector,NumericVector)");
+        signatures.insert("Rcpp::NumericVector(*add_forward_speed_Cpp)(Rcpp::NumericVector,Rcpp::NumericVector,Rcpp::NumericVector,Rcpp::NumericVector,Rcpp::NumericVector,Rcpp::NumericVector)");
         signatures.insert("NumericVector(*add_inflow_Cpp)(NumericVector,NumericVector,NumericVector)");
-        signatures.insert("NumericVector(*radians_to_degrees_Cpp1)(NumericVector)");
-        signatures.insert("NumericVector(*calc_bearing_Cpp)(NumericVector,NumericVector,NumericVector,NumericVector)");
+        signatures.insert("Rcpp::NumericVector(*radians_to_degrees_Cpp1)(Rcpp::NumericVector)");
+        signatures.insert("Rcpp::NumericVector(*calc_bearing_Cpp)(Rcpp::NumericVector,Rcpp::NumericVector,Rcpp::NumericVector,Rcpp::NumericVector)");
         signatures.insert("Rcpp::NumericVector(*degrees_to_radians_Cpp)(Rcpp::NumericVector)");
         signatures.insert("double(*gradient_to_surface_Cpp)(double,double)");
         signatures.insert("Rcpp::NumericVector(*latlon_to_km_Cpp)(Rcpp::NumericVector,Rcpp::NumericVector,Rcpp::NumericVector,Rcpp::NumericVector,Rcpp::NumericVector)");
