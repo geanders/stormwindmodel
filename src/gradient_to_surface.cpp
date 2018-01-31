@@ -3,7 +3,6 @@ using namespace Rcpp;
 
 // [[Rcpp::interfaces(r, cpp)]]
 
-
 //' Calculate surface wind speed from gradient (C++ version)
 //' Calculates the surface wind speed based on an estimated gradient
 //' wind speed at a point and the radius from the storm center to
@@ -35,9 +34,9 @@ using namespace Rcpp;
 // [[Rcpp::export]]
 double gradient_to_surface_Cpp(double wind_gl_aa, double cdist) {
   double reduction_factor;
-  if(cdist < 100 || cdist == 100){
+  if (cdist < 100 || cdist == 100){
      reduction_factor = 0.9;
-  } else if(cdist > 700 || cdist == 700){
+  } else if (cdist > 700 || cdist == 700){
     reduction_factor = 0.75;
   } else {
     reduction_factor = 0.90 - (cdist - 100) * (0.15/ 600);
@@ -48,11 +47,11 @@ double gradient_to_surface_Cpp(double wind_gl_aa, double cdist) {
   return wind_gl_aa * reduction_factor;
 }
 
-
-
 /*** R
-gradient_to_surface(3814.862,9.182584e-05)
-gradient_to_surface_Cpp(3814.862,9.182584e-05)
+gradient_to_surface(3814.862, 9.182584e-05)
+gradient_to_surface_Cpp(3814.862, 9.182584e-05)
 library(microbenchmark)
-microbenchmark(gradient_to_surface(3814.862,9.182584e-05),gradient_to_surface_Cpp(3814.862,9.182584e-05))
+microbenchmark(gradient_to_surface(3814.862, 9.182584e-05),
+               gradient_to_surface_Cpp(3814.862, 9.182584e-05))
+# C++ function about 1.5 times faster
 */
