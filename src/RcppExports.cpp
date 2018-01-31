@@ -44,13 +44,13 @@ RcppExport SEXP _stormwindmodel_add_forward_speed_Cpp(SEXP wind_sfc_symSEXP, SEX
     return rcpp_result_gen;
 }
 // add_inflow_Cpp
-NumericVector add_inflow_Cpp(NumericVector gwd, NumericVector cdist, NumericVector Rmax);
+Rcpp::NumericVector add_inflow_Cpp(Rcpp::NumericVector gwd, Rcpp::NumericVector cdist, Rcpp::NumericVector Rmax);
 static SEXP _stormwindmodel_add_inflow_Cpp_try(SEXP gwdSEXP, SEXP cdistSEXP, SEXP RmaxSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
-    Rcpp::traits::input_parameter< NumericVector >::type gwd(gwdSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type cdist(cdistSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type Rmax(RmaxSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type gwd(gwdSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type cdist(cdistSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type Rmax(RmaxSEXP);
     rcpp_result_gen = Rcpp::wrap(add_inflow_Cpp(gwd, cdist, Rmax));
     return rcpp_result_gen;
 END_RCPP_RETURN_ERROR
@@ -277,7 +277,7 @@ static int _stormwindmodel_RcppExport_validate(const char* sig) {
     static std::set<std::string> signatures;
     if (signatures.empty()) {
         signatures.insert("Rcpp::NumericVector(*add_forward_speed_Cpp)(Rcpp::NumericVector,Rcpp::NumericVector,Rcpp::NumericVector,Rcpp::NumericVector,Rcpp::NumericVector,Rcpp::NumericVector)");
-        signatures.insert("NumericVector(*add_inflow_Cpp)(NumericVector,NumericVector,NumericVector)");
+        signatures.insert("Rcpp::NumericVector(*add_inflow_Cpp)(Rcpp::NumericVector,Rcpp::NumericVector,Rcpp::NumericVector)");
         signatures.insert("Rcpp::NumericVector(*radians_to_degrees_Cpp1)(Rcpp::NumericVector)");
         signatures.insert("Rcpp::NumericVector(*calc_bearing_Cpp)(Rcpp::NumericVector,Rcpp::NumericVector,Rcpp::NumericVector,Rcpp::NumericVector)");
         signatures.insert("Rcpp::NumericVector(*degrees_to_radians_Cpp)(Rcpp::NumericVector)");

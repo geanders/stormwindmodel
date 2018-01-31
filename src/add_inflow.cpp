@@ -1,10 +1,8 @@
 #include <Rcpp.h>
-#include <math.h>
 #include <cmath>
 using namespace Rcpp;
 
 // [[Rcpp::interfaces(r, cpp)]]
-
 
 //' Add inflow angle (C++ version)
 //'
@@ -39,19 +37,26 @@ using namespace Rcpp;
 //'
 //' @export
 // [[Rcpp::export]]
-NumericVector add_inflow_Cpp(NumericVector gwd, NumericVector cdist, NumericVector Rmax){
-  for (int i=0; i<gwd.size(); i++){
-    if(NumericVector :: is_na(gwd[i]) ||NumericVector ::  is_na(cdist[i]) ||NumericVector ::  is_na(Rmax[i])) {
+Rcpp::NumericVector add_inflow_Cpp(Rcpp::NumericVector gwd,
+                                   Rcpp::NumericVector cdist,
+                                   Rcpp::NumericVector Rmax){
+  for (int i = 0; i < gwd.size(); i++){
+    if(Rcpp::NumericVector :: is_na(gwd[i]) ||
+       Rcpp::NumericVector :: is_na(cdist[i]) ||
+       Rcpp::NumericVector :: is_na(Rmax[i])) {
       return -1; //Cannot return NA because the type is double
     }
   }
   // Calculate inflow angle over water based on radius of location from storm
   // center in comparison to radius of maximum winds (Phadke et al. 2003)
-  NumericVector inflow_angle(gwd.size()),overland_inflow_angle(gwd.size()),gwd_with_inflow(gwd.size());
-  for (int k=0; k<gwd.size(); k++){
-    if(cdist[k] < Rmax[k]){
+  Rcpp::NumericVector inflow_angle(gwd.size()),
+                                   overland_inflow_angle(gwd.size()),
+                                   gwd_with_inflow(gwd.size());
+
+  for (int k = 0; k < gwd.size(); k++){
+    if (cdist[k] < Rmax[k]){
       inflow_angle[k] = 10 + (1 + (cdist[k] / Rmax[k]));
-    } else if(cdist[k] >= Rmax[k] && cdist[k] < 1.2*Rmax[k]){
+    } else if (cdist[k] >= Rmax[k] && cdist[k] < 1.2 * Rmax[k]){
       inflow_angle[k] = 20 + 25 * ((cdist[k] / Rmax[k]) - 1);
     } else {
       inflow_angle[k] = 25;
@@ -66,13 +71,11 @@ NumericVector add_inflow_Cpp(NumericVector gwd, NumericVector cdist, NumericVect
   return gwd_with_inflow;
 }
 
-
-
-
 /*** R
-add_inflow(160,100,20)
-add_inflow_Cpp(160,100,20)
+add_inflow(160, 100, 20)
+add_inflow_Cpp(160, 100, 20)
 library(microbenchmark)
-microbenchmark(add_inflow(160,100,20),
-               add_inflow_Cpp(160,100,20))
+microbenchmark(add_inflow(160, 100, 20),
+               add_inflow_Cpp(160, 100, 20))
+# C++ function is about 1.5 times faster
 */

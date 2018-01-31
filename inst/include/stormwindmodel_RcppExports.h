@@ -43,11 +43,11 @@ namespace stormwindmodel {
         return Rcpp::as<Rcpp::NumericVector >(rcpp_result_gen);
     }
 
-    inline NumericVector add_inflow_Cpp(NumericVector gwd, NumericVector cdist, NumericVector Rmax) {
+    inline Rcpp::NumericVector add_inflow_Cpp(Rcpp::NumericVector gwd, Rcpp::NumericVector cdist, Rcpp::NumericVector Rmax) {
         typedef SEXP(*Ptr_add_inflow_Cpp)(SEXP,SEXP,SEXP);
         static Ptr_add_inflow_Cpp p_add_inflow_Cpp = NULL;
         if (p_add_inflow_Cpp == NULL) {
-            validateSignature("NumericVector(*add_inflow_Cpp)(NumericVector,NumericVector,NumericVector)");
+            validateSignature("Rcpp::NumericVector(*add_inflow_Cpp)(Rcpp::NumericVector,Rcpp::NumericVector,Rcpp::NumericVector)");
             p_add_inflow_Cpp = (Ptr_add_inflow_Cpp)R_GetCCallable("stormwindmodel", "_stormwindmodel_add_inflow_Cpp");
         }
         RObject rcpp_result_gen;
@@ -59,7 +59,7 @@ namespace stormwindmodel {
             throw Rcpp::internal::InterruptedException();
         if (rcpp_result_gen.inherits("try-error"))
             throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
-        return Rcpp::as<NumericVector >(rcpp_result_gen);
+        return Rcpp::as<Rcpp::NumericVector >(rcpp_result_gen);
     }
 
     inline Rcpp::NumericVector radians_to_degrees_Cpp1(Rcpp::NumericVector radians) {
