@@ -29,6 +29,7 @@ county_points <- read.csv(paste0("http://www2.census.gov/geo/docs/reference/",
          glat = latitude,
          glon = longitude,
          gpop = population) %>%
-  select(gridid, glat, glon)
+  select(gridid, glat, glon) %>%
+  mutate(over_land = TRUE)
 
 use_data(county_points, overwrite = TRUE)

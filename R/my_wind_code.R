@@ -141,6 +141,7 @@ calc_grid_wind <- function(grid_point = stormwindmodel::county_points[1, ],
                       # Bring back to surface level (surface wind reduction factor)
                       wind_sfc_sym = ~ mapply(gradient_to_surface,
                                               wind_gl_aa = wind_gl_aa,
+                                              over_land = grid_point$over_land,
                                               cdist = cdist),
                       # Get surface wind direction
                       swd = ~ mapply(add_inflow, gwd = gwd, cdist = cdist,

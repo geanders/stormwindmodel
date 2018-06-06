@@ -143,7 +143,7 @@ remove_forward_speed <- function(vmax, tcspd){
 #' 50(10):2149-2166
 #'
 #' @export
-gradient_to_surface <- function(wind_gl_aa, cdist){
+gradient_to_surface <- function(wind_gl_aa, over_land, cdist){
   if(cdist <= 100){
     reduction_factor <- 0.9
   } else if(cdist >= 700){
@@ -151,9 +151,13 @@ gradient_to_surface <- function(wind_gl_aa, cdist){
   } else {
     reduction_factor <- 0.90 - (cdist - 100) * (0.15/ 600)
   }
-  # Since all counties are over land, reduction factor should
+
+  # If the point being modeled is over land, reduction factor should
   # be 20% lower than if it were over water
-  reduction_factor <- reduction_factor * 0.8
+  if(over_land){
+    reduction_factor <- reduction_factor * 0.8
+  }
+
   wind_sfc_sym <- wind_gl_aa * reduction_factor
   return(wind_sfc_sym)
 }
