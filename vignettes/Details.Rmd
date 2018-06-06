@@ -617,7 +617,18 @@ county_points[1, ]
 
 The package includes a dataset called `county_points` that has the population mean centers of each county in hurricane-prone states. This dataset can be used directly from the package to determine county-level exposures.
 
-The `grid_point` input must follow a specific format. The column names for latitude and longitude must be `glat` and `glon`, both should be in decimal degrees, and the longitude should be expressed using negative numbers for the Western hemisphere. It also must have a column named `over_land` that specifies whether that point is over land (`TRUE`) or over water (`FALSE`). In the case of the county dataset, all points are over land, so this column is always `TRUE`. When using the wind model in other contexts (e.g., to model wind as an input to a storm surge model), some of the modeled points may be over water. 
+The `grid_point` input must follow a specific format. The column names for latitude and longitude must be `glat` and `glon`, both should be in decimal degrees, and the longitude should be expressed using negative numbers for the Western hemisphere. It also must have a column named `over_land` that specifies whether that point is over land (`TRUE`) or over water (`FALSE`). In the case of the county dataset, all points are over land, so this column is always `TRUE`. When using the wind model in other contexts (e.g., to model wind as an input to a storm surge model), some of the modeled points may be over water.
+
+If you have a dataset of grid points, but do not know which are over water, you can use the North Atlantic land mask that we've included with the package. Note that you need to enter the negative of the longitude data from the grid point dataframe, as this is the longitude format needed as an input to `check_over_land`.
+
+```{r}
+example_points <- data_frame(glat = c(38, 38.2, 38, 38.2),
+                             glon = c(-75, -75, -76, -76)) 
+example_points$over_land <- mapply(check_over_land, 
+                                   tclat = example_points$glat, 
+                                   tclon = -example_points$glon)
+example_points
+```
 
 Here is an example of running the `calc_grid_wind` function, as well as the typical output from the function. Notice that the function only outputs wind estimates for one grid point at a time; in this example, the point is for Dare County, NC, (FIPS 37055) during Hurricane Floyd:
 
