@@ -59,24 +59,19 @@ add_inflow <- function(gwd, cdist, Rmax){
   return(gwd_with_inflow)
 }
 
-#' Adds forward speed component to modeled surface wind
+#' Calculate the correction factor to add forward speed to modeled surface wind
 #'
-#' Adds the storm's forward speed component (i.e., motion asymmetery) back
-#' into the estimated surface wind speed at a grid point location after
-#' rotational winds have been modeled for the location.
+#' Calculates the correction factor (Phadke et al. 2003) to use to adds the
+#' storm's forward speed component (i.e., motion asymmetery) back
+#' into the estimated u- and v-components of the surface wind speed at a grid point
+#' location after u- and v-components of rotational winds have been modeled for the
+#' location.
 #'
-#' @param wind_sfc_sym A numeric vector with maximum 10-meter 1-minute
-#'    sustained wind with motion asymmetry removed (m / s).
-#' @param tcspd_u A numeric vector with the tropical cyclone speed, u-component
-#'    (m / s).
-#' @param tcspd_v A numeric vector with the tropical cyclone speed, v-component
-#'    (m / s).
-#' @param swd A numeric vector with surface wind direction (in degrees).
 #' @inheritParams add_inflow
 #' @inheritParams will3_right
 #'
-#' @return A numeric vector giving asymmeric surface windspeed (m / s) at the
-#'    location being modeled.
+#' @return A numeric vector giving the correction factor, calculated based
+#'   on Phadke et al. 2003
 #'
 #' @details
 #'
@@ -87,22 +82,125 @@ add_inflow <- function(gwd, cdist, Rmax){
 #' Phadke AC, Martino CD, Cheung KF, and Houston SH. 2003. Modeling of
 #'    tropical cyclone winds and waves for emergency management. Ocean
 #'    Engineering 30(4):553-578.
-add_forward_speed <- function(wind_sfc_sym, tcspd_u, tcspd_v, swd, cdist, Rmax){
-  # Calculate u- and v-components of surface wind speed
-  wind_sfc_sym_u <- wind_sfc_sym * cos(degrees_to_radians(swd))
-  wind_sfc_sym_v <-  wind_sfc_sym * sin(degrees_to_radians(swd))
-
-  # Add back in component from forward motion of the storm
+calc_corr_fct <- function(Rmax, cdist){
   correction_factor <- (Rmax * cdist) / (Rmax ^ 2 + cdist ^ 2)
+  return(correction_factor)
+}
+
+#' Calculates the u-component of wind with forward motion added
+#'
+#' Adds the storm's forward speed component (i.e., motion asymmetery) back
+#' into the estimated u-component of the surface wind speed at a grid point
+#' location after u-component of rotational winds have been modeled for the
+#' location.
+#'
+#' @param wind_sfc_sym A numeric vector with maximum 10-meter 1-minute
+#'    sustained wind with motion asymmetry removed (m / s).
+#' @param tcspd_u A numeric vector with the tropical cyclone speed, u-component
+#'    (m / s).
+#' @param swd A numeric vector with surface wind direction (in degrees).
+#' @param correction_factor A numeric vector giving the correction factor,
+#'  calculated based on Phadke et al. 2003
+#'
+#' @details
+#'
+#' This function uses equation 12 from Phadke et al. (2003).
+#'
+#' @references
+#'
+#' Phadke AC, Martino CD, Cheung KF, and Houston SH. 2003. Modeling of
+#'    tropical cyclone winds and waves for emergency management. Ocean
+#'    Engineering 30(4):553-578.
+calc_sfc_u <- function(wind_sfc_sym, tcspd_u, swd,
+                       correction_factor){
+  # Calculate u-component of surface wind speed
+  wind_sfc_sym_u <- wind_sfc_sym * cos(degrees_to_radians(swd))
 
   # Add tangential and forward speed components and calculate
-  # magnitude of this total wind
+  # magnitude of the u-component of the total wind
   wind_sfc_u <- wind_sfc_sym_u + correction_factor * tcspd_u
+
+  return(wind_sfc_u)
+}
+
+#' Calculates the v-component of wind with forward motion added
+#'
+#' Adds the storm's forward speed component (i.e., motion asymmetery) back
+#' into the estimated v-component of the surface wind speed at a grid point
+#' location after v-component of rotational winds have been modeled for the
+#' location.
+#'
+#' @param tcspd_v A numeric vector with the tropical cyclone speed, u-component
+#'    (m / s).
+#' @inheritParams calc_sfc_u
+#'
+#' @details
+#'
+#' This function uses equation 12 from Phadke et al. (2003).
+#'
+#' @references
+#'
+#' Phadke AC, Martino CD, Cheung KF, and Houston SH. 2003. Modeling of
+#'    tropical cyclone winds and waves for emergency management. Ocean
+#'    Engineering 30(4):553-578.
+calc_sfc_v <- function(wind_sfc_sym, tcspd_v, swd,
+                       correction_factor){
+  # Calculate v-component of surface wind speed
+  wind_sfc_sym_v <- wind_sfc_sym * sin(degrees_to_radians(swd))
+
+  # Add tangential and forward speed components and calculate
+  # magnitude of the v-component of the total wind
   wind_sfc_v <- wind_sfc_sym_v + correction_factor * tcspd_v
+
+  return(wind_sfc_v)
+}
+
+#' Calculate total modeled surface wind speed
+#'
+#' Adds together the u- and v-components of the surface winds, after the
+#' forward motion of the storm has been added back in, to calculate the
+#' total windspeed at a grid point.
+#'
+#' @param wind_sfc_u A numeric vector with the tropical cyclone speed, u-component
+#'    (m / s).
+#' @param wind_sfc_u A numeric vector with the tropical cyclone speed, v-component
+#'    (m / s).
+#'
+#' @return A numeric vector giving asymmeric surface windspeed (m / s) at the
+#'    location being modeled.
+add_forward_speed <- function(wind_sfc_u, wind_sfc_v){
+
+  # Combine the u- and v-components of surface winds to determine
+  # the total windspeed
   wind_sfc <- sqrt(wind_sfc_u ^ 2 + wind_sfc_v ^ 2)
 
   # Reset any negative values to 0
   wind_sfc <- ifelse(wind_sfc > 0, wind_sfc, 0)
 
   return(wind_sfc)
+}
+
+#' Calculate final surface wind direction
+#'
+#' Determines the final direction of the wind at a given grid point
+#' for a given storm location, based on both the symmetrical storm
+#' winds and the forward motion of the storm.
+#'
+#' @inheritParams add_forward_speed
+#'
+#' @return A numeric vector giving the final surface wind direction,
+#'  including both symmetrical and forward storm motion components of
+#'  the wind.
+calc_sfc_final <- function(wind_sfc_u, wind_sfc_v){
+
+  # Calculate final surface wind direction
+  swd_final <- atan2(wind_sfc_v, wind_sfc_u)
+
+  # Convert to degrees
+  swd_final <- radians_to_degrees(swd_final)
+
+  # Make sure the direction is between 0 and 360 degrees
+  swd_final <- swd_final %% 360
+
+  return(swd_final)
 }

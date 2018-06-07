@@ -147,10 +147,19 @@ calc_grid_wind <- function(grid_point = stormwindmodel::county_points[1, ],
                       swd = ~ mapply(add_inflow, gwd = gwd, cdist = cdist,
                                      Rmax = Rmax),
                       # Add back in storm forward motion component
-                      windspeed = ~ add_forward_speed(wind_sfc_sym,
-                                                      tcspd_u, tcspd_v,
-                                                      swd, cdist, Rmax)) %>%
-          dplyr::select_(~ date, ~ windspeed)
+                      correction_factor = ~ calc_corr_fct(Rmax = Rmax, cdist = cdist),
+                      wind_sfc_u = ~ calc_sfc_u(wind_sfc_sym = wind_sfc_sym,
+                                                tcspd_u = tcspd_u,
+                                                swd = swd,
+                                                correction_factor = correction_factor),
+                      wind_sfc_v = ~ calc_sfc_v(wind_sfc_sym = wind_sfc_sym,
+                                                tcspd_v = tcspd_v,
+                                                swd = swd,
+                                                correction_factor = correction_factor),
+                      windspeed = ~ add_forward_speed(wind_sfc_u = wind_sfc_u,
+                                                      wind_sfc_v = wind_sfc_v),
+                      swd_final = ~ calc_sfc_final(wind_sfc_u = wind_sfc_u,
+                                                   wind_sfc_v = wind_sfc_v))
         return(grid_wind)
 }
 

@@ -73,7 +73,8 @@ var_names <- dplyr::data_frame(var = c("`vmax`",
                                        "`vmax_gust`",
                                        "`sust_dur`",
                                        "`gust_dur`",
-                                       "`gust_factor`"),
+                                       "`gust_factor`",
+                                       "`swd_final`"),
                                math = c("$V_{max}$",
                                         "$V_{max,sym}$",
                                         "$V_{max,G}$",
@@ -113,7 +114,8 @@ var_names <- dplyr::data_frame(var = c("`vmax`",
                                         "$V_{max,gust}$",
                                         "$T_{sust}$",
                                         "$T_{gust}$",
-                                        "$G_{3,60}$"),
+                                        "$G_{3,60}$",
+                                        "$\\theta_{F}$"),
                                defn = c("Maximum 10-m 1-min sustained wind for the tropical cyclone",
                                         "Maximum 10-m 1-min sustained wind for the tropical cyclone with motion asymmetry removed",
                                         "Maximum gradient-level 1-min sustained wind for the tropical cyclone",
@@ -133,7 +135,7 @@ var_names <- dplyr::data_frame(var = c("`vmax`",
                                         "Upper boundary of the transition zone for Willoughby model",
                                         "Gradient wind direction",
                                         "Inflow angle (0 to 360)",
-                                        "Surface wind direction",
+                                        "Surface wind direction without forward motion",
                                         "Azimuthal average winds inside $R_1$",
                                         "Azimuthal average winds outside $R_2$",
                                         "Azimuthal average winds, varies by radius $r$", 
@@ -153,7 +155,8 @@ var_names <- dplyr::data_frame(var = c("`vmax`",
                                         "Max 10-m 1-min gust wind experienced at grid point",
                                         "Duration of time a certain sustained wind was experienced at grid point",
                                         "Duration of time a certain gust wind was experienced at grid point",
-                                        "10-m gust factor to convert from 1-min averaged mean wind to highest 3-sec mean (gust) within a 1-min observation period"),
+                                        "10-m gust factor to convert from 1-min averaged mean wind to highest 3-sec mean (gust) within a 1-min observation period",
+                                        "Surface wind direction with forward motion"),
                                units = c("m/s",
                                          "m/s",
                                          "m/s",
@@ -193,7 +196,8 @@ var_names <- dplyr::data_frame(var = c("`vmax`",
                                          "m/s",
                                          "minutes",
                                          "minutes",
-                                         "--"))
+                                         "--",
+                                         "degrees"))
 knitr::kable(var_names, col.names = c("R variable", "Expression in equations",
                                       "Definition", "Units"))
 ```
@@ -648,6 +652,116 @@ ggplot(grid_wind, aes(x = date, y = windspeed)) +
   ylab("Modeled surface wind (m / s)")
 ```
 
+Here is a plot of the angles of the gradient and surface winds at each time point: 
+
+```{r warning = FALSE, fig.width = 7, fig.height = 4, fig.align = "center"}
+grid_wind %>% 
+  select(date, tcdir, gwd, swd, swd_final, windspeed) %>% 
+  gather(key, value, -date, -windspeed) %>% 
+  mutate(key = factor(key, levels = c("tcdir", "gwd", "swd", "swd_final"), 
+                      labels = c("Direction of forward motion",
+                                 "Gradient wind direction",
+                                 "Symmetric surface wind direction",
+                                 "Surface wind direction\n(including forward component)"))) %>% 
+  ggplot(aes(x = date, y = value, color = key, alpha = log10(windspeed))) + 
+  geom_line() + 
+  labs(x = "Observation time (UTC)",
+       y = "Wind direction\n(0 is due east, 90 is due north)",
+       color = "")
+```
+
+Here, we've plotted several directional componenents of the storm and its winds at this point for a few time points. The storm location at each time is shown by the black point, with the black arrow showing the direction of the storm's forward movement (length of this arrow is proportional to the storm's forward speed) and the gray arrow showing the bearing from the storm to the grid location being modeled. The blue dot shows the grid location (here, the population mean center of Dare County, NC). The brightest blue arrow shows the modeled wind direction at the gradient level, the darkest blue arrow shows the modeled symmetrical wind direction at the surface level, and the medium blue arrow shows the final modeled wind direction at the surface level, once the forward motion of the storm is added in. For each of these arrows, the length is proportional to the given modeled windspeed).
+
+```{r message = FALSE, fig.width = 8, fig.height = 4, fig.align = "center"}
+library(lubridate)
+grid_wind %>% 
+  filter(date >= ymd_hms("1999-09-16 11:30:00") & 
+         date <= ymd_hms("1999-09-16 13:20:00")) %>% 
+  select(date, tclat, tclon, tcspd_u, tcspd_v, tcdir,
+         wind_gl_aa, wind_sfc_sym, windspeed,
+         chead, gwd, swd, swd_final) %>% 
+  mutate(tcspeed = sqrt(tcspd_u ^ 2 + tcspd_v ^ 2),
+         tclon = -tclon,
+         glat = grid_point$glat, 
+         glon = grid_point$glon) %>%  
+  ggplot() + 
+  geom_point(aes(x = tclon, y = tclat)) + 
+  geom_point(aes(x = glon, y = glat), color = "blue") + 
+  geom_spoke(aes(x = tclon, y = tclat, 
+                 angle = chead * pi / 180,
+                 radius = 0.1),
+             arrow = arrow(length = unit(.05, 'inches')),
+             color = "darkgray") +
+  geom_spoke(aes(x = tclon, y = tclat, 
+                 angle = tcdir * pi / 180,
+                 radius = tcspeed / 200),
+             arrow = arrow(length = unit(.05, 'inches'))) +
+  geom_spoke(aes(x = glon, y = glat, 
+                 angle = gwd * pi / 180, 
+                 radius = wind_gl_aa / 200),
+             arrow = arrow(length = unit(.05, 'inches')),
+             color = "cyan",
+             alpha = 0.5) +
+    geom_spoke(aes(x = glon, y = glat, 
+                 angle = swd * pi / 180, 
+                 radius = wind_sfc_sym / 200),
+             arrow = arrow(length = unit(.05, 'inches')),
+             color = "darkcyan",
+             alpha = 0.5) +
+      geom_spoke(aes(x = glon, y = glat, 
+                 angle = swd_final * pi / 180, 
+                 radius = windspeed / 200),
+             arrow = arrow(length = unit(.05, 'inches')),
+             color = "blue") +
+  facet_wrap(~ date, ncol = 4) + 
+  labs(x = "Longitude (degrees West)", y = "Latitude (degrees North)")
+```
+
+You can do this for multiple points for multiple storm positions: 
+
+```{r fig.width = 9, fig.height = 6}
+library(viridis)
+ex_points <- landmask %>% 
+  mutate(longitude = longitude - 360) %>% 
+  filter(-78.5 <= longitude & 
+           longitude <= -76 & 
+           33.5 <= latitude & 
+           latitude <= 35.5) %>% 
+  mutate(gridid = as.character(1:n()),
+         over_land = land == "land") %>% 
+  rename(glat = latitude, 
+         glon = longitude) %>% 
+  select(gridid, glat, glon, over_land)
+
+grid_list <- split(ex_points, f = ex_points$gridid)
+grid_winds <- lapply(grid_list, FUN = calc_grid_wind,
+                       with_wind_radii = filter(with_wind_radii,
+                                                date >= ymd_hms("1999-09-16 7:00:00") &
+                                                date <= ymd_hms("1999-09-16 8:15:00")))
+grid_winds <- bind_rows(grid_winds, .id = "gridid") 
+
+grid_winds %>% 
+  left_join(ex_points, by = "gridid") %>% 
+  ggplot() + 
+  geom_point(aes(x = -tclon, y = tclat), size = 3, color = "darkred") +
+  geom_spoke(aes(x = -tclon, y = tclat, 
+                 angle = tcdir * pi / 180, 
+                 radius = sqrt(tcspd_u ^ 2 + tcspd_v ^ 2) / 100),
+             size = 1.5, 
+             arrow = arrow(length = unit(.05, 'inches')),
+             color = "darkred") +
+  geom_spoke(aes(x = glon, y = glat, 
+                 angle = swd_final * pi / 180,
+                 color = windspeed, 
+                 radius = windspeed / 200),
+             arrow = arrow(length = unit(.05, 'inches'))) +
+  geom_point(aes(x = glon, y = glat, shape = over_land), alpha = 0.3, size = 2.5) +
+  scale_color_viridis(option = "B") + 
+  theme(legend.position = "top") + 
+  facet_wrap(~ date, ncol = 3) + 
+  theme_dark()
+```
+
 You can also apply this function across all grid points for all storm observations to create a large dataset with the estimated wind speed at each county at each observation point. For example, you could run this for Floyd and then plot winds at particular time "snap shots" using the following code: 
 
 ```{r fig.width = 8}
@@ -766,13 +880,13 @@ Here is the function the code uses for this part:
 stormwindmodel:::gradient_to_surface
 ```
 
-Here is a reproduction of part of Figure 3 from Knaff et al. [-@knaff2011automated] using this function:
+Here is a reproduction of part of Figure 3 from Knaff et al. [-@knaff2011automated], for points that are over water, using this function:
  
 ```{r, fig.align = "center", fig.width = 4, fig.height = 2.5}
 rf_example <- data.frame(r = 0:800,
                          rf = mapply(
                            stormwindmodel:::gradient_to_surface, 
-                           wind_gl_aa = 1, cdist = 0:800))
+                           wind_gl_aa = 1, cdist = 0:800, over_land = FALSE))
 ggplot(rf_example, aes(x = r, y = rf)) + 
   geom_line() + 
   theme_classic() + 
@@ -839,10 +953,31 @@ where:
 - $R_{max}$: Radius of maximum winds (km)
 - $F$: Forward speed of the storm (m / s)
 
-Both the u- and v-components of forward speed are corrected with this correction factor, then these components are added to the u- and v-components of tangential surface wind. These u- and v-components are then used to calculate the magnitude of total wind associated with the storm at the grid point:
+First, the Phadke correction factor ($U(r)$) is calculated using `calc_corr_fct`:
+
+```{r}
+stormwindmodel:::calc_corr_fct
+```
+
+Next, both the u- and v-components of forward speed are calculated and corrected with this correction factor, then these components are added to the u- and v-components of tangential surface winds, using `calc_sfc_u` and `calc_sfc_v`: 
+
+```{r}
+stormwindmodel:::calc_sfc_u
+stormwindmodel:::calc_sfc_v
+```
+
+Finally, these u- and v-components are then used to calculate the magnitude of total wind associated with the storm at the grid point:
 
 ```{r}
 stormwindmodel:::add_forward_speed
+```
+
+### Calculate the direction of surface winds, including the forward component
+
+The direction of the surface wind is then calculated. This uses the modeled u- and v-wind components that have been adjusted for the forward motion of the storm, and so this final estimate of surface wind direction incorporates the forward motion of the storm. By contrast, the earlier calculation of surface wind direction (i.e., calculating the `swd` value) gave the direction of only the symmetrical component of the storm winds.
+
+```{r}
+stormwindmodel:::calc_sfc_final
 ```
 
 ### Calculate 3-second gust wind speed from sustained wind speed
