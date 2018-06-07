@@ -131,12 +131,8 @@ remove_forward_speed <- function(vmax, tcspd){
 #' @details The reduction factor is based on Figure 3 of Knaff et al., 2003.
 #' Over water, it is estimated to be 0.9 up to a radius of 100 km,
 #' 0.75 for a radius of 700 km or more, and decrease linearly between
-#' a radius of 100 km and 700 km. Points over land should use a reduction
-#' factor that is 20\% lower. Because all of the counties are over
-#' land, the function makes this adjustment for all grid points.
-#'
-#' @note This function is only appropriate to use for points that are over
-#'    land.
+#' a radius of 100 km and 700 km. Points over land use a reduction
+#' factor that is 20\% lower.
 #'
 #' @references
 #'
