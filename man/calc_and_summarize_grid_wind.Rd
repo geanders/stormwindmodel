@@ -69,4 +69,3 @@ grid_wind_summary <- calc_and_summarize_grid_wind(grid_point = grid_point,
 }
 
 }
-

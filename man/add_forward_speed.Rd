@@ -2,43 +2,23 @@
 % Please edit documentation in R/boundary_layer_helpers.R
 \name{add_forward_speed}
 \alias{add_forward_speed}
-\title{Adds forward speed component to modeled surface wind}
+\title{Calculate total modeled surface wind speed}
 \usage{
-add_forward_speed(wind_sfc_sym, tcspd_u, tcspd_v, swd, cdist, Rmax)
+add_forward_speed(wind_sfc_u, wind_sfc_v)
 }
 \arguments{
-\item{wind_sfc_sym}{A numeric vector with maximum 10-meter 1-minute
-sustained wind with motion asymmetry removed (m / s).}
-
-\item{tcspd_u}{A numeric vector with the tropical cyclone speed, u-component
+\item{wind_sfc_u}{A numeric vector with the tropical cyclone speed, u-component
 (m / s).}
 
-\item{tcspd_v}{A numeric vector with the tropical cyclone speed, v-component
+\item{wind_sfc_u}{A numeric vector with the tropical cyclone speed, v-component
 (m / s).}
-
-\item{swd}{A numeric vector with surface wind direction (in degrees).}
-
-\item{cdist}{A numeric vector giving radius (in kilometers) from the storm
-center to the location being modeled.}
-
-\item{Rmax}{A numeric vector giving the radius to maximum winds (in kilometers)
-for the tropical storm.}
 }
 \value{
 A numeric vector giving asymmeric surface windspeed (m / s) at the
    location being modeled.
 }
 \description{
-Adds the storm's forward speed component (i.e., motion asymmetery) back
-into the estimated surface wind speed at a grid point location after
-rotational winds have been modeled for the location.
+Adds together the u- and v-components of the surface winds, after the
+forward motion of the storm has been added back in, to calculate the
+total windspeed at a grid point.
 }
-\details{
-This function uses equation 12 from Phadke et al. (2003).
-}
-\references{
-Phadke AC, Martino CD, Cheung KF, and Houston SH. 2003. Modeling of
-   tropical cyclone winds and waves for emergency management. Ocean
-   Engineering 30(4):553-578.
-}
-

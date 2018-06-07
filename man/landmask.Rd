@@ -21,4 +21,3 @@ so an appropriate conversion factor can be used to estimate gradient winds
 from sustained surface winds.
 }
 \keyword{datasets}
-

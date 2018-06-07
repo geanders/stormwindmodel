@@ -60,4 +60,3 @@ full_track <- create_full_track(hurr_track = floyd_tracks)
 full_track <- create_full_track(hurr_track = floyd_tracks, tint = 0.5)
 
 }
-

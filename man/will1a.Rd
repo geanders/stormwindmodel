@@ -21,4 +21,3 @@ in kilometers}
 \description{
 Willoughby et al. (2006), Equation 1(a)
 }
-

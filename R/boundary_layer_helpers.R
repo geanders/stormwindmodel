@@ -163,7 +163,7 @@ calc_sfc_v <- function(wind_sfc_sym, tcspd_v, swd,
 #'
 #' @param wind_sfc_u A numeric vector with the tropical cyclone speed, u-component
 #'    (m / s).
-#' @param wind_sfc_u A numeric vector with the tropical cyclone speed, v-component
+#' @param wind_sfc_v A numeric vector with the tropical cyclone speed, v-component
 #'    (m / s).
 #'
 #' @return A numeric vector giving asymmeric surface windspeed (m / s) at the

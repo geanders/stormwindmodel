@@ -119,7 +119,7 @@ remove_forward_speed <- function(vmax, tcspd){
 #'
 #' @param wind_gl_aa A numerical value with estimated gradient-level wind speed
 #'    (m / s) at a grid point.
-#'@over_land A logical value specifying whether the grid point is over land (TRUE)
+#' @param over_land A logical value specifying whether the grid point is over land (TRUE)
 #'    or over water (FALSE). For points over land, the reduction factor is
 #'    reduced by 20\% (see Details).
 #' @param cdist A numerical value with radius from the storm center to the grid
