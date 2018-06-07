@@ -112,7 +112,8 @@ With some cleaning, you can get this data to the format required for the `get_gr
 ```{r}
 new_orleans_tract_centers <- new_orleans_tract_centers %>%
   tbl_df() %>%
-  mutate(gridid = unique(new_orleans@data$TRACTCE)) %>%
+  mutate(gridid = unique(new_orleans@data$TRACTCE),
+         over_land = TRUE) %>%
   rename(glat = y, 
          glon = x)
 head(new_orleans_tract_centers)
