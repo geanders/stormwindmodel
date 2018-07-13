@@ -59,21 +59,36 @@ calc_gradient_speed <- function(vmax_sfc_sym, over_land){
 #'
 #' @param tclon Numeric vector of the absolute value of latitude, in degrees.
 #' @inheritParams will7a
+#' @inheritParams hem_adjust_track
 #'
 #' @return A logical vector of whether the storm is over land (TRUE) or water
 #'    (FALSE)
 #'
 #' @export
-check_over_land <- function(tclat, tclon){
-  lat_diffs <- abs(tclat - stormwindmodel::landmask$latitude)
-  closest_grid_lat <- stormwindmodel::landmask$latitude[which(lat_diffs ==
-                                                                min(lat_diffs))][1]
+check_over_land <- function(tclat, tclon, hemisphere = 1){
+  if (hemisphere == 1) {
+    hem_landmask <- stormwindmodel::landmask
+  } else if (hemisphere == 2) {
+    hem_landmask <- stormwindmodel::landmask %>%
+      dplyr::mutate_(longitude = ~ -(longitude - 360) + 360)
+  } else if (hemisphere == 3) {
+    hem_landmask <- stormwindmodel::landmask %>%
+      dplyr::mutate_(latitude = ~ -latitude)
+  } else if (hemisphere == 4) {
+    hem_landmask <- stormwindmodel::landmask %>%
+      dplyr::mutate_(latitude = ~ -latitude) %>%
+      dplyr::mutate_(longitude = ~ -(longitude - 360) + 360)
+  } else {
+    stop("hemisphere not defined")
+  }
 
-  lon_diffs <- abs(tclon - (360 - stormwindmodel::landmask$longitude))
-  closest_grid_lon <- stormwindmodel::landmask$longitude[which(lon_diffs ==
-                                                                 min(lon_diffs))][1]
+  lat_diffs <- abs(tclat - hem_landmask$latitude)
+  closest_grid_lat <- hem_landmask$latitude[which(lat_diffs == min(lat_diffs))][1]
 
-  over_land <- stormwindmodel::landmask %>%
+  lon_diffs <- abs(tclon - (360 - hem_landmask$longitude))
+  closest_grid_lon <- hem_landmask$longitude[which(lon_diffs == min(lon_diffs))][1]
+
+  over_land <- hem_landmask %>%
     dplyr::filter_(~ latitude == closest_grid_lat &
                      longitude == closest_grid_lon) %>%
     dplyr::mutate_(land = ~ land == "land") %>%
