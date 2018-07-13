@@ -6,6 +6,7 @@
 #' tracks.These inputs and parameters are later used to model wind speed
 #' at each grid point for every observation.
 #'
+#' @inheritParams hem_adjust_track
 #' @param full_track A dataframe with interpolated hurricane track data, as
 #'    created by \code{\link{create_full_track}}. This dataframe must have the
 #'    following columns:
@@ -48,7 +49,7 @@
 #' }
 #'
 #' @export
-add_wind_radii <- function(full_track = create_full_track()){
+add_wind_radii <- function(full_track = create_full_track(), hemisphere = 1){
 
         with_wind_radii <- full_track %>%
           dplyr::mutate_(tcspd = ~ calc_forward_speed(tclat, tclon, date,
@@ -61,7 +62,7 @@ add_wind_radii <- function(full_track = create_full_track()){
                         tcspd_u = ~ tcspd * cos(degrees_to_radians(tcdir)),
                         tcspd_v = ~ tcspd * sin(degrees_to_radians(tcdir)),
                         vmax_sfc_sym = ~ remove_forward_speed(vmax, tcspd),
-                        over_land = ~ mapply(check_over_land, tclat, tclon),
+                        over_land = ~ mapply(check_over_land, tclat, tclon, hemisphere = hemisphere),
                         vmax_gl = ~ mapply(calc_gradient_speed,
                                            vmax_sfc_sym = vmax_sfc_sym,
                                            over_land = over_land),
@@ -314,15 +315,22 @@ get_grid_winds <- function(hurr_track = stormwindmodel::floyd_tracks,
                            tint = 0.25,
                            gust_duration_cut = 20,
                            sust_duration_cut = 20){
+        hemisphere <- check_hemisphere(hurr_track = hurr_track)
+        if (hemisphere > 4) {
+          stop("stormwindmodel not appropriate as storm crosses East / West Hemispheres.")
+        }
+        hurr_track <- hem_adjust_track(hurr_track = hurr_track, hemisphere = hemisphere)
+        grid_df <- hem_adjust_grid(grid = grid_df, hurr_track = hurr_track, hemisphere = hemisphere)
+
         full_track <- create_full_track(hurr_track = hurr_track, tint = tint)
-        with_wind_radii <- add_wind_radii(full_track = full_track)
+        with_wind_radii <- add_wind_radii(full_track = full_track, hemisphere = hemisphere)
 
         grid_winds <- plyr::adply(grid_df, 1, calc_and_summarize_grid_wind,
                                   with_wind_radii = with_wind_radii,
                                   tint = tint,
                                   gust_duration_cut = gust_duration_cut,
                                   sust_duration_cut = sust_duration_cut)
-
+        grid_winds <- hem_adjust_grid(grid = grid_winds, hurr_track = hurr_track, hemisphere = hemisphere)
         return(grid_winds)
 }
 
