@@ -45,9 +45,9 @@ check_north_hemisphere <- function(hurr_track) {
 #'
 #' @export
 check_west_hemisphere <- function(hurr_track) {
-  if (all(hurr_track$longitude < 0)) {
+  if (all(hurr_track$longitude < 0 & hurr_track$longitude > -180)) {
     TRUE
-  } else if (all(hurr_track$longitude > 0)) {
+  } else if (all(hurr_track$longitude > 0 & hurr_track$longitude < 180)) {
     FALSE
   } else {
     warning("hemisphere (east/west) undefined")
@@ -67,10 +67,10 @@ check_west_hemisphere <- function(hurr_track) {
 #'     indicates that the storm track is located in the Northern and Eastern
 #'     Hemispheres; SW (level = 3) indicates that the storm track is located in
 #'     the Southern and Western Hemispheres; and SE (level = 4) indicates that
-#'     the storm track is located in the Southern and Eastern Hemispheres; NB 
-#'     (level = 5) indicates that the storm track is in the Northern Hemisphere 
-#'     but crosses between the Eastern and Western Hemispheres; SB (level = 6) 
-#'     indicates that the storm track is in the Southern Hemisphere but crosses 
+#'     the storm track is located in the Southern and Eastern Hemispheres; NB
+#'     (level = 5) indicates that the storm track is in the Northern Hemisphere
+#'     but crosses between the Eastern and Western Hemispheres; SB (level = 6)
+#'     indicates that the storm track is in the Southern Hemisphere but crosses
 #'     between the Eastern and Western Hemispheres.
 #'
 #' @note
@@ -95,7 +95,7 @@ check_hemisphere <- function(hurr_track) {
     hemisphere <- 2
   } else if (north_hem == TRUE && west_hem == TRUE) {
     hemisphere <- 1
-  } 
+  }
   return(hemisphere)
 }
 
