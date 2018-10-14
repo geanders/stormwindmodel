@@ -41,4 +41,3 @@ Phadke AC, Martino CD, Cheung KF, and Houston SH. 2003. Modeling of
    tropical cyclone winds and waves for emergency management. Ocean
    Engineering 30(4):553-578.
 }
-

@@ -50,4 +50,3 @@ map_wind(grid_winds_katrina, break_point = 20)
 }
 
 }
-

@@ -28,4 +28,3 @@ came from the Extended Best Track dataset:
 \url{http://rammb.cira.colostate.edu/research/tropical_cyclones/tc_extended_best_track_dataset/}
 }
 \keyword{datasets}
-

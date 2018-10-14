@@ -58,4 +58,3 @@ This function uses the following equations to calculate the bearing
    360 degrees, the function applies modular arithmetic to bring the value
    back within the 0--360 degree range.
 }
-

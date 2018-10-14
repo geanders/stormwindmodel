@@ -51,4 +51,3 @@ automated, objective, multiple-satellite-platform tropical cyclone surface
 wind speed analysis. Journal of Applied Meteorology and Climatology
 50(10):2149-2166
 }
-
