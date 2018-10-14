@@ -131,7 +131,7 @@ new_orleans_centers <- new_orleans_tract_centers %>%
 library(ggplot2)
 ggplot() + 
   geom_sf(data = new_orleans) + 
-  geom_sf(data = new_orleans_centers, color = "red")
+  geom_sf(data = new_orleans_centers, color = "red", size = 0.6)
 ```
 
 Since the `new_orleans_tract_centers` is now in the appropriate format to use with the `stormwindmodel` functions, you can input it directly into `get_grid_winds` to model the winds from Hurricane Katrina at each census tract center: 
@@ -157,7 +157,7 @@ new_orleans <- new_orleans %>%
 library(viridis)
 ggplot() + 
   geom_sf(data = new_orleans, aes(fill = vmax_sust)) + 
-  geom_sf(data = new_orleans_centers, color = "red") + 
+  geom_sf(data = new_orleans_centers, color = "red", size = 0.6) + 
   scale_fill_viridis(name = "Maximum\nsustained\nwinds (m/s)")
 ```
 
