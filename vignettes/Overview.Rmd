@@ -94,7 +94,7 @@ For the grid point locations at which to model, you can input a dataframe with g
 
 First, the `tigris` package can be used to pull US Census tract shapefiles for a county. You can use the following code to pull these census tract file shapefiles for Orleans Parish in Louisiana: 
 
-```{r message = FALSE, warning = FALSE}
+```{r message = FALSE, warning = FALSE, results = "hide"}
 library(tigris)
 new_orleans <- tracts(state = "LA", county = c("Orleans")) 
 ```
@@ -113,42 +113,28 @@ With some cleaning, you can get this data to the format required for the `get_gr
 new_orleans_tract_centers <- new_orleans_tract_centers %>%
   tbl_df() %>%
   mutate(gridid = unique(new_orleans@data$TRACTCE)) %>%
-  rename(glat = y, 
-         glon = x)
+  dplyr::rename(glat = y, 
+                glon = x)
 head(new_orleans_tract_centers)
 ```
 
 Here is a map of the census tracts, with the center point of each shown with a red dot (note that an area over water is also included-- this is included as one of the census tract shapefiles pulled by `tigris` for Orleans Parish):
 
-```{r message = FALSE, warning = FALSE}
+```{r message = FALSE, warning = FALSE, fig.width = 7}
+library(sf)
+new_orleans <- new_orleans %>% 
+  st_as_sf()
+new_orleans_centers <- new_orleans_tract_centers %>% 
+  st_as_sf(coords = c("glon", "glat")) %>% 
+  st_set_crs(4269)
+
 library(ggplot2)
-library(ggmap)
-library(sp)
-
-new_orleans_bbox <- bbox(new_orleans)
+ggplot() + 
+  geom_sf(data = new_orleans) + 
+  geom_sf(data = new_orleans_centers, color = "red")
 ```
 
-```{r message = FALSE, warning = FALSE, fig.width = 6, fig.height = 6, eval = FALSE, echo = c(2:10)}
-png(filename = "figures/new_orleans1.png", height = 400, width = 400)
-get_map(location = new_orleans_bbox + c(-0.1, -0.1, 0.1, 0.1), source = "stamen") %>%
-  ggmap() + 
-  geom_polygon(data = fortify(new_orleans), 
-               aes(x = long, y = lat, group = group), 
-               color = "black", fill = NA) + 
-  theme_void() + 
-  geom_point(data = new_orleans_tract_centers,
-             aes(x = glon, y = glat, group = NULL), 
-             color = "red", size = 1, alpha = 0.5)
-dev.off()
-```
-
-```{r echo = FALSE, fig.width = 6, fig.height = 6}
-knitr::include_graphics("figures/new_orleans1.png")
-```
-
-(As a note, to get this code to work correctly yourself, you may need to install the development version of the `ggmap` package from GitHub. You can do that with the command `devtools::install_github("dkahle/ggmap")`. You will need to have the `devtools` package installed on your computer.)
-
-Since the `new_orleans_tract_centers` is now in the appropriate format, you can input it directly into `get_grid_winds` to model the winds from Hurricane Katrina at each census tract center: 
+Since the `new_orleans_tract_centers` is now in the appropriate format to use with the `stormwindmodel` functions, you can input it directly into `get_grid_winds` to model the winds from Hurricane Katrina at each census tract center: 
 
 ```{r eval = FALSE, echo = c(1:2)}
 new_orleans_tracts_katrina <- get_grid_winds(hurr_track = katrina_tracks, 
@@ -160,31 +146,20 @@ load("data/new_orleans.Rdata")
 head(new_orleans_tracts_katrina)
 ```
 
-To plot these modeled winds, you can merge this modeled data back into a "fortified" version of the census tract shapefile data, joining by census tract identification, and then add to the map. You can showwind speed in this map with color.
+To plot these modeled winds, you can merge this modeled data back into the "sf" version of the census tract shapefile data, joining by census tract identification, and then add to the map. You can show wind speed in this map with color.
 
-```{r message = FALSE, message = FALSE, warning = FALSE, fig.width = 7, fig.height = 6}
-library(viridis)
-
+```{r}
 new_orleans <- new_orleans %>% 
-  fortify(region = "TRACTCE") %>%
-  left_join(new_orleans_tracts_katrina, by = c("id" = "gridid"))
-```
-```{r eval = FALSE, echo = c(2:9)}
-png("figures/new_orleans2.png", height = 400, width = 500)
-get_map(location = new_orleans_bbox + c(-0.1, -0.1, 0.1, 0.1), source = "stamen") %>%
-  ggmap() + 
-  geom_polygon(data = new_orleans, 
-               aes(x = long, y = lat, group = group,
-                   fill = vmax_sust), 
-               color = "black", alpha = 0.7, size = 0.2) + 
-  scale_fill_viridis(name = "Maximum\nsustained\nwind (m / s)") + 
-  theme_void() 
-dev.off()
-```
-```{r echo = FALSE, fig.width= 7, fig.height = 5}
-knitr::include_graphics("figures/new_orleans2.png")
+  left_join(new_orleans_tracts_katrina, by = c("TRACTCE" = "gridid"))
 ```
 
+```{r, fig.width = 7}
+library(viridis)
+ggplot() + 
+  geom_sf(data = new_orleans, aes(fill = vmax_sust)) + 
+  geom_sf(data = new_orleans_centers, color = "red") + 
+  scale_fill_viridis(name = "Maximum\nsustained\nwinds (m/s)")
+```
 
 There are also functions in this package that you can use to create a time series of all modeled winds at a specific grid point throughout the storm. For example, here is the code to calculate modeled wind at the population mean center of Dare County, NC (FIPS: 37055) throughout Hurricane Floyd: 
 
