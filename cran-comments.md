@@ -8,7 +8,7 @@
 0 errors | 0 warnings | 0 notes
 
 * This release removes all use of `ggmap`. In the previous version of the 
-package, use of the Google Maps API was causing errors for CRAN checks.
+package, use of the Google Maps API was causing problems for CRAN checks.
 The package has been changed to completely avoid use of the Google Maps
 API to address this problem.
 
