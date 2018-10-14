@@ -9,10 +9,10 @@ r_github_packages:
   - cran/survival
   - cran/bindrcpp
   - dkahle/ggmap
-  - cran/sf
 
 r_binary_packages:
   - rgdal
+  - sf
   - sp
   - rgeos
 
