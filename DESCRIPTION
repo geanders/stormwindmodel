@@ -2,7 +2,7 @@ Package: stormwindmodel
 Type: Package
 Title: Model Tropical Cyclone Wind Speeds
 Version: 0.1.1
-Date: 2017-01-08
+Date: 2018-10-14
 Authors@R: c(person("Brooke", "Anderson", 
                     email = "brooke.anderson@colostate.edu",
                     role = c("aut", "cre")),
@@ -41,7 +41,7 @@ Description: Allows users to input tracking data for a hurricane
     Department of Energy (DE-FG02-08ER64644).
 URL: https://github.com/geanders/stormwindmodel
 BugReports: https://github.com/geanders/stormwindmodel/issues
-License: GPL-2
+License: GPL (>= 2)
 Imports:
     dplyr (>= 0.5.0),
     ggplot2 (>= 2.1.0),
