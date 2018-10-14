@@ -148,7 +148,7 @@ county during the storm in meters per second.
 map_wind(floyd_winds)
 ```
 
-![](README-unnamed-chunk-7-1.png)<!-- -->
+![](man/figures/README-unnamed-chunk-7-1.png)<!-- -->
 
 ## Further functionality
 
@@ -241,7 +241,7 @@ ggplot() +
   geom_sf(data = new_orleans_centers, color = "red", size = 0.6)
 ```
 
-![](README-unnamed-chunk-11-1.png)<!-- -->
+![](man/figures/README-unnamed-chunk-11-1.png)<!-- -->
 
 Since the `new_orleans_tract_centers` is now in the appropriate format
 to use with the `stormwindmodel` functions, you can input it directly
@@ -280,7 +280,7 @@ ggplot() +
   scale_fill_viridis(name = "Maximum\nsustained\nwinds (m/s)")
 ```
 
-![](README-unnamed-chunk-14-1.png)<!-- -->
+![](man/figures/README-unnamed-chunk-14-1.png)<!-- -->
 
 There are also functions in this package that you can use to create a
 time series of all modeled winds at a specific grid point throughout the
@@ -306,7 +306,7 @@ ggplot(dare_winds, aes(x = date, y = windspeed)) +
   ylab("Modeled surface wind (m / s)") 
 ```
 
-![](README-unnamed-chunk-15-1.png)<!-- -->
+![](man/figures/README-unnamed-chunk-15-1.png)<!-- -->
 
 For more details, see the “Details” vignette, which walks through all
 steps of the modeling process.
@@ -329,7 +329,7 @@ floyd_map <- map_wind(floyd_winds)
 add_storm_track(floyd_tracks, plot_object = floyd_map)
 ```
 
-![](README-unnamed-chunk-16-1.png)<!-- -->
+![](man/figures/README-unnamed-chunk-16-1.png)<!-- -->
 
 You can also choose whether to map sustained or gust winds (`value`,
 which can take “vmax\_gust” or “vmax\_sust”), as well as the unit to use
@@ -340,7 +340,7 @@ default\] or “knots”).
 map_wind(floyd_winds, value = "vmax_gust", wind_metric = "knots")
 ```
 
-![](README-unnamed-chunk-17-1.png)<!-- -->
+![](man/figures/README-unnamed-chunk-17-1.png)<!-- -->
 
 Finally, you can map a binary classification of counties with winds at
 or above a certain break point. For example, to map counties with
@@ -351,7 +351,7 @@ map_wind(floyd_winds, value = "vmax_sust", wind_metric = "knots",
          break_point = 34)
 ```
 
-![](README-unnamed-chunk-18-1.png)<!-- -->
+![](man/figures/README-unnamed-chunk-18-1.png)<!-- -->
 
 ## Tracks data
 
