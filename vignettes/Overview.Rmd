@@ -153,7 +153,7 @@ new_orleans <- new_orleans %>%
   left_join(new_orleans_tracts_katrina, by = c("TRACTCE" = "gridid"))
 ```
 
-```{r, fig.width = 7}
+```{r, fig.width = 7, message = FALSE, warning = FALSE}
 library(viridis)
 ggplot() + 
   geom_sf(data = new_orleans, aes(fill = vmax_sust)) + 
