@@ -1,6 +1,7 @@
 .Rproj.user
 .Rhistory
 .RData
+.DS_Store
 writing/*
 inst/doc
 vignettes/stormwindmodel_cache
