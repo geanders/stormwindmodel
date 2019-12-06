@@ -17,7 +17,7 @@ names for each of these must be \code{date}, \code{latitude},
 dataset for an example of the required format.}
 
 \item{tint}{Interval (in hours) to which to interpolate the tracks. The
-default is 0.25 (i.e., 15 minutes)}
+default is 0.25 (i.e., 15 minutes).}
 }
 \value{
 A version of the storm's track data with
@@ -36,9 +36,9 @@ This function also does some reformatting necessary for later functions in
 the \code{stormwindmodel} package.
 }
 \details{
-The function uses natural cubic splines for interpolation, both for location
-and for wind speed. Degrees of freedom are based on the number of available
-observations for the storm.
+The function uses natural cubic splines for interpolation for location
+and linear splines for interpolation for wind speed. The base R functions
+\code{spline} and \code{approx} are used for these interpolations.
 }
 \note{
 This function imputes between each original data point, and it starts

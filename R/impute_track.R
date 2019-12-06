@@ -6,9 +6,9 @@
 #' This function also does some reformatting necessary for later functions in
 #' the \code{stormwindmodel} package.
 #'
-#' @details The function uses natural cubic splines for interpolation, both for location
-#' and for wind speed. Degrees of freedom are based on the number of available
-#' observations for the storm.
+#' @details The function uses natural cubic splines for interpolation for location
+#' and linear splines for interpolation for wind speed. The base R functions
+#' \code{spline} and \code{approx} are used for these interpolations.
 #'
 #' @param hurr_track Dataframe with hurricane track data for a single
 #'    storm. The dataframe must include columns for date-time (year, month, day,
@@ -18,7 +18,7 @@
 #'    \code{longitude}, and \code{wind}. See the example \code{\link{floyd_tracks}}
 #'    dataset for an example of the required format.
 #' @param tint Interval (in hours) to which to interpolate the tracks. The
-#'    default is 0.25 (i.e., 15 minutes)
+#'    default is 0.25 (i.e., 15 minutes).
 #'
 #' @return A version of the storm's track data with
 #'    latitude, longitude, and wind speed interpolated between
