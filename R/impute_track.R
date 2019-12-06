@@ -52,41 +52,50 @@
 #' @export
 create_full_track <- function(hurr_track = stormwindmodel::floyd_tracks,
                               tint = 0.25){
-  hurr_track <- dplyr::select_(hurr_track, ~ date, ~ latitude,
-                               ~ longitude, ~ wind) %>%
-    dplyr::rename_(vmax = ~ wind,
-                   tclat = ~ latitude,
-                   tclon = ~ longitude) %>%
-    dplyr::mutate_(date = ~ lubridate::ymd_hm(date),
-                   tclat = ~ abs(as.numeric(tclat)),
-                   tclon = ~ as.numeric(tclon),
-                   tclon = ~ ifelse(tclon > -180, tclon, tclon + 360),
-                   tclon = ~ -1 * tclon,
-                   vmax = ~ weathermetrics::convert_wind_speed(vmax, "knots",
-                                                               "mps",
-                                                               round = 3))
+  hurr_track <- dplyr::select(hurr_track, .data$date, .data$latitude,
+                               .data$longitude, .data$wind) %>%
+    dplyr::rename(vmax = .data$wind,
+                  tclat = .data$latitude,
+                  tclon = .data$longitude) %>%
+    dplyr::mutate(date = lubridate::ymd_hm(.data$date),
+                  tclat = abs(as.numeric(.data$tclat)),
+                  tclon = as.numeric(.data$tclon),
+                  tclon = ifelse(.data$tclon > -180, .data$tclon, .data$tclon + 360),
+                  tclon = -1 * .data$tclon,
+                  vmax = weathermetrics::convert_wind_speed(.data$vmax, "knots",
+                                                            "mps", round = 3),
+                  track_time_simple = difftime(.data$date, first(.data$date),
+                                               units = "hour"),
+                  track_time_simple = as.numeric(.data$track_time_simple))
 
-  interp_df <- floor(nrow(hurr_track) / 2)
-  interp_date <- seq(from = min(hurr_track$date),
-                     to = max(hurr_track$date),
-                     by = tint * 3600) # Date time sequence must use `by` in
-                                       # seconds
-  interp_date <- data.frame(date = interp_date)
+  full_track <- hurr_track %>%
+    tidyr::nest(data = tidyr::everything()) %>%
+    # Create times to interpolate to
+    dplyr::mutate(interp_time = purrr::map(.data$data,
+                                           .f = ~ seq(from = first(.x$track_time_simple),
+                                                      to = last(.x$track_time_simple),
+                                                      by = tint))) %>%
+    # Interpolate latitude and longitude using natural cubic splines
+    dplyr::mutate(tclat = purrr::map2(.data$data, .data$interp_time,
+                                      .f = ~ spline(x = .x$track_time_simple,
+                                                    y = .x$tclat,
+                                                    xout = .y,
+                                                    method = "natural")$y)) %>%
+    dplyr::mutate(tclon = purrr::map2(.data$data, .data$interp_time,
+                                      .f = ~ spline(x = .x$track_time_simple,
+                                                    y = .x$tclon,
+                                                    xout = .y,
+                                                    method = "natural")$y)) %>%
+    # Interpolate max wind using linear interpolation
+    dplyr::mutate(vmax = purrr::map2(.data$data, .data$interp_time,
+                                     .f = ~ approx(x = .x$track_time_simple,
+                                                   y = .x$vmax,
+                                                   xout = .y)$y)) %>%
+    dplyr::mutate(date = purrr::map2(.data$data, .data$interp_time,
+                                    .f = ~ first(.x$date) +
+                                      lubridate::seconds(3600 * .y))) %>%
+    dplyr::select(.data$date, .data$tclat, .data$tclon, .data$vmax) %>%
+    tidyr::unnest(.data$date:.data$vmax)
 
-  tclat_spline <- stats::glm(tclat ~ splines::ns(date, df = interp_df),
-                             data = hurr_track)
-  interp_tclat <- stats::predict.glm(tclat_spline,
-                                     newdata = as.data.frame(interp_date))
-  tclon_spline <- stats::glm(tclon ~ splines::ns(date, df = interp_df),
-                             data = hurr_track)
-  interp_tclon <- stats::predict.glm(tclon_spline, newdata = interp_date)
-  vmax_spline <- stats::glm(vmax ~ splines::ns(date, df = interp_df),
-                            data = hurr_track)
-  interp_vmax <- stats::predict.glm(vmax_spline, newdata = interp_date)
-
-  full_track <- data.frame(date = interp_date,
-                           tclat = interp_tclat,
-                           tclon = interp_tclon,
-                           vmax = interp_vmax)
   return(full_track)
 }
