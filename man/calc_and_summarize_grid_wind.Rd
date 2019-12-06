@@ -18,7 +18,7 @@ parameters for the Willoughby wind model, as created by
 \code{\link{add_wind_radii}}.}
 
 \item{tint}{Interval (in hours) to which to interpolate the tracks. The
-default is 0.25 (i.e., 15 minutes)}
+default is 0.25 (i.e., 15 minutes).}
 
 \item{gust_duration_cut}{The wind speed, in meters per second, to use as a
 cutoff point for determining the duration of gust winds. The function

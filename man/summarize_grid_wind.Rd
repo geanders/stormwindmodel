@@ -12,7 +12,7 @@ summarize_grid_wind(grid_wind, tint = 0.25, gust_duration_cut = 20,
 a location, as created by \code{\link{calc_grid_wind}}.}
 
 \item{tint}{Interval (in hours) to which to interpolate the tracks. The
-default is 0.25 (i.e., 15 minutes)}
+default is 0.25 (i.e., 15 minutes).}
 
 \item{gust_duration_cut}{The wind speed, in meters per second, to use as a
 cutoff point for determining the duration of gust winds. The function
