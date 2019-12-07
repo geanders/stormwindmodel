@@ -64,7 +64,7 @@ create_full_track <- function(hurr_track = stormwindmodel::floyd_tracks,
                   tclon = -1 * .data$tclon,
                   vmax = weathermetrics::convert_wind_speed(.data$vmax, "knots",
                                                             "mps", round = 3),
-                  track_time_simple = difftime(.data$date, first(.data$date),
+                  track_time_simple = difftime(.data$date, dplyr::first(.data$date),
                                                units = "hour"),
                   track_time_simple = as.numeric(.data$track_time_simple))
 
@@ -72,8 +72,8 @@ create_full_track <- function(hurr_track = stormwindmodel::floyd_tracks,
     tidyr::nest(data = tidyr::everything()) %>%
     # Create times to interpolate to
     dplyr::mutate(interp_time = purrr::map(.data$data,
-                                           .f = ~ seq(from = first(.x$track_time_simple),
-                                                      to = last(.x$track_time_simple),
+                                           .f = ~ seq(from = dplyr::first(.x$track_time_simple),
+                                                      to = dplyr::last(.x$track_time_simple),
                                                       by = tint))) %>%
     # Interpolate latitude and longitude using natural cubic splines
     dplyr::mutate(tclat = purrr::map2(.data$data, .data$interp_time,
@@ -92,7 +92,7 @@ create_full_track <- function(hurr_track = stormwindmodel::floyd_tracks,
                                                    y = .x$vmax,
                                                    xout = .y)$y)) %>%
     dplyr::mutate(date = purrr::map2(.data$data, .data$interp_time,
-                                    .f = ~ first(.x$date) +
+                                    .f = ~ dplyr::first(.x$date) +
                                       lubridate::seconds(3600 * .y))) %>%
     dplyr::select(.data$date, .data$tclat, .data$tclon, .data$vmax) %>%
     tidyr::unnest(.data$date:.data$vmax)
