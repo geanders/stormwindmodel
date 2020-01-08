@@ -4,8 +4,12 @@
 \alias{summarize_grid_wind}
 \title{Generate wind summaries for grid point}
 \usage{
-summarize_grid_wind(grid_wind, tint = 0.25, gust_duration_cut = 20,
-  sust_duration_cut = 20)
+summarize_grid_wind(
+  grid_wind,
+  tint = 0.25,
+  gust_duration_cut = 20,
+  sust_duration_cut = 20
+)
 }
 \arguments{
 \item{grid_wind}{A dataframe with a time series of modeled wind speeds at

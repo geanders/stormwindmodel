@@ -4,8 +4,13 @@
 \alias{add_storm_track}
 \title{Plot Atlantic basin hurricane tracks}
 \usage{
-add_storm_track(storm_tracks, plot_object, plot_points = FALSE,
-  alpha = 1, color = "firebrick")
+add_storm_track(
+  storm_tracks,
+  plot_object,
+  plot_points = FALSE,
+  alpha = 1,
+  color = "firebrick"
+)
 }
 \arguments{
 \item{storm_tracks}{A data frame with best tracks data for the storm

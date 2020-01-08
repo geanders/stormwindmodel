@@ -4,8 +4,10 @@
 \alias{calc_grid_wind}
 \title{Calculate wind speed at grid points}
 \usage{
-calc_grid_wind(grid_point = stormwindmodel::county_points[1, ],
-  with_wind_radii = add_wind_radii())
+calc_grid_wind(
+  grid_point = stormwindmodel::county_points[1, ],
+  with_wind_radii = add_wind_radii()
+)
 }
 \arguments{
 \item{grid_point}{A one-row dataframe with the grid id, latitude, and

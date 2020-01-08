@@ -4,8 +4,12 @@
 \alias{map_wind}
 \title{Map wind exposure at the county level}
 \usage{
-map_wind(grid_winds, value = "vmax_sust", break_point = NULL,
-  wind_metric = "mps")
+map_wind(
+  grid_winds,
+  value = "vmax_sust",
+  break_point = NULL,
+  wind_metric = "mps"
+)
 }
 \arguments{
 \item{grid_winds}{A dataframe that is the output of running

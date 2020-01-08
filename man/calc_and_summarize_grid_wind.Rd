@@ -4,10 +4,13 @@
 \alias{calc_and_summarize_grid_wind}
 \title{Calculate and summarize grid winds}
 \usage{
-
-  calc_and_summarize_grid_wind(grid_point = stormwindmodel::county_points[1,
-  ], with_wind_radii = add_wind_radii(), tint = 0.25,
-  gust_duration_cut = 20, sust_duration_cut = 20)
+calc_and_summarize_grid_wind(
+  grid_point = stormwindmodel::county_points[1, ],
+  with_wind_radii = add_wind_radii(),
+  tint = 0.25,
+  gust_duration_cut = 20,
+  sust_duration_cut = 20
+)
 }
 \arguments{
 \item{grid_point}{A one-row dataframe with the grid id, latitude, and

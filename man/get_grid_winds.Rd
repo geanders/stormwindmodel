@@ -4,9 +4,13 @@
 \alias{get_grid_winds}
 \title{Determine hurricane winds at locations}
 \usage{
-get_grid_winds(hurr_track = stormwindmodel::floyd_tracks,
-  grid_df = stormwindmodel::county_points, tint = 0.25,
-  gust_duration_cut = 20, sust_duration_cut = 20)
+get_grid_winds(
+  hurr_track = stormwindmodel::floyd_tracks,
+  grid_df = stormwindmodel::county_points,
+  tint = 0.25,
+  gust_duration_cut = 20,
+  sust_duration_cut = 20
+)
 }
 \arguments{
 \item{hurr_track}{Dataframe with hurricane track data for a single
