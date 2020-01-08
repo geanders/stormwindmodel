@@ -52,8 +52,7 @@ Imports:
     rlang (>= 0.4.1),
     stringr (>= 1.4.0),
     tidyr (>= 1.0.0),
-    weathermetrics (>= 1.2.2),
-    Rcpp
+    weathermetrics (>= 1.2.2)
 LazyData: TRUE
 RoxygenNote: 7.0.2
 Depends:
@@ -71,5 +70,4 @@ Suggests:
     tigris (>= 0.8.2),
     viridis (>= 0.5.1)
 VignetteBuilder: knitr
-LinkingTo: 
-    Rcpp
+
