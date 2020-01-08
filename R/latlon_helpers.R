@@ -138,8 +138,7 @@ calc_bearing <- function(tclat_1, tclon_1, tclat_2, tclon_2){
 #'
 #' @return A numeric vector with measurement in radians.
 degrees_to_radians <- function(degrees){
-  radians <- degrees * pi / 180
-  return(radians)
+  degrees * pi / 180
 }
 
 #' Convert from radians to degrees
@@ -148,6 +147,5 @@ degrees_to_radians <- function(degrees){
 #'
 #' @return A numeric vector with the measurement in degrees.
 radians_to_degrees <- function(radians){
-  degrees <- radians * 180 / pi
-  return(degrees)
+  radians * 180 / pi
 }
