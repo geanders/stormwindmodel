@@ -48,6 +48,7 @@
 #' full_track <- create_full_track(hurr_track = floyd_tracks, tint = 0.5)
 #'
 #' @importFrom dplyr %>%
+#' @importFrom rlang .data
 #'
 #' @export
 create_full_track <- function(hurr_track = stormwindmodel::floyd_tracks,
