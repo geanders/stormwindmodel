@@ -1,7 +1,7 @@
 Package: stormwindmodel
 Type: Package
 Title: Model Tropical Cyclone Wind Speeds
-Version: 0.1.1.9
+Version: 0.1.2
 Date: 2020-01-08
 Encoding: UTF-8
 Authors@R: c(person("Brooke", "Anderson", 
