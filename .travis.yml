@@ -13,7 +13,6 @@ r_github_packages:
   - r-dbi/DBI
   - r-dbi/RPostgres
   - r-lib/covr
-  - r-spatial/stars
 
 r_binary_packages:
   - rgdal
