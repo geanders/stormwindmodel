@@ -1,2 +1,14 @@
- language: R
- cache: packages
+language: R
+sudo: false
+cache: packages
+r:
+  - release
+  - dev
+
+warnings_are_errors: true
+
+addons:
+  apt:
+    packages:
+      - libudunits2-dev
+
