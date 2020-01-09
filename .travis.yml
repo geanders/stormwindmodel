@@ -8,11 +8,14 @@ r:
   - release
   #- dev
 
+deploy.skip_cleanup: true
+
 latex: false
 
 r_github_packages:
   - cran/survival
   - cran/bindrcpp
+  - ropenscilabs/tic
 
 addons:
   postgresql: "9.6"
