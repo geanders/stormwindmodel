@@ -415,7 +415,7 @@ will10b <- function(vmax_gl, tclat){
 
 #' Calculate A for Willoughby model
 #'
-#' Calculates \eqn{A}, a paramter for the Willoughby wind model, using equation 10c
+#' Calculates \eqn{A}, a parameter for the Willoughby wind model, using equation 10c
 #' (Willoughby et al. 2006).
 #'
 #' @inheritParams will1a

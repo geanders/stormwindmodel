@@ -41,7 +41,7 @@ and linear splines for interpolation for wind speed. The base R functions
 }
 \note{
 This function imputes between each original data point, and it starts
-   by determing the difference in time between each pair of data points.
+   by determining the difference in time between each pair of data points.
    Because of this, the function can handle data that includes a point
    that is not at one of the four daily synoptic times (00:00, 06:00, 12:00,
    and 18:00). Typically, the only time hurricane observations are given

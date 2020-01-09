@@ -16,7 +16,7 @@
 #'    continuous wind speed values. If the \code{break_point} argument is set
 #'    to a numeric value, the function will return a map where counties are given
 #'    binary classifications of "exposed" or "not exposed" based on whether
-#'    modeleded wind speed for the county is above or below this break point.
+#'    modeled wind speed for the county is above or below this break point.
 #' @param wind_metric A character vector with the wind metric to use for the map.
 #'    Possible values are \code{"knots"} and \code{"mps"} (m / s, the default).
 #'

@@ -25,7 +25,7 @@ center to the location being modeled.}
 for the tropical storm.}
 }
 \value{
-A numeric vector giving asymmeric surface windspeed (m / s) at the
+A numeric vector giving asymmetric surface windspeed (m / s) at the
    location being modeled.
 }
 \description{

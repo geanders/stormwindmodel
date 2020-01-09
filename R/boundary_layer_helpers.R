@@ -75,7 +75,7 @@ add_inflow <- function(gwd, cdist, Rmax){
 #' @inheritParams add_inflow
 #' @inheritParams will3_right
 #'
-#' @return A numeric vector giving asymmeric surface windspeed (m / s) at the
+#' @return A numeric vector giving asymmetric surface windspeed (m / s) at the
 #'    location being modeled.
 #'
 #' @details

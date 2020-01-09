@@ -17,7 +17,7 @@ A numeric vector that is a parameter required for the Willoughby
    model.
 }
 \description{
-Calculates \eqn{A}, a paramter for the Willoughby wind model, using equation 10c
+Calculates \eqn{A}, a parameter for the Willoughby wind model, using equation 10c
 (Willoughby et al. 2006).
 }
 \details{

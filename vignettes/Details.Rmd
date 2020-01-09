@@ -292,7 +292,7 @@ Here is the full code for the `add_wind_radii` function:
 stormwindmodel::add_wind_radii
 ```
 
-This function uses many helper functions, which do each step of the process to calculate inputs and parametes for the wind model. These helper functions are fully described below. 
+This function uses many helper functions, which do each step of the process to calculate inputs and parameters for the wind model. These helper functions are fully described below. 
 
 ### Calculate the storm's forward speed
 
@@ -327,7 +327,7 @@ stormwindmodel:::degrees_to_radians
 stormwindmodel:::latlon_to_km
 ```
 
-The package uses thes functions in a function called `calc_forward_speed` that caculates the distance between two storm locations, calculates the time difference in their observation times, and from that determines the forward speed in kilometers per hour and converts it to meters per second. 
+The package uses thes functions in a function called `calc_forward_speed` that calculates the distance between two storm locations, calculates the time difference in their observation times, and from that determines the forward speed in kilometers per hour and converts it to meters per second. 
 
 ```{r}
 stormwindmodel:::calc_forward_speed
@@ -906,7 +906,7 @@ load("data/grid_winds_katrina.Rdata")
 head(grid_winds_katrina)
 ```
 
-with the maxmium sustained and gust wind speeds (in meters per second) and duration of winds over 20 meters per second for each wind type (this cutoff point can be customized with the `gust_duration` and `sust_duration` arguments) added for each grid point.
+with the maximum sustained and gust wind speeds (in meters per second) and duration of winds over 20 meters per second for each wind type (this cutoff point can be customized with the `gust_duration` and `sust_duration` arguments) added for each grid point.
 
 Here is the code for this function: 
 
