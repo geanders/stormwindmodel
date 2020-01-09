@@ -11,3 +11,4 @@
 ^Details_README/*$
 ^devel_scripts/*$
 ^cran-comments\.md$
+^CRAN-RELEASE$
