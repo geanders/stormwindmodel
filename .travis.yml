@@ -12,10 +12,9 @@ deploy.skip_cleanup: true
 
 latex: false
 
-r_github_packages:
-  - cran/survival
-  - cran/bindrcpp
-  - ropenscilabs/tic
+# r_github_packages:
+#  - cran/survival
+#  - cran/bindrcpp
 
 addons:
   postgresql: "9.6"
