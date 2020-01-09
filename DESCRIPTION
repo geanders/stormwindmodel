@@ -4,6 +4,7 @@ Title: Model Tropical Cyclone Wind Speeds
 Version: 0.1.2
 Date: 2020-01-08
 Encoding: UTF-8
+Language: en-US
 Authors@R: c(person("Brooke", "Anderson", 
                     email = "brooke.anderson@colostate.edu",
                     role = c("aut", "cre")),
