@@ -90,7 +90,6 @@ add_wind_radii <- function(full_track = create_full_track()){
 #'    \code{\link{add_wind_radii}}.
 #' @param grid_point A one-row dataframe with the grid id, latitude, and
 #'    longitude for a single location for which you want to model winds.
-#' @inheritParams create_full_track
 #'
 #' @return A dataframe with date (\code{date}) and modeled wind speed
 #'    (\code{windspeed}, in m / s) at the grid point location for all storm

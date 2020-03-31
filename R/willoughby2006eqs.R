@@ -163,7 +163,6 @@ will2 <- function(r, R1){
 #' @param X1 A numeric vector of one of the parameters of the Willoughby model.
 #' @param Rmax A numeric vector giving the radius to maximum winds (in kilometers)
 #'    for the tropical storm.
-#' @inheritParams will1a
 #'
 #' @return A numeric vector with the value for the right-hand side of Eqn. 3 in
 #'    Willoughby et al. 2006, using the dual exponential version of that
