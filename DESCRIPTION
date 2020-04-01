@@ -60,7 +60,6 @@ Depends:
     R (>= 3.6)
 Suggests:
     ggthemes (>= 4.2.0),
-    ggmap (>= 3.0.0),
     gridExtra (>= 2.3.0),
     knitr (>= 1.28.0), 
     mapproj (>= 1.2.7),

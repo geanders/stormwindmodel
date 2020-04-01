@@ -42,9 +42,9 @@
 map_wind <- function(grid_winds, value = "vmax_sust", break_point = NULL,
                      wind_metric = "mps"){
 
-  grid_winds$value <- grid_winds[ , value]
+  grid_winds[ , "value"] <- grid_winds[ , value]
   if(wind_metric != "mps"){
-    grid_winds$value <- weathermetrics::convert_wind_speed(grid_winds$value,
+    grid_winds[ , "value"] <- weathermetrics::convert_wind_speed(grid_winds$value,
                                                            old_metric = "mps",
                                                            new_metric = wind_metric)
   }
@@ -74,19 +74,19 @@ map_wind <- function(grid_winds, value = "vmax_sust", break_point = NULL,
     exposure_palette <- c("#ffffff", exposure_palette, "#1a1a1a")
 
     grid_winds <- grid_winds %>%
-      dplyr::mutate_(value = ~ cut(value, breaks = breaks,
+      dplyr::mutate(value = cut(.data$value, breaks = breaks,
                                    include.lowest = TRUE))
   }
 
-  map_data <- dplyr::mutate_(grid_winds,
-                             fips = ~ as.numeric(gridid)) %>%
-    dplyr::select_(~ fips, ~ value)
+  map_data <- dplyr::mutate(grid_winds,
+                             fips = as.numeric(.data$gridid)) %>%
+    dplyr::select(.data$fips, .data$value)
 
   county.fips <- maps::county.fips %>%
-    dplyr::mutate_(polyname = ~ as.character(polyname)) %>%
-    dplyr::mutate_(polyname = ~ stringr::str_replace(polyname, ":.+", ""))
+    dplyr::mutate(polyname = as.character(.data$polyname)) %>%
+    dplyr::mutate(polyname = stringr::str_replace(.data$polyname, ":.+", ""))
   us_counties <- ggplot2::map_data("county") %>%
-    dplyr::filter_(~ !(region %in% c("arizona", "california", "colorado", "idaho",
+    dplyr::filter(!(.data$region %in% c("arizona", "california", "colorado", "idaho",
                            "montana", "nebraska", "nevada", "new mexico",
                            "north dakota", "oregon", "south dakota",
                            "utah", "washington", "wyoming", "minnesota"))) %>%
@@ -176,12 +176,12 @@ add_storm_track <- function(storm_tracks, plot_object,
 
   map_data <- plot_object$data
   tracks <- storm_tracks %>%
-    dplyr::select_(~ latitude, ~ longitude, ~ date) %>%
-    dplyr::filter_(~ longitude > -106.65 &
-                     longitude < -67.01 &
-                     latitude > 25.13 &
-                     latitude < 47.48) %>%
-    dplyr::mutate_(date = ~ lubridate::ymd_hm(date))
+    dplyr::select(.data$latitude, .data$longitude, .data$date) %>%
+    dplyr::filter(.data$longitude > -106.65 &
+                     .data$longitude < -67.01 &
+                     .data$latitude > 25.13 &
+                     .data$latitude < 47.48) %>%
+    dplyr::mutate(date = lubridate::ymd_hm(.data$date))
 
   if(nrow(tracks) >= 3){
     full_tracks <- interp_track(tracks)

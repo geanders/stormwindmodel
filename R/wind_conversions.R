@@ -74,10 +74,10 @@ check_over_land <- function(tclat, tclon){
                                                                  min(lon_diffs))][1]
 
   over_land <- stormwindmodel::landmask %>%
-    dplyr::filter_(~ latitude == closest_grid_lat &
-                     longitude == closest_grid_lon) %>%
-    dplyr::mutate_(land = ~ land == "land") %>%
-    dplyr::select_(~ land)
+    dplyr::filter(.data$latitude == closest_grid_lat &
+                     .data$longitude == closest_grid_lon) %>%
+    dplyr::mutate(land = .data$land == "land") %>%
+    dplyr::select(.data$land)
   over_land <- as.vector(over_land$land[1])
 
   return(over_land)

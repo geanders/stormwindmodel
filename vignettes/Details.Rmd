@@ -34,7 +34,7 @@ This process is conducted in the `stormwindmodel` package using three main funct
 Here are variables used in this modeling process. 
 
 ```{r echo = FALSE}
-var_names <- dplyr::data_frame(var = c("`vmax`",
+var_names <- dplyr::tibble(var = c("`vmax`",
                                        "`vmax_sfc_sym`",
                                        "`vmax_gl`",
                                        "`tclat`",
@@ -327,7 +327,7 @@ stormwindmodel:::degrees_to_radians
 stormwindmodel:::latlon_to_km
 ```
 
-The package uses thes functions in a function called `calc_forward_speed` that calculates the distance between two storm locations, calculates the time difference in their observation times, and from that determines the forward speed in kilometers per hour and converts it to meters per second. 
+The package uses these functions in a function called `calc_forward_speed` that calculates the distance between two storm locations, calculates the time difference in their observation times, and from that determines the forward speed in kilometers per hour and converts it to meters per second. 
 
 ```{r}
 stormwindmodel:::calc_forward_speed
@@ -900,7 +900,7 @@ grid_winds_katrina <- get_grid_winds(hurr_track = katrina_tracks,
 ```
 
 
-```{r cache = TRUE, echo = c(3), eval = c(2:3)}
+```{r echo = c(3), eval = c(2:3)}
 save(grid_winds_katrina, file = "data/grid_winds_katrina.Rdata")
 load("data/grid_winds_katrina.Rdata")
 head(grid_winds_katrina)

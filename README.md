@@ -127,12 +127,12 @@ floyd_winds %>%
   dplyr::select(gridid, vmax_gust, vmax_sust, gust_dur, sust_dur) %>%
   slice(1:6)
 #>   gridid vmax_gust vmax_sust gust_dur sust_dur
-#> 1  01001  2.969661  1.993061        0        0
-#> 2  01003  1.929468  1.294945        0        0
-#> 3  01005  4.800611  3.221887        0        0
-#> 4  01007  2.312488  1.552005        0        0
-#> 5  01009  2.609132  1.751095        0        0
-#> 6  01011  4.076456  2.735877        0        0
+#> 1  01001  2.971364  1.994204        0        0
+#> 2  01003  1.958180  1.314215        0        0
+#> 3  01005  4.806562  3.225880        0        0
+#> 4  01007  2.309274  1.549848        0        0
+#> 5  01009  2.600039  1.744992        0        0
+#> 6  01011  4.077514  2.736587        0        0
 ```
 
 If you use the `coutny_points` data that comes with the package for the
@@ -189,12 +189,12 @@ library(rgeos)
 new_orleans_tract_centers <- gCentroid(new_orleans, byid = TRUE)@coords
 head(new_orleans_tract_centers)
 #>             x        y
-#> 141 -89.96588 30.05844
-#> 142 -90.07139 29.94885
-#> 143 -90.03572 29.96558
-#> 144 -90.03305 29.99398
-#> 145 -90.07957 29.99610
-#> 146 -90.07068 29.92515
+#> 1   -90.11803 30.01587
+#> 102 -90.06530 30.01225
+#> 103 -90.07112 29.99737
+#> 104 -90.06421 29.99926
+#> 105 -90.06670 29.97066
+#> 106 -90.10075 29.94475
 ```
 
 With some cleaning, you can get this data to the format required for the
@@ -212,12 +212,12 @@ head(new_orleans_tract_centers)
 #> # A tibble: 6 x 3
 #>    glon  glat gridid
 #>   <dbl> <dbl> <chr> 
-#> 1 -90.0  30.1 001745
-#> 2 -90.1  29.9 013400
-#> 3 -90.0  30.0 013600
-#> 4 -90.0  30.0 013700
-#> 5 -90.1  30.0 013800
-#> 6 -90.1  29.9 014100
+#> 1 -90.1  30.0 007606
+#> 2 -90.1  30.0 003304
+#> 3 -90.1  30.0 003307
+#> 4 -90.1  30.0 003308
+#> 5 -90.1  30.0 003400
+#> 6 -90.1  29.9 010300
 ```
 
 Here is a map of the census tracts, with the center point of each shown
@@ -252,12 +252,12 @@ new_orleans_tracts_katrina <- get_grid_winds(hurr_track = katrina_tracks,
                                              grid_df = new_orleans_tract_centers)
 head(new_orleans_tracts_katrina)
 #>        glon     glat gridid vmax_gust vmax_sust gust_dur sust_dur
-#> 1 -89.96588 30.05844 001745  64.40277  43.22333     1110      690
-#> 2 -90.07139 29.94885 013400  59.19886  39.73078     1095      705
-#> 3 -90.03572 29.96558 013600  61.05882  40.97908     1110      705
-#> 4 -90.03305 29.99398 013700  60.94199  40.90066     1095      690
-#> 5 -90.07957 29.99610 013800  58.36141  39.16873     1095      690
-#> 6 -90.07068 29.92515 014100  59.37257  39.84736     1110      690
+#> 1 -90.11803 30.01587 007606  54.45502  36.54699     1095      675
+#> 2 -90.06530 30.01225 003304  56.81248  38.12918     1095      675
+#> 3 -90.07112 29.99737 003307  56.60149  37.98758     1095      675
+#> 4 -90.06421 29.99926 003308  56.91473  38.19780     1095      675
+#> 5 -90.06670 29.97066 003400  56.97638  38.23918     1110      675
+#> 6 -90.10075 29.94475 010300  55.49392  37.24424     1095      675
 ```
 
 To plot these modeled winds, you can merge this modeled data back into
@@ -373,38 +373,45 @@ hurr_tracks %>%
   dplyr::group_by(year) %>% 
   dplyr::summarize(storms = paste(storm, collapse = ", ")) %>% 
   knitr::kable()
+#> Warning: Expected 2 pieces. Additional pieces discarded in 27 rows [3313, 3314,
+#> 3315, 3316, 3317, 3318, 3319, 3320, 3321, 3322, 3323, 3324, 3325, 3326, 3327,
+#> 3328, 3329, 3330, 3331, 3332, ...].
 ```
 
 | year | storms                                                                      |
 | :--- | :-------------------------------------------------------------------------- |
-| 1988 | Alberto, Beryl, Chris, Florence, Gilbert, Keith                             |
+| 1988 | Alberto, Beryl, Chris, Florence, Gilbert, Keith, AL13, AL14, AL17           |
 | 1989 | Allison, Chantal, Hugo, Jerry                                               |
-| 1990 | Bertha, Marco                                                               |
-| 1991 | Ana, Bob, Fabian, Notnamed                                                  |
-| 1992 | Andrew, Danielle, Earl                                                      |
-| 1993 | Arlene, Emily                                                               |
-| 1994 | Alberto, Beryl, Gordon                                                      |
+| 1990 | AL01, Bertha, Marco                                                         |
+| 1991 | Ana, Bob, Fabian, AL12                                                      |
+| 1992 | AL02, Andrew, Danielle, Earl                                                |
+| 1993 | AL01, Arlene, Emily                                                         |
+| 1994 | Alberto, AL02, Beryl, Gordon                                                |
 | 1995 | Allison, Dean, Erin, Gabrielle, Jerry, Opal                                 |
 | 1996 | Arthur, Bertha, Edouard, Fran, Josephine                                    |
-| 1997 | Subtrop, Ana, Danny                                                         |
+| 1997 | AL01, Ana, Danny                                                            |
 | 1998 | Bonnie, Charley, Earl, Frances, Georges, Hermine, Mitch                     |
-| 1999 | Bret, Dennis, Floyd, Harvey, Irene                                          |
-| 2000 | Beryl, Gordon, Helene, Leslie                                               |
-| 2001 | Allison, Barry, Gabrielle, Michelle                                         |
+| 1999 | Bret, Dennis, AL07, Floyd, Harvey, Irene                                    |
+| 2000 | AL04, Beryl, AL09, Gordon, Helene, Leslie                                   |
+| 2001 | Allison, Barry, Gabrielle, Karen, Michelle                                  |
 | 2002 | Arthur, Bertha, Cristobal, Edouard, Fay, Gustav, Hanna, Isidore, Kyle, Lili |
-| 2003 | Bill, Claudette, Erika, Grace, Henri, Isabel                                |
+| 2003 | Bill, Claudette, AL07, Erika, Grace, Henri, Isabel                          |
 | 2004 | Alex, Bonnie, Charley, Frances, Gaston, Hermine, Ivan, Jeanne, Matthew      |
 | 2005 | Arlene, Cindy, Dennis, Emily, Katrina, Ophelia, Rita, Tammy, Wilma          |
 | 2006 | Alberto, Beryl, Chris, Ernesto                                              |
-| 2007 | Andrea, Barry, Erin, Gabrielle, Humberto, Noel                              |
+| 2007 | Andrea, Barry, Erin, Gabrielle, Humberto, Ten, Noel                         |
 | 2008 | Cristobal, Dolly, Edouard, Fay, Gustav, Hanna, Ike, Kyle, Paloma            |
-| 2009 | Claudette, Ida                                                              |
-| 2010 | Alex, Bonnie, Earl, Hermine, Nicole, Paula                                  |
+| 2009 | One, Claudette, Ida                                                         |
+| 2010 | Alex, Two, Bonnie, Five, Earl, Hermine, Nicole, Paula                       |
 | 2011 | Bret, Don, Emily, Irene, Lee                                                |
 | 2012 | Alberto, Beryl, Debby, Isaac, Sandy                                         |
 | 2013 | Andrea, Dorian, Karen                                                       |
 | 2014 | Arthur                                                                      |
 | 2015 | Ana, Bill, Claudette                                                        |
+| 2016 | Bonnie, Colin, Eight, Hermine, Julia, Matthew                               |
+| 2017 | Cindy, Emily, Harvey, Irma, Jose, Nate, Philippe                            |
+| 2018 | Alberto, Chris, Florence, Gordon, Michael                                   |
+| Two  | Twenty                                                                      |
 
 # References
 

@@ -29,7 +29,7 @@ A numeric vector giving asymmetric surface windspeed (m / s) at the
    location being modeled.
 }
 \description{
-Adds the storm's forward speed component (i.e., motion asymmetery) back
+Adds the storm's forward speed component (i.e., motion asymmetry) back
 into the estimated surface wind speed at a grid point location after
 rotational winds have been modeled for the location.
 }

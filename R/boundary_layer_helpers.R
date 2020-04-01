@@ -61,7 +61,7 @@ add_inflow <- function(gwd, cdist, Rmax){
 
 #' Adds forward speed component to modeled surface wind
 #'
-#' Adds the storm's forward speed component (i.e., motion asymmetery) back
+#' Adds the storm's forward speed component (i.e., motion asymmetry) back
 #' into the estimated surface wind speed at a grid point location after
 #' rotational winds have been modeled for the location.
 #'
