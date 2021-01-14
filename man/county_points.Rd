@@ -4,7 +4,8 @@
 \name{county_points}
 \alias{county_points}
 \title{Eastern U.S. county latitude and longitudes}
-\format{A dataframe with 2,396 rows and 3 variables:
+\format{
+A dataframe with 2,396 rows and 3 variables:
 \describe{
    \item{fips}{A character vector giving the county's five-digit Federal
                Information Processing Standard (FIPS) code}
@@ -12,7 +13,8 @@
                    center of each county}
    \item{glon}{A numeric vector giving the longitude of the population mean
                     center of each county}
-}}
+}
+}
 \source{
 \url{http://www2.census.gov/geo/docs/reference/cenpop2010/county/CenPop2010_Mean_CO.txt}
 }

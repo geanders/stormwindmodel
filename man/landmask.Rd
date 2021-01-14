@@ -4,12 +4,14 @@
 \name{landmask}
 \alias{landmask}
 \title{Land-sea mask}
-\format{A dataframe with 30,351 rows and 3 variables:
+\format{
+A dataframe with 30,351 rows and 3 variables:
 \describe{
    \item{longitude}{A numeric vector with the longitude of the grid point}
    \item{latitude}{A numeric vector with the latitude of the grid point}
    \item{land}{A factor specifying whether that grid point is land or water}
-}}
+}
+}
 \usage{
 landmask
 }

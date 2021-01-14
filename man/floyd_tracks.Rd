@@ -4,7 +4,8 @@
 \name{floyd_tracks}
 \alias{floyd_tracks}
 \title{Hurricane Floyd tracks data}
-\format{A dataframe with 48 rows and 4 variables:
+\format{
+A dataframe with 48 rows and 4 variables:
 \describe{
     \item{date}{A character string giving the date and time of the observation}
     \item{latitude}{A numeric vector giving the storm's latitude at that
@@ -13,7 +14,8 @@
                     observation time}
     \item{wind}{A numeric vector giving the estimated maximum sustained
                 wind of that storm at that observation time, in knots}
-}}
+}
+}
 \source{
 \url{http://rammb.cira.colostate.edu/research/tropical_cyclones/tc_extended_best_track_dataset/}
 }

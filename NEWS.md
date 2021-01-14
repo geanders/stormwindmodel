@@ -1,3 +1,13 @@
+# stormwindmodel 0.1.4
+
+* Resolve a warning on CRAN when building vignettes. Due to a change in 
+one of the packages used in one vignette, that vignette was building with 
+an error. The `tigris` package changed to import Census spatial files as
+`sf` objects by default, rather than `sp` objects. This caused an error
+in later code that worked with the objected being imported in the vignette. 
+We have resolved this by explicitly requesting the object from `tigris` 
+be a `sp` class in the vignette code. 
+
 # stormwindmodel 0.1.3
 
 * Resolve a warning on CRAN when rebuilding vignettes in Windows that 

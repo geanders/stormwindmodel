@@ -94,28 +94,41 @@ For the grid point locations at which to model, you can input a dataframe with g
 
 First, the `tigris` package can be used to pull US Census tract shapefiles for a county. You can use the following code to pull these census tract file shapefiles for Orleans Parish in Louisiana: 
 
-```{r message = FALSE, warning = FALSE, results = "hide"}
+```{r eval = FALSE, message = FALSE, warning = FALSE, results = "hide"}
 library(tigris)
-new_orleans <- tracts(state = "LA", county = c("Orleans")) 
+new_orleans <- tracts(state = "LA", county = c("Orleans"), 
+                      class = "sp") 
+save(new_orleans, file = "data/new_orleans.Rdata")
+```
+```{r, echo = FALSE}
+load("data/new_orleans.Rdata")
 ```
 
 This shapefile gives the polygon for each census tract. You can use the `gCentroid` function from the `rgeos` package to determine the location of the center of each census tract: 
 
-```{r message = FALSE}
+```{r eval = FALSE, message = FALSE, echo = c(1, 2)}
 library(rgeos)
 new_orleans_tract_centers <- gCentroid(new_orleans, byid = TRUE)@coords
+save(new_orleans_tract_centers, file = "data/new_orleans_tract_centers.Rdata")
+```
+```{r echo = c(2)}
+load("data/new_orleans_tract_centers.Rdata")
 head(new_orleans_tract_centers)
 ```
 
 With some cleaning, you can get this data to the format required for the `get_grid_winds` function. In particular, you should add the tract id from the original shapefiles as the grid id, as this will help you map the modeled wind results: 
 
-```{r}
-new_orleans_tract_centers <- new_orleans_tract_centers %>%
-  tbl_df() %>%
+```{r eval = FALSE, echo = c(1, 2, 3, 4, 5)}
+new_orleans_tract_centers2 <- new_orleans_tract_centers %>%
+  as_tibble() %>%
   mutate(gridid = unique(new_orleans@data$TRACTCE)) %>%
   dplyr::rename(glat = y, 
                 glon = x)
-head(new_orleans_tract_centers)
+save(new_orleans_tract_centers2, file = "data/new_orleans_tract_centers2.Rdata")
+```
+```{r echo = c(2)}
+load("data/new_orleans_tract_centers2.Rdata")
+head(new_orleans_tract_centers2)
 ```
 
 Here is a map of the census tracts, with the center point of each shown with a red dot (note that an area over water is also included-- this is included as one of the census tract shapefiles pulled by `tigris` for Orleans Parish):
@@ -124,7 +137,7 @@ Here is a map of the census tracts, with the center point of each shown with a r
 library(sf)
 new_orleans <- new_orleans %>% 
   st_as_sf()
-new_orleans_centers <- new_orleans_tract_centers %>% 
+new_orleans_centers <- new_orleans_tract_centers2 %>% 
   st_as_sf(coords = c("glon", "glat")) %>% 
   st_set_crs(4269)
 
@@ -138,11 +151,11 @@ Since the `new_orleans_tract_centers` is now in the appropriate format to use wi
 
 ```{r eval = FALSE, echo = c(1:2)}
 new_orleans_tracts_katrina <- get_grid_winds(hurr_track = katrina_tracks, 
-                                             grid_df = new_orleans_tract_centers)
-save(new_orleans_tracts_katrina, file = "data/new_orleans.Rdata")
+                                             grid_df = new_orleans_tract_centers2)
+save(new_orleans_tracts_katrina, file = "data/new_orleans_tracts_katrina.Rdata")
 ```
 ```{r echo = c(2)}
-load("data/new_orleans.Rdata")
+load("data/new_orleans_tracts_katrina.Rdata")
 head(new_orleans_tracts_katrina)
 ```
 

@@ -104,7 +104,8 @@ First, the `tigris` package can be used to pull US Census tract shapefiles for a
 
 ```{r message = FALSE, warning = FALSE, results = "hide"}
 library(tigris)
-new_orleans <- tracts(state = "LA", county = c("Orleans")) 
+new_orleans <- tracts(state = "LA", county = c("Orleans"), 
+                      class = "sp") 
 ```
 
 This shapefile gives the polygon for each census tract. You can use the `gCentroid` function from the `rgeos` package to determine the location of the center of each census tract: 

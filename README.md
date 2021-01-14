@@ -17,8 +17,7 @@ this model is fit are provided in the “Details” vignette of the
 `stormwindmodel` package.
 
 This package is currently in development on GitHub. You can install it
-using the `install_github` function from the `devtools` package
-using:
+using the `install_github` function from the `devtools` package using:
 
 ``` r
 devtools::install_github("geanders/stormwindmodel", build_vignettes = TRUE)
@@ -123,6 +122,19 @@ run:
 ``` r
 floyd_winds <- get_grid_winds(hurr_track = floyd_tracks,
                               grid_df = county_points)
+#> Warning: `mutate_()` is deprecated as of dplyr 0.7.0.
+#> Please use `mutate()` instead.
+#> See vignette('programming') for more help
+#> This warning is displayed once every 8 hours.
+#> Call `lifecycle::last_warnings()` to see where this warning was generated.
+#> Warning: `select_()` is deprecated as of dplyr 0.7.0.
+#> Please use `select()` instead.
+#> This warning is displayed once every 8 hours.
+#> Call `lifecycle::last_warnings()` to see where this warning was generated.
+#> Warning: `summarise_()` is deprecated as of dplyr 0.7.0.
+#> Please use `summarise()` instead.
+#> This warning is displayed once every 8 hours.
+#> Call `lifecycle::last_warnings()` to see where this warning was generated.
 floyd_winds %>%
   dplyr::select(gridid, vmax_gust, vmax_sust, gust_dur, sust_dur) %>%
   slice(1:6)
@@ -177,7 +189,8 @@ census tract file shapefiles for Orleans Parish in Louisiana:
 
 ``` r
 library(tigris)
-new_orleans <- tracts(state = "LA", county = c("Orleans")) 
+new_orleans <- tracts(state = "LA", county = c("Orleans"), 
+                      class = "sp") 
 ```
 
 This shapefile gives the polygon for each census tract. You can use the
@@ -188,13 +201,13 @@ of the center of each census tract:
 library(rgeos)
 new_orleans_tract_centers <- gCentroid(new_orleans, byid = TRUE)@coords
 head(new_orleans_tract_centers)
-#>             x        y
-#> 1   -90.11803 30.01587
-#> 102 -90.06530 30.01225
-#> 103 -90.07112 29.99737
-#> 104 -90.06421 29.99926
-#> 105 -90.06670 29.97066
-#> 106 -90.10075 29.94475
+#>            x        y
+#> 1  -89.95393 30.04011
+#> 2  -89.91693 30.03769
+#> 30 -90.01988 29.95959
+#> 31 -90.07362 29.97811
+#> 32 -90.12008 29.91933
+#> 46 -90.08967 29.94482
 ```
 
 With some cleaning, you can get this data to the format required for the
@@ -208,16 +221,20 @@ new_orleans_tract_centers <- new_orleans_tract_centers %>%
   mutate(gridid = unique(new_orleans@data$TRACTCE)) %>%
   dplyr::rename(glat = y, 
                 glon = x)
+#> Warning: `tbl_df()` is deprecated as of dplyr 1.0.0.
+#> Please use `tibble::as_tibble()` instead.
+#> This warning is displayed once every 8 hours.
+#> Call `lifecycle::last_warnings()` to see where this warning was generated.
 head(new_orleans_tract_centers)
 #> # A tibble: 6 x 3
 #>    glon  glat gridid
 #>   <dbl> <dbl> <chr> 
-#> 1 -90.1  30.0 007606
-#> 2 -90.1  30.0 003304
-#> 3 -90.1  30.0 003307
-#> 4 -90.1  30.0 003308
-#> 5 -90.1  30.0 003400
-#> 6 -90.1  29.9 010300
+#> 1 -90.0  30.0 001747
+#> 2 -89.9  30.0 001750
+#> 3 -90.0  30.0 000800
+#> 4 -90.1  30.0 003600
+#> 5 -90.1  29.9 011400
+#> 6 -90.1  29.9 008600
 ```
 
 Here is a map of the census tracts, with the center point of each shown
@@ -244,20 +261,19 @@ ggplot() +
 Since the `new_orleans_tract_centers` is now in the appropriate format
 to use with the `stormwindmodel` functions, you can input it directly
 into `get_grid_winds` to model the winds from Hurricane Katrina at each
-census tract
-center:
+census tract center:
 
 ``` r
 new_orleans_tracts_katrina <- get_grid_winds(hurr_track = katrina_tracks, 
                                              grid_df = new_orleans_tract_centers)
 head(new_orleans_tracts_katrina)
 #>        glon     glat gridid vmax_gust vmax_sust gust_dur sust_dur
-#> 1 -90.11803 30.01587 007606  54.45502  36.54699     1095      675
-#> 2 -90.06530 30.01225 003304  56.81248  38.12918     1095      675
-#> 3 -90.07112 29.99737 003307  56.60149  37.98758     1095      675
-#> 4 -90.06421 29.99926 003308  56.91473  38.19780     1095      675
-#> 5 -90.06670 29.97066 003400  56.97638  38.23918     1110      675
-#> 6 -90.10075 29.94475 010300  55.49392  37.24424     1095      675
+#> 1 -89.95393 30.04011 001747  62.91971  42.22799     1110      690
+#> 2 -89.91693 30.03769 001750  65.34514  43.85580     1110      690
+#> 3 -90.01988 29.95959 000800  59.41499  39.87583     1110      675
+#> 4 -90.07362 29.97811 003600  56.61081  37.99383     1110      675
+#> 5 -90.12008 29.91933 011400  54.80164  36.77962     1110      690
+#> 6 -90.08967 29.94482 008600  55.98677  37.57502     1095      675
 ```
 
 To plot these modeled winds, you can merge this modeled data back into
@@ -284,8 +300,7 @@ There are also functions in this package that you can use to create a
 time series of all modeled winds at a specific grid point throughout the
 storm. For example, here is the code to calculate modeled wind at the
 population mean center of Dare County, NC (FIPS: 37055) throughout
-Hurricane
-Floyd:
+Hurricane Floyd:
 
 ``` r
 dare_county <- county_points %>% # Get grid point information for Dare County
@@ -376,6 +391,7 @@ hurr_tracks %>%
 #> Warning: Expected 2 pieces. Additional pieces discarded in 27 rows [3313, 3314,
 #> 3315, 3316, 3317, 3318, 3319, 3320, 3321, 3322, 3323, 3324, 3325, 3326, 3327,
 #> 3328, 3329, 3330, 3331, 3332, ...].
+#> `summarise()` ungrouping output (override with `.groups` argument)
 ```
 
 | year | storms                                                                      |
