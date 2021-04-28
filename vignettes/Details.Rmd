@@ -235,11 +235,9 @@ floyd_2_hrs <- create_full_track(floyd_tracks, tint = 2)
 
 ```{r message = FALSE, warning = FALSE, fig.align = "center", fig.width = 8, fig.height = 4}
 floyd_15_min <- floyd_15_min %>% 
-  mutate(tclon = -tclon) %>% 
   st_as_sf(coords = c("tclon", "tclat")) %>% 
   st_set_crs(4326)
 floyd_2_hrs <- floyd_2_hrs %>% 
-  mutate(tclon = -tclon) %>% 
   st_as_sf(coords = c("tclon", "tclat")) %>% 
   st_set_crs(4326)
 
@@ -278,7 +276,7 @@ Here is an example of Hurricane Floyd tracks, with estimated $R_{max}$ and $V_{m
 
 ```{r echo = FALSE, warning = FALSE, fig.align = "center", fig.width = 4, fig.height = 4, eval = FALSE}
 a + geom_point(data = with_wind_radii,
-               aes(x = -tclon, y = tclat, size = Rmax, color = vmax_gl),
+               aes(x = tclon, y = tclat, size = Rmax, color = vmax_gl),
                alpha = 0.2) + 
   scale_color_continuous(name = expression(V[maxG])) + 
   scale_size_continuous(name = expression(R[max]))
@@ -432,16 +430,19 @@ stormwindmodel:::check_over_land
 
 Here is an example of applying this function to the tracks for Hurricane Floyd:
 
-```{r fig.width = 8, fig.height = 5}
+```{r fig.width = 8, fig.height = 5, message = FALSE, warning = FALSE}
 floyd_tracks$land <- mapply(stormwindmodel:::check_over_land,
                             tclat = floyd_tracks$latitude,
-                            tclon = -floyd_tracks$longitude)
-ggplot(landmask, aes(x = longitude - 360, y = latitude, color = land)) +
+                            tclon = floyd_tracks$longitude)
+ggplot(landmask, aes(x = longitude, y = latitude, color = land)) +
   geom_point() + 
   geom_point(data = floyd_tracks, aes(x = longitude, y = latitude, 
                                      color = NULL, shape = land)) + 
   scale_color_discrete("Land mask") + 
-  scale_shape_discrete("Track over land")
+  scale_shape_discrete("Track over land") + 
+  xlim(c(-100, -40)) + 
+  ylim(c(15, 50)) +
+  coord_map()
 ```
 
 In the `add_wind_radii` function, there is code to check whether the point is over land or water and apply the proper reduction factor:
