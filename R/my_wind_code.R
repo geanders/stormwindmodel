@@ -127,7 +127,7 @@ calc_grid_wind <- function(grid_point = stormwindmodel::county_points[1, ],
         grid_wind <- dplyr::mutate_(with_wind_radii,
                       # Calculated distance from storm center to location
                       cdist = ~ latlon_to_km(tclat, tclon,
-                                             grid_point$glat, -grid_point$glon),
+                                             grid_point$glat, grid_point$glon),
                       # Calculate gradient winds at the point
                       wind_gl_aa = ~ mapply(will1, cdist = cdist, Rmax = Rmax,
                                             R1 = R1, R2 = R2, vmax_gl = vmax_gl,
@@ -135,7 +135,7 @@ calc_grid_wind <- function(grid_point = stormwindmodel::county_points[1, ],
                       # calculate the gradient wind direction (gwd) at this
                       # grid point
                       chead = ~ calc_bearing(tclat, tclon,
-                                             grid_point$glat, - grid_point$glon),
+                                             grid_point$glat, grid_point$glon),
                       gwd = ~ (90 + chead) %% 360,
                       # Bring back to surface level (surface wind reduction factor)
                       wind_sfc_sym = ~ mapply(gradient_to_surface,
