@@ -69,7 +69,7 @@ check_over_land <- function(tclat, tclon){
   closest_grid_lat <- stormwindmodel::landmask$latitude[which(lat_diffs ==
                                                                 min(lat_diffs))][1]
 
-  lon_diffs <- abs(tclon - (360 - stormwindmodel::landmask$longitude))
+  lon_diffs <- abs(tclon - stormwindmodel::landmask$longitude)
   closest_grid_lon <- stormwindmodel::landmask$longitude[which(lon_diffs ==
                                                                  min(lon_diffs))][1]
 
