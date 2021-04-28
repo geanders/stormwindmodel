@@ -87,7 +87,7 @@ calc_forward_speed <- function(tclat_1, tclon_1, time_1, tclat_2, tclon_2, time_
 #' @return A numeric vector giving the direction of the second location from the first location,
 #'    in degrees. A direction of 0 degrees indicates the second location is
 #'    due east of the first, 90 degrees indicates the second location is due
-#'    north of the first, etc.
+#'    north of the first, etc (i.e., polar, rather than meteorological, coordinate system).
 #'
 #' @details This function uses the following equations to calculate the bearing
 #'    from one latitude-longitude pair to another:
