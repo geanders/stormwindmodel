@@ -52,7 +52,7 @@
 #' so an appropriate conversion factor can be used to estimate gradient winds
 #' from sustained surface winds.
 #'
-#' @format A dataframe with 30,351 rows and 3 variables:
+#' @format A dataframe with 35,376 rows and 3 variables:
 #' \describe{
 #'    \item{longitude}{A numeric vector with the longitude of the grid point}
 #'    \item{latitude}{A numeric vector with the latitude of the grid point}
