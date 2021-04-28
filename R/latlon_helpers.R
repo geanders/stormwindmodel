@@ -117,9 +117,9 @@ calc_forward_speed <- function(tclat_1, tclon_1, time_1, tclat_2, tclon_2, time_
 #' @export
 calc_bearing <- function(tclat_1, tclon_1, tclat_2, tclon_2){
   tclat_1 <- degrees_to_radians(tclat_1)
-  tclon_1 <- degrees_to_radians(-tclon_1)
+  tclon_1 <- degrees_to_radians(tclon_1)
   tclat_2 <- degrees_to_radians(tclat_2)
-  tclon_2 <- degrees_to_radians(-tclon_2)
+  tclon_2 <- degrees_to_radians(tclon_2)
 
   S <- cos(tclat_2) * sin(tclon_1 - tclon_2)
   C <- cos(tclat_1) * sin(tclat_2) - sin(tclat_1) * cos(tclat_2) * cos(tclon_1 - tclon_2)
