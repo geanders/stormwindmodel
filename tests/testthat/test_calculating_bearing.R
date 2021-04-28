@@ -1,7 +1,7 @@
 library(tidyverse)
 library(lubridate)
 
-example_storms <- tribble(
+example_storms2 <- tribble(
   ~ storm_name, ~ basin, ~ time, ~ lat, ~ lon,
   "Laura", "North Atlantic", ymd_hms("2020-08-27 03:00:00"), 29.10, -93.15,
   "Laura", "North Atlantic", ymd_hms("2020-08-27 06:00:00"), 29.80, -93.30,
@@ -32,7 +32,7 @@ example_storms <- tribble(
 ## calc_polar <- function (x) (90 - x) %% 360
 
 test_that("Bearing calculation correct for North Atlantic basin storm", {
-  storm <- example_storms %>%
+  storm <- example_storms2 %>%
     filter(basin == "North Atlantic")
   bear <- calc_bearing(tclat_1 = storm$lat[1],
                        tclon_1 = storm$lon[1],
@@ -43,7 +43,7 @@ test_that("Bearing calculation correct for North Atlantic basin storm", {
 })
 
 test_that("Bearing calculation correct for Eastern Pacific basin storm", {
-  storm <- example_storms %>%
+  storm <- example_storms2 %>%
     filter(basin == "Eastern Pacific")
   bear <- calc_bearing(tclat_1 = storm$lat[1],
                        tclon_1 = storm$lon[1],
@@ -54,7 +54,7 @@ test_that("Bearing calculation correct for Eastern Pacific basin storm", {
 })
 
 test_that("Bearing calculation correct for Western Pacific basin storm", {
-  storm <- example_storms %>%
+  storm <- example_storms2 %>%
     filter(basin == "Western Pacific")
   bear <- calc_bearing(tclat_1 = storm$lat[1],
                        tclon_1 = storm$lon[1],
@@ -65,7 +65,7 @@ test_that("Bearing calculation correct for Western Pacific basin storm", {
 })
 
 test_that("Bearing calculation correct for Northern Indian basin storm", {
-  storm <- example_storms %>%
+  storm <- example_storms2 %>%
     filter(basin == "Northern Indian")
   bear <- calc_bearing(tclat_1 = storm$lat[1],
                        tclon_1 = storm$lon[1],
@@ -76,7 +76,7 @@ test_that("Bearing calculation correct for Northern Indian basin storm", {
 })
 
 test_that("Bearing calculation correct for Southern Indian basin storm", {
-  storm <- example_storms %>%
+  storm <- example_storms2 %>%
     filter(basin == "Southern Indian")
   bear <- calc_bearing(tclat_1 = storm$lat[1],
                        tclon_1 = storm$lon[1],
@@ -87,7 +87,7 @@ test_that("Bearing calculation correct for Southern Indian basin storm", {
 })
 
 test_that("Bearing calculation correct for Southern Pacific basin storm", {
-  storm <- example_storms %>%
+  storm <- example_storms2 %>%
     filter(basin == "Southern Pacific")
   bear <- calc_bearing(tclat_1 = storm$lat[1],
                        tclon_1 = storm$lon[1],
@@ -98,7 +98,7 @@ test_that("Bearing calculation correct for Southern Pacific basin storm", {
 })
 
 test_that("Bearing calculation correct for Southern Atlantic basin storm", {
-  storm <- example_storms %>%
+  storm <- example_storms2 %>%
     filter(basin == "Southern Atlantic")
   bear <- calc_bearing(tclat_1 = storm$lat[1],
                        tclon_1 = storm$lon[1],
@@ -109,7 +109,7 @@ test_that("Bearing calculation correct for Southern Atlantic basin storm", {
 })
 
 test_that("Bearing calculation correct for crossing prime meridian", {
-  storm <- example_storms %>%
+  storm <- example_storms2 %>%
     filter(basin == "crossed prime meridian")
   bear <- calc_bearing(tclat_1 = storm$lat[1],
                        tclon_1 = storm$lon[1],
@@ -120,7 +120,7 @@ test_that("Bearing calculation correct for crossing prime meridian", {
 })
 
 test_that("Bearing calculation correct for crossing international date line", {
-  storm <- example_storms %>%
+  storm <- example_storms2 %>%
     filter(basin == "crossed international date line")
   bear <- calc_bearing(tclat_1 = storm$lat[1],
                        tclon_1 = storm$lon[1],
@@ -131,7 +131,7 @@ test_that("Bearing calculation correct for crossing international date line", {
 })
 
 test_that("Bearing calculation correct for crossing international date line, IBTrACS conventions", {
-  storm <- example_storms %>%
+  storm <- example_storms2 %>%
     filter(basin == "crossed international date line IBTrACS")
   bear <- calc_bearing(tclat_1 = storm$lat[1],
                        tclon_1 = storm$lon[1],
