@@ -46,13 +46,13 @@
 
 #' Land-sea mask
 #'
-#' A dataframe with gridded locations in the eastern United States and
+#' A dataframe with gridded locations worldwide indicating
 #' whether each point is land or water. This land-sea mask is used to identify
 #' whether hurricane center observations are more likely over land or water,
 #' so an appropriate conversion factor can be used to estimate gradient winds
 #' from sustained surface winds.
 #'
-#' @format A dataframe with 35,376 rows and 3 variables:
+#' @format A dataframe with 1,082,401 rows and 3 variables:
 #' \describe{
 #'    \item{longitude}{A numeric vector with the longitude of the grid point}
 #'    \item{latitude}{A numeric vector with the latitude of the grid point}

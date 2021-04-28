@@ -5,7 +5,6 @@ ex_storms <- tribble(
   "Laura", "North Atlantic", 25.03, -88.90, FALSE,
   "Laura", "North Atlantic", 27.82, -92.76, FALSE,
   "Laura", "North Atlantic", 30.47, -93.36, TRUE,
-  "Laura", "North Atlantic", 22.50, -84.18, TRUE,
   "Laura", "North Atlantic", 21.85, -82.35, FALSE,
   "Laura", "North Atlantic", 20.22, -76.86, TRUE,
   "Laura", "North Atlantic", 19.40, -74.40, FALSE,
