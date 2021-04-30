@@ -25,7 +25,7 @@ hemisphere longitudes.}
 A numeric vector giving the direction of the second location from the first location,
    in degrees. A direction of 0 degrees indicates the second location is
    due east of the first, 90 degrees indicates the second location is due
-   north of the first, etc.
+   north of the first, etc (i.e., polar, rather than meteorological, coordinate system).
 }
 \description{
 Calculates the bearing of a second location, as seen from
