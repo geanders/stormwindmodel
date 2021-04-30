@@ -325,7 +325,7 @@ calc_R1 <- function(Rmax, xi){
 #' \itemize{
 #'   \item{\eqn{R_{max}}{Rmax}: Radius from the storm center to the point at which the maximum wind occurs (km)}
 #'   \item{\eqn{V_{max,G}}{vmax_gl}: Tangential wind component of the gradient-level maximum wind speed (m / s)}
-#'   \item{\eqn{\phi}: Latitude (degrees)}
+#'   \item{\eqn{\phi}: Absolute value of latitude (in decimal degrees)}
 #' }
 #'
 #' @return A numeric vector with \eqn{R_{max}}{Rmax}, the radius of maximum
@@ -339,7 +339,7 @@ calc_R1 <- function(Rmax, xi){
 #'
 #' @export
 will7a <- function(vmax_gl, tclat){
-    Rmax <- 46.4 * exp(-0.0155 * vmax_gl + 0.0169 * tclat)
+    Rmax <- 46.4 * exp(-0.0155 * vmax_gl + 0.0169 * abs(tclat))
     return(Rmax)
 }
 
@@ -363,7 +363,7 @@ will7a <- function(vmax_gl, tclat){
 #'      \item{\eqn{X_1}{X1}: Parameter for the Willoughby wind model}
 #'      \item{\eqn{V_{max,G}}{vmax_gl}: Maximum gradient-level 1-min sustained
 #'         wind (m / s)}
-#'      \item{\eqn{\phi}: Latitude, in decimal degrees}
+#'      \item{\eqn{\phi}: Absolute value of latitude, in decimal degrees}
 #'    }
 #'
 #' @references
@@ -374,7 +374,7 @@ will7a <- function(vmax_gl, tclat){
 #'
 #' @export
 will10a <- function(vmax_gl, tclat){
-  X1 <- 317.1 - 2.026 * vmax_gl + 1.915 * tclat
+  X1 <- 317.1 - 2.026 * vmax_gl + 1.915 * abs(tclat)
   return(X1)
 }
 
@@ -397,7 +397,7 @@ will10a <- function(vmax_gl, tclat){
 #'      \item{\eqn{n}: Parameter for the Willoughby wind model}
 #'      \item{\eqn{V_{max,G}}{vmax_gl}:  Maximum gradient-level 1-min sustained
 #'         wind (m / s)}
-#'      \item{\eqn{\phi}: Latitude, in decimal degrees}
+#'      \item{\eqn{\phi}: Absolute value of latitude, in decimal degrees}
 #'    }
 #'
 #' @references
@@ -408,7 +408,7 @@ will10a <- function(vmax_gl, tclat){
 #'
 #' @export
 will10b <- function(vmax_gl, tclat){
-  n <- 0.4067 + 0.0144 * vmax_gl - 0.0038 * tclat
+  n <- 0.4067 + 0.0144 * vmax_gl - 0.0038 * abs(tclat)
   return(n)
 }
 
@@ -435,7 +435,7 @@ will10b <- function(vmax_gl, tclat){
 #'          of A calculated as negative is re-set to 0)}
 #'      \item{\eqn{V_{max,G}}{vmax_gl}: Tangential component of the maximum
 #'            gradient-level sustained wind speed (in m / s)}
-#'      \item{\eqn{\phi}: Latitude, in decimal degrees}
+#'      \item{\eqn{\phi}: Absolute value of latitude, in decimal degrees}
 #'    }
 #'    Any negative values of \eqn{A} are reset to 0.
 #'
@@ -447,7 +447,7 @@ will10b <- function(vmax_gl, tclat){
 #'
 #' @export
 will10c <- function(vmax_gl, tclat){
-  A <- 0.0696 + 0.0049 * vmax_gl - 0.0064 * tclat
+  A <- 0.0696 + 0.0049 * vmax_gl - 0.0064 * abs(tclat)
   A[A < 0 & !is.na(A)] <- 0
   return(A)
 }

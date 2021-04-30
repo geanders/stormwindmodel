@@ -33,7 +33,7 @@ This function calculates \eqn{A} using equation 10c (Willoughby et al.
          of A calculated as negative is re-set to 0)}
      \item{\eqn{V_{max,G}}{vmax_gl}: Tangential component of the maximum
            gradient-level sustained wind speed (in m / s)}
-     \item{\eqn{\phi}: Latitude, in decimal degrees}
+     \item{\eqn{\phi}: Absolute value of latitude, in decimal degrees}
    }
    Any negative values of \eqn{A} are reset to 0.
 }

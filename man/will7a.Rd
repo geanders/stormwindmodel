@@ -30,7 +30,7 @@ where:
 \itemize{
   \item{\eqn{R_{max}}{Rmax}: Radius from the storm center to the point at which the maximum wind occurs (km)}
   \item{\eqn{V_{max,G}}{vmax_gl}: Tangential wind component of the gradient-level maximum wind speed (m / s)}
-  \item{\eqn{\phi}: Latitude (degrees)}
+  \item{\eqn{\phi}: Absolute value of latitude (in decimal degrees)}
 }
 }
 \references{

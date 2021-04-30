@@ -30,7 +30,7 @@ et al. 2006) to calculate the \eqn{X_1}{X1} parameter:
      \item{\eqn{X_1}{X1}: Parameter for the Willoughby wind model}
      \item{\eqn{V_{max,G}}{vmax_gl}: Maximum gradient-level 1-min sustained
         wind (m / s)}
-     \item{\eqn{\phi}: Latitude, in decimal degrees}
+     \item{\eqn{\phi}: Absolute value of latitude, in decimal degrees}
    }
 }
 \references{
