@@ -29,6 +29,8 @@ example_storms <- tribble(
 # Distance estimates compared with those made through NOAA widget, available
 # at https://www.nhc.noaa.gov/gccalc.shtml
 
+## Estimates of storm forward speed are also available in IBTrACS
+
 test_that("Forward speed calculation correct for North Atlantic basin storm", {
   storm <- example_storms %>%
     filter(basin == "North Atlantic")

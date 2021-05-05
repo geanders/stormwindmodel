@@ -31,6 +31,9 @@ example_storms2 <- tribble(
 ## calculate in polar coordinates (0 is East, 90 is North, etc.). Converted using
 ## calc_polar <- function (x) (90 - x) %% 360
 
+## Estimates of storm direction are also available through IBTrACS, although they
+## use a coordinate system where north is 0, east is 90, etc.
+
 test_that("Bearing calculation correct for North Atlantic basin storm", {
   storm <- example_storms2 %>%
     filter(basin == "North Atlantic")
