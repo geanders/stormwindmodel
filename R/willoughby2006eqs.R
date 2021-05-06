@@ -14,6 +14,17 @@ will1a <- function(vmax_gl, r, Rmax, n){
   return(Vi)
 }
 
+#' Willoughby et al. (2006), Equation 4
+#'
+#' @inheritParams will3_right
+#' @inheritParams will1a
+#'
+#' @export
+will4 <- function(vmax_gl, A, r, Rmax, X1, X2 = 25){
+  Vo <- vmax_gl * ((1 - A) * exp((Rmax - r) / X1) + A * exp((Rmax - r) / X2))
+  return(Vo)
+}
+
 #' Model wind speed at a grid point for a storm track observation
 #'
 #' Models the gradient wind speed at a certain radius from
@@ -106,17 +117,16 @@ will1 <- function(cdist, Rmax, R1, R2, vmax_gl, n, A, X1, X2 = 25){
     return(NA)
   } else {
 
-    Vi <- vmax_gl * (cdist / Rmax) ^ n
-    Vo <- vmax_gl * ((1 - A) * exp((Rmax - cdist)/X1) + A * exp((Rmax - cdist) / X2))
+    Vi <- will1a(vmax_gl = vmax_gl, r = cdist, Rmax = Rmax, n = n)
+    Vo <- will4(vmax_gl = vmax_gl, A = A, r = cdist, Rmax = Rmax, X1 = X1, X2 = X2)
 
     if(cdist < R1){
       wind_gl_aa <- Vi
     } else if (cdist > R2){
       wind_gl_aa <- Vo
     } else {
-      eps <- (cdist - R1) / (R2 - R1)
-      w <- 126 * eps ^ 5 - 420 * eps ^ 6 + 540 * eps ^ 7 - 315 *
-        eps ^ 8 + 70 * eps ^ 9
+      w <- will2(r = cdist, R1 = R1, R2 = R2)
+      # Willoughby equation 1b
       wind_gl_aa <- Vi * (1 - w) + Vo * w
     }
 
@@ -138,8 +148,8 @@ will1 <- function(cdist, Rmax, R1, R2, vmax_gl, n, A, X1, X2 = 25){
 #'    profile equations (\eqn{w}).
 #'
 #' @export
-will2 <- function(r, R1){
-  xi = (r - R1) / 25
+will2 <- function(r, R1, R2){
+  xi = (r - R1) / (R2 - R1)
 
   if(xi <= 0){
       w <- 0
