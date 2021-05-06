@@ -356,6 +356,13 @@ where:
 - $S$, $C$: Intermediary results
 - $\theta_F$ is the direction of the storm movement, in degrees
 
+The direction of storm movement ($\theta_F$) is given in polar coordinates, with 0 degrees representing movement due East, 90 degrees due North, and so on: 
+
+```{r echo = FALSE, fig.align = "center"}
+knitr::include_graphics("images/polar_coordinates.jpg")
+```
+
+
 This calculation is implemented in our package through the `calc_bearing` function:
 
 ```{r}
