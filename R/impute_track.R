@@ -59,13 +59,22 @@ create_full_track <- function(hurr_track = stormwindmodel::floyd_tracks,
                   tclat = .data$latitude,
                   tclon = .data$longitude) %>%
     dplyr::mutate(date = lubridate::ymd_hm(.data$date),
-                  tclat = abs(as.numeric(.data$tclat)),
+                  tclat = as.numeric(.data$tclat),
                   tclon = as.numeric(.data$tclon),
                   vmax = weathermetrics::convert_wind_speed(.data$vmax, "knots",
                                                             "mps", round = 3),
                   track_time_simple = difftime(.data$date, dplyr::first(.data$date),
                                                units = "hour"),
                   track_time_simple = as.numeric(.data$track_time_simple))
+
+  # Identify cases where a storm goes over the international date line, and
+  # longitudes change from about 180 to about -180, or vice versa. Correct this
+  # before interpolating (then later we get everything back within the 180 to -180
+  # range).
+  if(diff(range(hurr_track$tclon)) > 300){
+    hurr_track <- hurr_track %>%
+      dplyr::mutate(tclon = ifelse(tclon > 0, tclon, tclon + 360))
+  }
 
   full_track <- hurr_track %>%
     tidyr::nest(data = tidyr::everything()) %>%
@@ -94,7 +103,9 @@ create_full_track <- function(hurr_track = stormwindmodel::floyd_tracks,
                                     .f = ~ dplyr::first(.x$date) +
                                       lubridate::seconds(3600 * .y))) %>%
     dplyr::select(.data$date, .data$tclat, .data$tclon, .data$vmax) %>%
-    tidyr::unnest(.data$date:.data$vmax)
+    tidyr::unnest(.data$date:.data$vmax) %>%
+    # Make sure that longitude is between -180 and 180
+    dplyr::mutate(tclon = ((tclon + 180) %% 360) - 180)
 
   return(full_track)
 }
