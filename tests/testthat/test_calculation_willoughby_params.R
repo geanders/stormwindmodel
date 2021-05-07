@@ -50,7 +50,7 @@ test_that("Calculation of power-law exponent (n, Will. eq. 10b) is correct", {
 })
 
 test_that("Calculation of contribution of shorter decay length (A, Will. eq. 10c) is correct", {
-  # n will typically be between 0.5 and 1.5, almost always between 0 and 3
+  # A will be between 0 and 1
   expect_equal(will10c(vmax_gl = 30, tclat = 25), 0.0566)
   expect_equal(will10c(vmax_gl = 60, tclat = 15), 0.2676)
   expect_equal(will10c(vmax_gl = 20.5, tclat = 40.2), 0)
@@ -63,6 +63,32 @@ test_that("Calculation of contribution of shorter decay length (A, Will. eq. 10c
   # At equal Vmax, A should decrease as you get further from the equator
   expect_gt(will10c(vmax_gl = 30, tclat = 25), will10c(vmax_gl = 30, tclat = 35))
   expect_gt(will10c(vmax_gl = 30, tclat = -25), will10c(vmax_gl = 30, tclat = -35))
+})
+
+test_that("Calculation of R1 is correct", {
+  # Need to put together a few functions to get this values
+  get_R1 <- function(vmax_gl, tclat){
+    Rmax <- will7a(vmax_gl = vmax_gl, tclat = tclat)
+    X1 <- will10a(vmax_gl = vmax_gl, tclat = tclat)
+    A <- will10c(vmax_gl = vmax_gl, tclat = tclat)
+    n <- will10b(vmax_gl = vmax_gl, tclat = tclat)
+    eq3_right <- will3_right(n = n, A = A, X1 = X1, Rmax = Rmax)
+    xi <- solve_for_xi(eq3_right = eq3_right)
+    R1 <- calc_R1(Rmax = Rmax, xi = xi)
+    return(R1)
+  }
+
+  # R1 will always be less than Rmax, which is usually 20--60 km, almost always under 100 km
+  expect_equal(get_R1(vmax_gl = 30, tclat = 25), 28.21953)
+  expect_equal(get_R1(vmax_gl = 60, tclat = 15), 6.15703)
+  expect_equal(get_R1(vmax_gl = 20.5, tclat = 40.2), 51.48897)
+  # Check that is works for Southern Hemisphere storms
+  expect_equal(get_R1(vmax_gl = 30, tclat = -25), 28.21953)
+  # At equal latitudes, A should decrease with higher Vmax
+  expect_gt(get_R1(vmax_gl = 30, tclat = 25), get_R1(vmax_gl = 40, tclat = 25))
+  # At equal Vmax, R1 should increase as you get further from the equator
+  expect_lt(get_R1(vmax_gl = 30, tclat = 25), get_R1(vmax_gl = 30, tclat = 35))
+  expect_lt(get_R1(vmax_gl = 30, tclat = -25), get_R1(vmax_gl = 30, tclat = -35))
 })
 
 test_that("Calculated parameters are reasonable for a sample N. Atlantic storm", {
