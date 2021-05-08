@@ -41,7 +41,7 @@ test_that("Interpolation works for Southern Atlantic storm", {
   )
   interp_track_1 <- create_full_track(hurr_track = sample_track_1, tint = 3)
 
-  # Expectations are from 3-hourly IBTrACS data (expect -46.40 in
+  # Expectations are from 3-hourly IBTrACS data (except -46.40 in
   # IBTRaCS replaced with -46.60)
   expected_interp_lats <- c(-29.10, -29.20, -29.30, -29.41, -29.50,
                             -29.59, -29.60, -29.48, -29.30)
@@ -50,6 +50,31 @@ test_that("Interpolation works for Southern Atlantic storm", {
 
   expect_equal(round(interp_track_1$tclat), round(expected_interp_lats))
   expect_equal(round(interp_track_1$tclon), round(expected_interp_longs))
+})
+
+test_that("Interpolation works for Western Pacific storm", {
+  sample_track_1 <- tribble(
+    ~ date, ~ latitude, ~ longitude, ~ wind,
+    "202008311200", 22.90, 145.80, 25,
+    "202008311800", 22.10, 145.31, 35,
+    "202009010000", 21.80, 144.50, 35,
+    "202009010600", 20.90, 144.40, 39,
+    "202009011200", 20.50, 144.10, 39
+  )
+  interp_track_1 <- create_full_track(hurr_track = sample_track_1, tint = 3)
+
+  # Expectations are from 3-hourly IBTrACS data (except 145.31 in
+  # IBTRaCS replaced with 145.51)
+  expected_interp_lats <- c(22.90, 22.44, 22.10, 21.96, 21.80,
+                            21.36, 20.90, 20.65, 20.50)
+  expected_interp_longs <- c(145.80, 145.51, 144.90, 144.64, 144.50,
+                             144.44, 144.40, 144.31, 144.10)
+  expected_interp_vmax <- c(25, 30, 35, 35, 35, 37, 39, 39, 39) %>%
+    weathermetrics::knots_to_speed(unit = "mps", round = 1)
+
+  expect_equal(round(interp_track_1$tclat), round(expected_interp_lats))
+  expect_equal(round(interp_track_1$tclon), round(expected_interp_longs))
+  expect_equal(round(interp_track_1$vmax), round(expected_interp_vmax))
 })
 
 # Harold crossed the international dateline. Try with both IBTrACs conventions
