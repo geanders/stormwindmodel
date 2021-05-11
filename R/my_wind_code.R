@@ -134,16 +134,15 @@ calc_grid_wind <- function(grid_point = stormwindmodel::county_points[1, ],
                                             n = n, A = A, X1 = X1),
                       # calculate the gradient wind direction (gwd) at this
                       # grid point
-                      chead = ~ calc_bearing(tclat, tclon,
-                                             grid_point$glat, grid_point$glon),
-                      gwd = ~ (90 + chead) %% 360,
+                      gwd = ~ calc_gwd(tclat = tclat, tclon = tclon,
+                                       glat = grid_point$glat, glon = grid_point$glon),
                       # Bring back to surface level (surface wind reduction factor)
                       wind_sfc_sym = ~ mapply(gradient_to_surface,
                                               wind_gl_aa = wind_gl_aa,
                                               cdist = cdist),
                       # Get surface wind direction
                       swd = ~ mapply(add_inflow, gwd = gwd, cdist = cdist,
-                                     Rmax = Rmax),
+                                     Rmax = Rmax, tclat = tclat),
                       # Add back in storm forward motion component
                       windspeed = ~ add_forward_speed(wind_sfc_sym,
                                                       tcspd_u, tcspd_v,

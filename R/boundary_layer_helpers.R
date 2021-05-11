@@ -1,3 +1,41 @@
+#' Calculate the gradient wind direction
+#'
+#' This function determines the bearing from the storm's center to a
+#' grid point location and then calculates the direction of gradient
+#' winds at that grid point. Gradient winds will be perpendicular to
+#' the direction from the storm's center to the grid point. In the
+#' Northern hemisphere, cyclonic winds are counterclockwise, so you
+#' add 90 degrees to the bearing from the storm center to the grid point
+#' when using polar coordinates. In the Southern hemisphere, cyclonic
+#' winds are clockwise, so you subtract 90 degrees.
+#'
+#' @return Numeric vector with the gradient wind direction (in degrees),
+#' prior to adding an inflow angle.
+#'
+#' @examples
+#' calc_gwd(tclat = 41.4, tclon = -72.8,
+#'          glat = 32.50039, glon = -86.49416)
+#'
+#' calc_gwd(tclat = -41.4, tclon = -72.8,
+#'          glat = -32.50039, glon = -86.49416)
+#'
+#' @export
+calc_gwd <- function(tclat, tclon, glat, glon){
+  # calculate the gradient wind direction (gwd) at the
+  # grid point
+  chead <- calc_bearing(tclat_1 = tclat, tclon_1 = tclon,
+                        tclat_2 = glat, tclon_2 = glon)
+
+  # Cyclonic winds will be perpendicular to the bearing
+  # from the storm to the grid point. In the Northern
+  # Hemisphere, they'll be counterclockwise, so add 90 degrees
+  # in polar coordinates. In the Southern Hemisphere, they'll
+  # be clockwise, so subtract 90 degrees in polar coordinates.
+  cycl_wind <- ifelse(tclat > 0, 90, -90)
+  gwd <- (chead + cycl_wind) %% 360
+  return(gwd)
+}
+
 #' Add inflow angle
 #'
 #' This function adds an inflow angle to the angle of the wind direction.
@@ -32,10 +70,12 @@
 #'    Engineering 30(4):553-578.
 #'
 #' @examples
-#' add_inflow(gwd = 160, cdist = 100, Rmax = 20)
+#' add_inflow(gwd = 160, cdist = 100, Rmax = 20, tclat = 32)
+#'
+#' add_inflow(gwd = 160, cdist = 100, Rmax = 20, tclat = -32)
 #'
 #' @export
-add_inflow <- function(gwd, cdist, Rmax){
+add_inflow <- function(gwd, cdist, Rmax, tclat){
   if(is.na(gwd) | is.na(cdist) | is.na(Rmax)){
     return(NA)
   }
@@ -53,8 +93,11 @@ add_inflow <- function(gwd, cdist, Rmax){
   # Add 20 degrees to inflow angle since location is over land, not water
   overland_inflow_angle <- inflow_angle + 20
 
+  # Add an adjustment for northern versus southern hemisphere
+  hemisphere_adj <- ifelse(tclat > 0, 1, -1)
+
   # Add inflow angle to gradient wind direction
-  gwd_with_inflow <- (gwd + overland_inflow_angle) %% 360
+  gwd_with_inflow <- (gwd + hemisphere_adj * overland_inflow_angle) %% 360
 
   return(gwd_with_inflow)
 }
