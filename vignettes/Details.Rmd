@@ -495,14 +495,16 @@ vmax_gl = mapply(calc_gradient_speed,
 Next, the package code calculates $R_{max}$, the radius of maximum wind speed, using Eq. 7a from Willoughby et al. [-@willoughby2006parametric]:
 
 $$
-R_{max} = 46.4 e^{- 0.0155 V_{max,G} + 0.0169\phi}
+R_{max} = 46.4 e^{- 0.0155 V_{max,G} + 0.0169 \lvert \phi \rvert}
 $$
 
 where: 
 
 - $R_{max}$: Radius from the storm center to the point at which the maximum wind occurs (km)
 - $V_{max,G}$: Maximum gradient-level 1-min sustained wind (m / s)
-- $\phi$: Latitude, in decimal degrees
+- $\phi$: Latitude, in decimal degrees. The absolute value of this is taken, as
+this is a factor of how far the storm is from the equator---taking the absolute
+value accommodates Southern Hemisphere storms.
 
 ```{r}
 stormwindmodel::will7a
@@ -513,7 +515,7 @@ stormwindmodel::will7a
 Next, the code calculates $X_1$, which is a parameter needed for the Willoughby model. This is done using equation 10a from Willoughby et al.  [-@willoughby2006parametric]:
 
 $$
-X_1 = 317.1 - 2.026V_{max,G} + 1.915 \phi
+X_1 = 317.1 - 2.026V_{max,G} + 1.915 \lvert \phi \rvert
 $$
 
 where: 
@@ -529,7 +531,7 @@ stormwindmodel::will10a
 Next, the code calculates another Willoughby parameter, $n$. This is done with equation 10b from Willoughby et al. [-@willoughby2006parametric]:
 
 $$
-n = 0.4067 + 0.0144 V_{max,G} - 0.0038 \phi
+n = 0.4067 + 0.0144 V_{max,G} - 0.0038 \lvert \phi \rvert
 $$
 
 where: 
@@ -545,7 +547,7 @@ stormwindmodel::will10b
 Next, the code calculates another Willoughby parameter, $A$, with equation 10c from Willoughby et al. [-@willoughby2006parametric]:
 
 $$
-A = 0.0696 + 0.0049 V_{max,G} - 0.0064 \phi
+A = 0.0696 + 0.0049 V_{max,G} - 0.0064 \lvert \phi \rvert
 $$
 $$
 A = \begin{cases}
