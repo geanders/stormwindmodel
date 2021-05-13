@@ -1,19 +1,24 @@
 
 test_that("Calculation of radius to maximum winds (Rmax, Will. eq. 7a) is reasonable", {
   # X1 will typically be between 200 km and 400 km, almost always between 0 km and 500 km
-  expect_equal(will7a(vmax_gl = 30, tclat = 25), 44.46932)
-  expect_equal(will7a(vmax_gl = 60, tclat = 15), 23.58945)
-  expect_equal(will7a(vmax_gl = 20.5, tclat = 40.2), 66.61498)
+  expect_equal(round(will7a(vmax_gl = 30, tclat = 25), 1), 44.5)
+  expect_equal(round(will7a(vmax_gl = 60, tclat = 15), 1), 23.6)
+  expect_equal(round(will7a(vmax_gl = 20.5, tclat = 40.2), 1), 66.6)
   # Check that it works on vector inputs, rather than single inputs
-  expect_equal(will7a(vmax_gl = c(30, 60), tclat = c(25, 15)), c(44.46932, 23.58945))
+  expect_equal(round(will7a(vmax_gl = c(30, 60), tclat = c(25, 15)), 1),
+               c(44.5, 23.6))
   # Check that is works for Southern Hemisphere storms
-  expect_equal(will7a(vmax_gl = 30, tclat = -25), 44.46932)
-  expect_equal(will7a(vmax_gl = 30, tclat = -25), will7a(vmax_gl = 30, tclat = 25))
+  expect_equal(round(will7a(vmax_gl = 30, tclat = -25), 1), 44.5)
+  expect_equal(round(will7a(vmax_gl = 30, tclat = -25), 1),
+               round(will7a(vmax_gl = 30, tclat = 25), 1))
   # At equal latitudes, Rmax increase decrease with higher Vmax
-  expect_gt(will7a(vmax_gl = 30, tclat = 25), will7a(vmax_gl = 40, tclat = 25))
+  expect_gt(round(will7a(vmax_gl = 30, tclat = 25), 1),
+            round(will7a(vmax_gl = 40, tclat = 25), 1))
   # At equal Vmax, Rmax should increase as you get further from the equator
-  expect_lt(will7a(vmax_gl = 30, tclat = 25), will7a(vmax_gl = 30, tclat = 35))
-  expect_lt(will7a(vmax_gl = 30, tclat = -25), will7a(vmax_gl = 30, tclat = -35))
+  expect_lt(round(will7a(vmax_gl = 30, tclat = 25), 1),
+            round(will7a(vmax_gl = 30, tclat = 35), 1))
+  expect_lt(round(will7a(vmax_gl = 30, tclat = -25), 1),
+            round(will7a(vmax_gl = 30, tclat = -35), 1))
 })
 
 test_that("Calculation of dual exponential decay length (X1, Will. eq. 10a) is correct", {
@@ -79,16 +84,19 @@ test_that("Calculation of R1 is correct", {
   }
 
   # R1 will always be less than Rmax, which is usually 20--60 km, almost always under 100 km
-  expect_equal(get_R1(vmax_gl = 30, tclat = 25), 28.21953)
-  expect_equal(get_R1(vmax_gl = 60, tclat = 15), 6.15703)
-  expect_equal(get_R1(vmax_gl = 20.5, tclat = 40.2), 51.48897)
+  expect_equal(round(get_R1(vmax_gl = 30, tclat = 25), 1), 28.2)
+  expect_equal(round(get_R1(vmax_gl = 60, tclat = 15), 1), 6.2)
+  expect_equal(round(get_R1(vmax_gl = 20.5, tclat = 40.2), 1), 51.5)
   # Check that is works for Southern Hemisphere storms
-  expect_equal(get_R1(vmax_gl = 30, tclat = -25), 28.21953)
+  expect_equal(round(get_R1(vmax_gl = 30, tclat = -25), 1), 28.2)
   # At equal latitudes, A should decrease with higher Vmax
-  expect_gt(get_R1(vmax_gl = 30, tclat = 25), get_R1(vmax_gl = 40, tclat = 25))
+  expect_gt(round(get_R1(vmax_gl = 30, tclat = 25), 1),
+            round(get_R1(vmax_gl = 40, tclat = 25), 1))
   # At equal Vmax, R1 should increase as you get further from the equator
-  expect_lt(get_R1(vmax_gl = 30, tclat = 25), get_R1(vmax_gl = 30, tclat = 35))
-  expect_lt(get_R1(vmax_gl = 30, tclat = -25), get_R1(vmax_gl = 30, tclat = -35))
+  expect_lt(round(get_R1(vmax_gl = 30, tclat = 25), 1),
+            round(get_R1(vmax_gl = 30, tclat = 35), 1))
+  expect_lt(round(get_R1(vmax_gl = 30, tclat = -25), 1),
+            round(get_R1(vmax_gl = 30, tclat = -35), 1))
 })
 
 test_that("Calculated parameters are reasonable for a sample N. Atlantic storm", {
