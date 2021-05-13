@@ -826,7 +826,13 @@ stormwindmodel::will2
 
 Now, to get estimated symmetric surface-level tangential winds from gradient-levels winds, the code uses a method from Knaff et al. [-@knaff2011automated]. 
 
-In this case, we can always assume the point is over land, not water, so the code always uses a reduction factor that is reduced by 20%. This method uses a reduction factor of 0.90 up to a radius of 100 km, a reduction factor of 0.75 for any radius 700 km or greater, and a linear decreasing reduction factor for any radius between those two radius values [@knaff2011automated]. If the point is over land (true for any county), this reduction factor is further reduced by 20%.
+In this case, we can always assume the point is over land, not water, since we
+are modeling exposure among humans. Therefore, the code always uses a reduction
+factor that is reduced by 20%. This method uses a reduction factor of 0.90 up to
+a radius of 100 km, a reduction factor of 0.75 for any radius 700 km or greater,
+and a linear decreasing reduction factor for any radius between those two radius
+values [@knaff2011automated]. If the point is over land (true for any county and
+almost any residence), this reduction factor is further reduced by 20%.
 
 Here is the function the code uses for this part:
 
