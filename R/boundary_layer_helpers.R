@@ -130,6 +130,8 @@ add_inflow <- function(gwd, cdist, Rmax, tclat){
 #' Phadke AC, Martino CD, Cheung KF, and Houston SH. 2003. Modeling of
 #'    tropical cyclone winds and waves for emergency management. Ocean
 #'    Engineering 30(4):553-578.
+#'
+#' @export
 add_forward_speed <- function(wind_sfc_sym, tcspd_u, tcspd_v, swd, cdist, Rmax){
   # Calculate u- and v-components of surface wind speed
   wind_sfc_sym_u <- wind_sfc_sym * cos(degrees_to_radians(swd))
