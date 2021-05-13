@@ -451,7 +451,7 @@ The code uses the reduction factor from Figure 3 of Knaff et al. [-@knaff2011aut
 stormwindmodel::calc_gradient_speed
 ```
 
-To determine if the storm center is over land or over water, the package includes a dataset called `landmask`, with locations of grid points in the eastern US and offshore, with a factor saying whether each point is over land or water:  
+To determine if the storm center is over land or over water, the package includes a dataset called `landmask`, with locations of grid points worldwide, with a factor saying whether each point is over land or water:  
 
 ```{r}
 data(landmask)
