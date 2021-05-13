@@ -258,6 +258,35 @@ c <- a +
 gridExtra::grid.arrange(b, c, ncol = 2)
 ```
 
+The function includes a correction in case the storm tracks cross the
+International Date line. In this case, the longitude might change from close to
+-180 to close to 180, or vice versa. The track interpolation checks for large
+differences in longitude that might happen in this case. If there are such
+changes, then the function brings all the longitudes into a similar range, to
+avoid problems with interpolation across the International Date line. After
+interpolation, all longitudes are brought to be between -180 and 180. Here is
+the code in the `create_full_track` function that adjusts for storm tracks that
+have large differences in longitude, and so likely cross the International Date
+line:
+
+```{r eval = FALSE}
+  # Identify cases where a storm goes over the international date line, and
+  # longitudes change from about 180 to about -180, or vice versa. Correct this
+  # before interpolating (then later we get everything back within the 180 to -180
+  # range).
+  if(diff(range(hurr_track$tclon)) > 300){
+    hurr_track <- hurr_track %>%
+      dplyr::mutate(tclon = ifelse(tclon > 0, tclon, tclon + 360))
+  }
+```
+
+Here is the code in the `create_full_track` function that ensures the output
+location data remain within -180 to 180 for longitude:
+
+```{r}
+    # Make sure that longitude is between -180 and 180
+    dplyr::mutate(tclon = ((tclon + 180) %% 360) - 180)
+```
 
 ## Add Willoughby inputs and parameters
 
