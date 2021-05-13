@@ -283,7 +283,7 @@ line:
 Here is the code in the `create_full_track` function that ensures the output
 location data remain within -180 to 180 for longitude:
 
-```{r}
+```{r eval = FALSE}
     # Make sure that longitude is between -180 and 180
     dplyr::mutate(tclon = ((tclon + 180) %% 360) - 180)
 ```
@@ -817,7 +817,7 @@ which includes several helper functions:
 
 ```{r}
 stormwindmodel::will1a
-stormwindmodel::will4
+stormwindmodel:::will4
 stormwindmodel::will2
 ```
 
@@ -880,7 +880,7 @@ to be between 0 and 360 degrees and is in polar coordinates (0 degrees is due Ea
 90 degrees is due North, etc.). 
 
 ```{r}
-stormwindmodel::calc_gwd
+stormwindmodel:::calc_gwd
 ```
 
 ### Calculate the surface wind direction
