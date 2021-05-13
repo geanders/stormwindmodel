@@ -857,25 +857,41 @@ ggplot(rf_example, aes(x = r, y = rf)) +
 
 ### Calculate the direction of gradient winds at each location 
 
-So far, the model has just calculated the the rotational component of the wind speed at each grid location (tangential wind). Now the code adds back asymmetry from the forward motion component of the wind speed (translational wind) at each location. The total storm winds will be increased by forward motion of the storm on the right side of the storm. Conversely, on the left side of the storm, the forward motion of the storm will offset some of the storm-related wind. 
+So far, the model has just calculated the the rotational component of the wind
+speed at each grid location (tangential wind). Now the code adds back asymmetry
+from the forward motion component of the wind speed (translational wind) at each
+location. The total storm winds will be increased by forward motion of the storm
+on the right side of the storm in the Northern Hemisphere and the left side of
+the storm in the Southern Hemisphere. Conversely, on the opposite side of the
+storm, the forward motion of the storm will offset some of the storm-related
+wind.
 
 We've already determined the direction of the forward direction of the storm. Now, we need to get the direction of the storm winds at the grid point location.
 
-First, the function determines, for each storm location, the direction from the storm center to the location. For this, the package uses the `calc_bearing` function described earlier to determine the bearing of the storm at each storm observation. Now, it is used to calculate the angle from the storm center to the grid point:
+First, a function determines, for each storm location, the direction from the storm center to the location. For this, the package uses the `calc_bearing` function described earlier to determine the bearing of the storm at each storm observation. Now, it is used to calculate the angle from the storm center to the grid point:
 
 ```{r}
 stormwindmodel:::calc_bearing
 ```
 
-Next, the function calculates the gradient wind direction based on the bearing of a location from the storm. This gradient wind direction is calculated by adding 90 degrees to the bearing of the grid point from the storm center.
+Next, a function calculates the gradient wind direction based on the bearing of a location from the storm. This gradient wind direction is calculated by adding 90 degrees to the bearing of the grid point from the storm center in the Northern Hemisphere
+and subtracting 90 degrees in the Southern Hemisphere. The direction is constrained
+to be between 0 and 360 degrees and is in polar coordinates (0 degrees is due East, 
+90 degrees is due North, etc.). 
 
-```{r eval = FALSE}
-gwd = (90 + chead) %% 360
+```{r}
+stormwindmodel::calc_gwd
 ```
 
 ### Calculate the surface wind direction
 
-The next step is to change from the gradient wind direction to the surface wind direction. To do this, the function adds an inflow angle to the gradient wind direction (making sure the final answer is between 0 and 360 degrees). This step is necessary because surface friction changes the wind direction near the surface compared to higher above the surface.
+The next step is to change from the gradient wind direction to the surface wind
+direction. To do this, the function adds an inflow angle to the gradient wind
+direction in the Northern Hemisphere and subtracts an inflow angle in the
+Southern Hemisphere (making sure the final answer is between 0 and 360 degrees).
+This step is necessary because surface friction changes the wind direction near
+the surface compared to higher above the surface, making the wind direction turn 
+in towards the center of the storm.
 
 The inflow angle is calculated as a function of the distance from the storm center to the location and the storm's $R_{max}$ at that observation point [eq. 11a--c, @phadke2003modeling]:
 
@@ -887,10 +903,16 @@ $$
 \end{cases}
 $$
 
-Over land, the inflow angle should be about 20 degrees more than it is over water. Therefore, after calculating the inflow angle from the equation above, the function adds 20 degrees to the value since all modeled locations are over land. The final calculation, then, is:
+Over land, the inflow angle should be about 20 degrees more than it is over water. Therefore, after calculating the inflow angle from the equation above, the function adds 20 degrees to the value since all modeled locations are over land. The final calculation, then, is, for the Northern Hemisphere:
 
 $$
 \theta_S = \theta_G + \beta + 20
+$$
+
+and for the Southern Hemisphere: 
+
+$$
+\theta_S = \theta_G - \beta - 20
 $$
 
 Here is the function for this step:
