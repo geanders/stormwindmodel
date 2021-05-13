@@ -786,9 +786,9 @@ and then:
 
 $$
 w = \begin{cases}
-0 & \text{if } \xi < 0 \\ 
-126 \xi^5 - 420 \xi^6 + 540 \xi^7- 315 \xi^8 + 70 \xi^9 & \text{if } 0 \le \xi \le 1\\
- 1 & \text{if } \xi > 1
+0 & \text{if } \xi \le 0 \\ 
+126 \xi^5 - 420 \xi^6 + 540 \xi^7- 315 \xi^8 + 70 \xi^9 & \text{if } 0 < \xi , 1\\
+ 1 & \text{if } \xi \ge 1
 \end{cases}
 $$
 
