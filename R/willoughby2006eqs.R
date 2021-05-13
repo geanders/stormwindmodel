@@ -120,9 +120,9 @@ will1 <- function(cdist, Rmax, R1, R2, vmax_gl, n, A, X1, X2 = 25){
     Vi <- will1a(vmax_gl = vmax_gl, r = cdist, Rmax = Rmax, n = n)
     Vo <- will4(vmax_gl = vmax_gl, A = A, r = cdist, Rmax = Rmax, X1 = X1, X2 = X2)
 
-    if(cdist <= R1){
+    if(cdist < R1){
       wind_gl_aa <- Vi
-    } else if (cdist >= R2){
+    } else if (cdist > R2){
       wind_gl_aa <- Vo
     } else {
       w <- will2(r = cdist, R1 = R1, R2 = R2)
