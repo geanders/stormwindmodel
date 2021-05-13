@@ -813,6 +813,15 @@ All of this is wrapped in a function:
 stormwindmodel:::will1
 ```
 
+which includes several helper functions: 
+
+```{r}
+stormwindmodel::will1a
+stormwindmodel::will4
+stormwindmodel::will2
+```
+
+
 ### Estimate surface level winds from gradient winds
 
 Now, to get estimated symmetric surface-level tangential winds from gradient-levels winds, the code uses a method from Knaff et al. [-@knaff2011automated]. 
