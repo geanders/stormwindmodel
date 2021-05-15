@@ -12,9 +12,7 @@ vignette: >
 
 ```{r echo = FALSE, message = FALSE}
 library(stormwindmodel)
-library(ggplot2)
-library(dplyr)
-library(tidyr)
+library(tidyverse)
 library(gridExtra)
 ```
 
@@ -455,7 +453,7 @@ To determine if the storm center is over land or over water, the package include
 
 ```{r}
 data(landmask)
-head(landmask)
+landmask[1:5, 1:5]
 ```
 
 The `check_over_land` function finds the closest grid point for a storm location and determines whether the storm is over land or over water at its observed location. 
@@ -470,7 +468,15 @@ Here is an example of applying this function to the tracks for Hurricane Floyd:
 floyd_tracks$land <- mapply(stormwindmodel:::check_over_land,
                             tclat = floyd_tracks$latitude,
                             tclon = floyd_tracks$longitude)
-ggplot(landmask, aes(x = longitude, y = latitude, color = land)) +
+
+landmask_df <- landmask %>% 
+  as.data.frame() %>% 
+  rownames_to_column("longitude") %>% 
+  pivot_longer(-longitude, names_to = "latitude", values_to = "land") %>% 
+  mutate(longitude = as.numeric(longitude), 
+         latitude = as.numeric(latitude))
+
+ggplot(landmask_df, aes(x = longitude, y = latitude, color = land)) +
   geom_point() + 
   geom_point(data = floyd_tracks, aes(x = longitude, y = latitude, 
                                      color = NULL, shape = land)) + 

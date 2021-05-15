@@ -65,20 +65,11 @@ calc_gradient_speed <- function(vmax_sfc_sym, over_land){
 #'
 #' @export
 check_over_land <- function(tclat, tclon){
-  lat_diffs <- abs(tclat - stormwindmodel::landmask$latitude)
-  closest_grid_lat <- stormwindmodel::landmask$latitude[which(lat_diffs ==
-                                                                min(lat_diffs))][1]
 
-  lon_diffs <- abs(tclon - stormwindmodel::landmask$longitude)
-  closest_grid_lon <- stormwindmodel::landmask$longitude[which(lon_diffs ==
-                                                                 min(lon_diffs))][1]
+  lon_index <- which.min(abs(as.numeric(rownames(stormwindmodel::landmask)) - tclon))
+  lat_index <- which.min(abs(as.numeric(colnames(stormwindmodel::landmask)) - tclat))
 
-  over_land <- stormwindmodel::landmask %>%
-    dplyr::filter(.data$latitude == closest_grid_lat &
-                     .data$longitude == closest_grid_lon) %>%
-    dplyr::mutate(land = .data$land == "land") %>%
-    dplyr::select(.data$land)
-  over_land <- as.vector(over_land$land[1])
+  over_land <- stormwindmodel::landmask[lon_index, lat_index] == "land"
 
   return(over_land)
 }
