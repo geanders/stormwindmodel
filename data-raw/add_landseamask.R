@@ -1,8 +1,8 @@
 library(tidyverse)
-landmask <- readr::read_csv("data-raw/landseamask_global.csv",
-                col_names = c("longitude", "latitude", "land")) %>%
-  dplyr::mutate(land = factor(land, levels = c(1, 0), labels = c("land", "water")),
-                longitude = longitude - 360)
+landmask <- readr::read_csv("data-raw/landmask_global_0p2deg.csv",
+                col_names = c("longitude", "latitude", "land"),
+                skip = 1) %>%
+  dplyr::mutate(land = factor(land))
 
 landmask <- landmask %>%
   arrange(latitude) %>%
