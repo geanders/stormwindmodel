@@ -51,6 +51,7 @@ Imports:
     maps (>= 3.3.0),
     plyr (>= 1.8.6),
     rlang (>= 0.4.10),
+    Rcpp,
     stringr (>= 1.4.0),
     tidyr (>= 1.1.2),
     weathermetrics (>= 1.2.2)
@@ -69,5 +70,6 @@ Suggests:
     sp (>= 1.4.5),
     testthat (>= 3.0.2),
     viridis (>= 0.5.1)
+LinkingTo: Rcpp
 VignetteBuilder: knitr
 Config/testthat/edition: 3
