@@ -4,7 +4,7 @@
 \alias{add_inflow}
 \title{Add inflow angle}
 \usage{
-add_inflow(gwd, cdist, Rmax)
+add_inflow(gwd, cdist, Rmax, tclat)
 }
 \arguments{
 \item{gwd}{A numeric vector giving direction of gradient wind at a location,
@@ -36,7 +36,9 @@ This function is only appropriate for modeling wind speeds for locations
 that are over land.
 }
 \examples{
-add_inflow(gwd = 160, cdist = 100, Rmax = 20)
+add_inflow(gwd = 160, cdist = 100, Rmax = 20, tclat = 32)
+
+add_inflow(gwd = 160, cdist = 100, Rmax = 20, tclat = -32)
 
 }
 \references{

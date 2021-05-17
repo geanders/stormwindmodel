@@ -4,7 +4,7 @@
 \alias{will2}
 \title{Willoughby et al. (2006), Equation 2}
 \usage{
-will2(r, R1)
+will2(r, R1, R2)
 }
 \arguments{
 \item{r}{Numeric vector of radius from the storm center to the point you are
