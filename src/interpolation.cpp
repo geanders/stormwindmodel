@@ -253,13 +253,16 @@ new_y <- stormwindmodel:::make_interp(test_x, test_y)
 // [[Rcpp::export]]
 NumericVector apply_interp(NumericVector new_x, NumericVector x,
                            NumericVector y, NumericVector y2d){
-  int m = x.size();
-  int n = new_x.size();
+  int m = x.size(); // 9
+  int n = new_x.size(); // 90
   int j, l, u, k;
-  NumericVector new_y(n);
+  NumericVector new_y(n); // length of 90
   float diff_x, A, B, C, D;
 
-  for(j = 0; j < n; j++){
+  l = 0;
+  u = m - 1;
+
+  for(j = 0; j < n; j++){ // j going from 0 to 89
     // Only look for the section if it's not the same as for the last value
     // At this point, l and u are still set to their final values from the
     // last iteration. Since we have ordered new x values, this should reduce
@@ -270,7 +273,7 @@ NumericVector apply_interp(NumericVector new_x, NumericVector x,
       l = 0;
       u = m-1;
       while ((u - l) > 1){
-        k = (u + l) / 2.0;
+        k = (u + l) / 2;
         if(x[k] > new_x[j]) {
           u = k;
         } else {
@@ -303,7 +306,7 @@ y <- rnorm(n)
 (xout <- seq(min(x), max(x), length.out = 10 * length(x)))
 (yout <- spline(x, y, method = "natural", xout = xout)$y)
 (y2d <- stormwindmodel:::make_interp(x, y))
-(test_yout <- apply_interp(xout, x, y, y2d))
+(test_yout <- stormwindmodel:::apply_interp(xout, x, y, y2d))
 
 plot(x, y)
 lines(xout, yout, col = "red")
@@ -312,7 +315,7 @@ lines(xout, test_yout, col = "blue")
 stopifnot(all.equal(yout, test_yout,
                     tolerance = 10 * sqrt(.Machine$double.eps)))
 bench::mark(spline(x, y, method = "natural", xout = xout),
-            apply_interp(xout, x, y, make_interp(x, y)),
+            stormwindmodel:::apply_interp(xout, x, y, make_interp(x, y)),
             check = FALSE)
 
 */

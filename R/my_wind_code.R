@@ -138,8 +138,8 @@ calc_grid_wind <- function(grid_point = stormwindmodel::county_points[1, ],
                                            rep(grid_point$glat,
                                                times = nrow(with_wind_radii)),
                                            rep(grid_point$glon,
-                                               times = nrow(with_wind_radii))),
-                      # Calculate gradient winds at the point
+                                               times = nrow(with_wind_radii)))) %>%
+          dplyr::mutate(# Calculate gradient winds at the point
                       wind_gl_aa = mapply(will1, cdist = .data$cdist,
                                           Rmax = .data$Rmax,
                                           R1 = .data$R1, R2 = .data$R2,

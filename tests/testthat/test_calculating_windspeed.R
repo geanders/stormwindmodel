@@ -1,7 +1,7 @@
 library(tidyverse)
 
 test_that("Wind speed estimates are reasonable for Hurricane Katrina", {
-  katrina_full_track <- create_full_track(hurr_track = katrina_tracks, tint = 0.25)
+  katrina_full_track <- create_full_track(hurr_track = stormwindmodel::katrina_tracks, tint = 0.25)
   katrina_wind_radii <- add_wind_radii(full_track = katrina_full_track)
 
   orleans_location <- county_points %>%

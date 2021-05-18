@@ -3,7 +3,8 @@ library(tidyverse)
 test_that("Interpolation works with North Atlantic storm", {
 
   # Floyd
-  interp_track_floyd <- create_full_track(floyd_tracks[34:40, ], tint = 3)
+  interp_track_floyd <- create_full_track(stormwindmodel::floyd_tracks[34:40, ],
+                                          tint = 3)
 
   # Expectations are from 3-hourly IBTrACS data (expect long -77.49, which
   # IBTRaCS interpolates to -77.65)
@@ -17,7 +18,8 @@ test_that("Interpolation works with North Atlantic storm", {
   expect_equal(round(interp_track_floyd$tclon), round(expected_interp_longs))
 
   # Katrina
-  interp_track_katrina <- create_full_track(katrina_tracks[22:26, ], tint = 3)
+  interp_track_katrina <- create_full_track(stormwindmodel::katrina_tracks[22:26, ],
+                                            tint = 3)
 
   # Expectations are from 3-hourly IBTrACS data
   expected_interp_lats <- c(27.2, 27.67, 28.20, 28.81, 29.50, 30.27,

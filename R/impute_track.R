@@ -84,15 +84,13 @@ create_full_track <- function(hurr_track = stormwindmodel::floyd_tracks,
                                                       by = tint))) %>%
     # Interpolate latitude and longitude using natural cubic splines
     dplyr::mutate(tclat = purrr::map2(.data$data, .data$interp_time,
-                                      .f = ~ spline(x = .x$track_time_simple,
-                                                    y = .x$tclat,
-                                                    xout = .y,
-                                                    method = "natural")$y)) %>%
+                                      .f = ~ interpolate_spline(x = .x$track_time_simple,
+                                                                y = .x$tclat,
+                                                                new_x = .y))) %>%
     dplyr::mutate(tclon = purrr::map2(.data$data, .data$interp_time,
-                                      .f = ~ spline(x = .x$track_time_simple,
-                                                    y = .x$tclon,
-                                                    xout = .y,
-                                                    method = "natural")$y)) %>%
+                                      .f = ~ interpolate_spline(x = .x$track_time_simple,
+                                                                y = .x$tclon,
+                                                                new_x = .y))) %>%
     # Interpolate max wind using linear interpolation
     dplyr::mutate(vmax = purrr::map2(.data$data, .data$interp_time,
                                      .f = ~ interpolate_line(x = .x$track_time_simple,
