@@ -20,9 +20,6 @@ sustained wind with motion asymmetry removed (m / s).}
 
 \item{cdist}{A numeric vector giving radius (in kilometers) from the storm
 center to the location being modeled.}
-
-\item{Rmax}{A numeric vector giving the radius to maximum winds (in kilometers)
-for the tropical storm.}
 }
 \value{
 A numeric vector giving asymmetric surface windspeed (m / s) at the

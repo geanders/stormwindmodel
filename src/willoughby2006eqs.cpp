@@ -1,7 +1,11 @@
 #include <Rcpp.h>
 using namespace Rcpp;
 
-//' Willoughby et al. (2006), Equation 1(a)
+//' Calculate wind within R1
+//'
+//' This function calculates windspeed inside R1, the radius that defines
+//' the end of the the transition region in Willoughby's double-exponential
+//' model.
 //'
 //' @param r Numeric vector of radius from the storm center to the point you are
 //'    measuring, in kilometers
@@ -10,6 +14,8 @@ using namespace Rcpp;
 //' @param Rmax Numeric vector of the radius at which the maximum wind occurs,
 //'    in kilometers
 //' @inheritParams will3_right
+//'
+//' @return A numeric value with the estimated wind inside the radius R1.
 //'
 //' @export
 
@@ -28,11 +34,18 @@ will1a(20.0, 50.0, 25.0, 1.2)
 */
 
 
-//' Willoughby et al. (2006), Equation 4
+//' Calculate wind outside R2
 //'
-//' @inheritParams will3_right
+//' This function calculates windspeed outside R2, the radius that defines
+//' the end of the the transition region in Willoughby's double-exponential
+//' model.
+//'
 //' @inheritParams will1a
+//' @inheritParams will1
+//' @inheritParams will3_right
 //'
+//' @return A numeric value with the estimated wind outside the radius R2.
+// '
 //' @export
 
 // [[Rcpp::export]]

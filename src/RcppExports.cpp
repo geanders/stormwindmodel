@@ -5,6 +5,82 @@
 
 using namespace Rcpp;
 
+// calc_linear_coefs
+NumericVector calc_linear_coefs(NumericVector x, NumericVector y);
+RcppExport SEXP _stormwindmodel_calc_linear_coefs(SEXP xSEXP, SEXP ySEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
+    rcpp_result_gen = Rcpp::wrap(calc_linear_coefs(x, y));
+    return rcpp_result_gen;
+END_RCPP
+}
+// find_x_section
+int find_x_section(double new_x, NumericVector x);
+RcppExport SEXP _stormwindmodel_find_x_section(SEXP new_xSEXP, SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type new_x(new_xSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(find_x_section(new_x, x));
+    return rcpp_result_gen;
+END_RCPP
+}
+// interpolate_line
+NumericVector interpolate_line(NumericVector x, NumericVector y, NumericVector new_x);
+RcppExport SEXP _stormwindmodel_interpolate_line(SEXP xSEXP, SEXP ySEXP, SEXP new_xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type new_x(new_xSEXP);
+    rcpp_result_gen = Rcpp::wrap(interpolate_line(x, y, new_x));
+    return rcpp_result_gen;
+END_RCPP
+}
+// make_interp
+NumericVector make_interp(NumericVector x, NumericVector y);
+RcppExport SEXP _stormwindmodel_make_interp(SEXP xSEXP, SEXP ySEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
+    rcpp_result_gen = Rcpp::wrap(make_interp(x, y));
+    return rcpp_result_gen;
+END_RCPP
+}
+// apply_interp
+NumericVector apply_interp(NumericVector new_x, NumericVector x, NumericVector y, NumericVector y2d);
+RcppExport SEXP _stormwindmodel_apply_interp(SEXP new_xSEXP, SEXP xSEXP, SEXP ySEXP, SEXP y2dSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type new_x(new_xSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type y2d(y2dSEXP);
+    rcpp_result_gen = Rcpp::wrap(apply_interp(new_x, x, y, y2d));
+    return rcpp_result_gen;
+END_RCPP
+}
+// interpolate_spline
+NumericVector interpolate_spline(NumericVector x, NumericVector y, NumericVector new_x);
+RcppExport SEXP _stormwindmodel_interpolate_spline(SEXP xSEXP, SEXP ySEXP, SEXP new_xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type new_x(new_xSEXP);
+    rcpp_result_gen = Rcpp::wrap(interpolate_spline(x, y, new_x));
+    return rcpp_result_gen;
+END_RCPP
+}
 // radians_to_degrees
 NumericVector radians_to_degrees(NumericVector radians);
 RcppExport SEXP _stormwindmodel_radians_to_degrees(SEXP radiansSEXP) {
@@ -210,6 +286,12 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_stormwindmodel_calc_linear_coefs", (DL_FUNC) &_stormwindmodel_calc_linear_coefs, 2},
+    {"_stormwindmodel_find_x_section", (DL_FUNC) &_stormwindmodel_find_x_section, 2},
+    {"_stormwindmodel_interpolate_line", (DL_FUNC) &_stormwindmodel_interpolate_line, 3},
+    {"_stormwindmodel_make_interp", (DL_FUNC) &_stormwindmodel_make_interp, 2},
+    {"_stormwindmodel_apply_interp", (DL_FUNC) &_stormwindmodel_apply_interp, 4},
+    {"_stormwindmodel_interpolate_spline", (DL_FUNC) &_stormwindmodel_interpolate_spline, 3},
     {"_stormwindmodel_radians_to_degrees", (DL_FUNC) &_stormwindmodel_radians_to_degrees, 1},
     {"_stormwindmodel_degrees_to_radians", (DL_FUNC) &_stormwindmodel_degrees_to_radians, 1},
     {"_stormwindmodel_latlon_to_km", (DL_FUNC) &_stormwindmodel_latlon_to_km, 5},

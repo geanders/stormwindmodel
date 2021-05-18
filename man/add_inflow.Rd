@@ -12,9 +12,6 @@ in degrees. Due east is 0 degrees, due north 90 degrees, etc.}
 
 \item{cdist}{A numeric vector giving radius (in kilometers) from the storm
 center to the location being modeled.}
-
-\item{Rmax}{A numeric vector giving the radius to maximum winds (in kilometers)
-for the tropical storm.}
 }
 \value{
 Numeric vector with the gradient wind direction (in degrees),

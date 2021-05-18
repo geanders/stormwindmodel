@@ -36,8 +36,7 @@ the \code{stormwindmodel} package.
 }
 \details{
 The function uses natural cubic splines for interpolation for location
-and linear splines for interpolation for wind speed. The base R functions
-\code{spline} and \code{approx} are used for these interpolations.
+and linear splines for interpolation for wind speed.
 }
 \note{
 This function imputes between each original data point, and it starts

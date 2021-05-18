@@ -7,8 +7,7 @@
 #' the \code{stormwindmodel} package.
 #'
 #' @details The function uses natural cubic splines for interpolation for location
-#' and linear splines for interpolation for wind speed. The base R functions
-#' \code{spline} and \code{approx} are used for these interpolations.
+#' and linear splines for interpolation for wind speed.
 #'
 #' @param hurr_track Dataframe with hurricane track data for a single
 #'    storm. The dataframe must include columns for date-time (year, month, day,
@@ -96,9 +95,9 @@ create_full_track <- function(hurr_track = stormwindmodel::floyd_tracks,
                                                     method = "natural")$y)) %>%
     # Interpolate max wind using linear interpolation
     dplyr::mutate(vmax = purrr::map2(.data$data, .data$interp_time,
-                                     .f = ~ approx(x = .x$track_time_simple,
+                                     .f = ~ interpolate_line(x = .x$track_time_simple,
                                                    y = .x$vmax,
-                                                   xout = .y)$y)) %>%
+                                                   new_x = .y))) %>%
     dplyr::mutate(date = purrr::map2(.data$data, .data$interp_time,
                                     .f = ~ dplyr::first(.x$date) +
                                       lubridate::seconds(3600 * .y))) %>%
