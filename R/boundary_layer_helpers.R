@@ -24,7 +24,8 @@ calc_gwd <- function(tclat, tclon, glat, glon){
   # calculate the gradient wind direction (gwd) at the
   # grid point
   chead <- calc_bearing(tclat_1 = tclat, tclon_1 = tclon,
-                        tclat_2 = glat, tclon_2 = glon)
+                        tclat_2 = rep(glat, times = length(tclat)),
+                        tclon_2 = rep(glon, times = length(tclon)))
 
   # Cyclonic winds will be perpendicular to the bearing
   # from the storm to the grid point. In the Northern

@@ -9,10 +9,10 @@
 #' @inheritParams will3_right
 #'
 #' @export
-will1a <- function(vmax_gl, r, Rmax, n){
-  Vi <- vmax_gl * (r / Rmax) ^ n
-  return(Vi)
-}
+# will1a <- function(vmax_gl, r, Rmax, n){
+#   Vi <- vmax_gl * (r / Rmax) ^ n
+#   return(Vi)
+# }
 
 #' Willoughby et al. (2006), Equation 4
 #'
@@ -20,10 +20,10 @@ will1a <- function(vmax_gl, r, Rmax, n){
 #' @inheritParams will1a
 #'
 #' @export
-will4 <- function(vmax_gl, A, r, Rmax, X1, X2 = 25){
-  Vo <- vmax_gl * ((1 - A) * exp((Rmax - r) / X1) + A * exp((Rmax - r) / X2))
-  return(Vo)
-}
+# will4 <- function(vmax_gl, A, r, Rmax, X1, X2 = 25){
+#   Vo <- vmax_gl * ((1 - A) * exp((Rmax - r) / X1) + A * exp((Rmax - r) / X2))
+#   return(Vo)
+# }
 
 #' Model wind speed at a grid point for a storm track observation
 #'
@@ -110,31 +110,31 @@ will4 <- function(vmax_gl, A, r, Rmax, X1, X2 = 25){
 #' continuous profiles. Monthly Weather Review 134(4):1102-1120.
 #'
 #' @export
-will1 <- function(cdist, Rmax, R1, R2, vmax_gl, n, A, X1, X2 = 25){
-
-  if(is.na(Rmax) || is.na(vmax_gl) ||
-     is.na(n) || is.na(A) || is.na(X1)){
-    return(NA)
-  } else {
-
-    Vi <- will1a(vmax_gl = vmax_gl, r = cdist, Rmax = Rmax, n = n)
-    Vo <- will4(vmax_gl = vmax_gl, A = A, r = cdist, Rmax = Rmax, X1 = X1, X2 = X2)
-
-    if(cdist < R1){
-      wind_gl_aa <- Vi
-    } else if (cdist > R2){
-      wind_gl_aa <- Vo
-    } else {
-      w <- will2(r = cdist, R1 = R1, R2 = R2)
-      # Willoughby equation 1b
-      wind_gl_aa <- Vi * (1 - w) + Vo * w
-    }
-
-    wind_gl_aa[wind_gl_aa < 0 & !is.na(wind_gl_aa)] <- 0
-
-    return(wind_gl_aa)
-  }
-}
+# will1 <- function(cdist, Rmax, R1, R2, vmax_gl, n, A, X1, X2 = 25){
+#
+#   if(is.na(Rmax) || is.na(vmax_gl) ||
+#      is.na(n) || is.na(A) || is.na(X1)){
+#     return(NA)
+#   } else {
+#
+#     Vi <- will1a(vmax_gl = vmax_gl, r = cdist, Rmax = Rmax, n = n)
+#     Vo <- will4(vmax_gl = vmax_gl, A = A, r = cdist, Rmax = Rmax, X1 = X1, X2 = X2)
+#
+#     if(cdist < R1){
+#       wind_gl_aa <- Vi
+#     } else if (cdist > R2){
+#       wind_gl_aa <- Vo
+#     } else {
+#       w <- will2(r = cdist, R1 = R1, R2 = R2)
+#       # Willoughby equation 1b
+#       wind_gl_aa <- Vi * (1 - w) + Vo * w
+#     }
+#
+#     wind_gl_aa[wind_gl_aa < 0 & !is.na(wind_gl_aa)] <- 0
+#
+#     return(wind_gl_aa)
+#   }
+# }
 
 #' Willoughby et al. (2006), Equation 2
 #'
@@ -148,20 +148,20 @@ will1 <- function(cdist, Rmax, R1, R2, vmax_gl, n, A, X1, X2 = 25){
 #'    profile equations (\eqn{w}).
 #'
 #' @export
-will2 <- function(r, R1, R2){
-  xi = (r - R1) / (R2 - R1)
-
-  if(xi <= 0){
-      w <- 0
-      } else if (xi >= 1){
-        w <- 1
-        } else {
-          w <- 126 * xi ^ 5 - 420 * xi ^ 6 + 540 * xi ^ 7 - 315 * xi ^ 8 +
-            70 * xi ^ 9
-        }
-
-  return(w)
-}
+# will2 <- function(r, R1, R2){
+#   xi = (r - R1) / (R2 - R1)
+#
+#   if(xi <= 0){
+#       w <- 0
+#       } else if (xi >= 1){
+#         w <- 1
+#         } else {
+#           w <- 126 * xi ^ 5 - 420 * xi ^ 6 + 540 * xi ^ 7 - 315 * xi ^ 8 +
+#             70 * xi ^ 9
+#         }
+#
+#   return(w)
+# }
 
 #' Calculate right-hand side of Willoughby Eqn. 3
 #'
@@ -185,11 +185,11 @@ will2 <- function(r, R1, R2){
 #' continuous profiles. Monthly Weather Review 134(4):1102-1120.
 #'
 #' @export
-will3_right <- function(n, A, X1, Rmax){
-  eq3_right <- (n * ((1 - A) * X1 + 25 * A)) /
-      (n * ((1 - A) * X1 + 25 * A) + Rmax)
-  return(eq3_right)
-}
+# will3_right <- function(n, A, X1, Rmax){
+#   eq3_right <- (n * ((1 - A) * X1 + 25 * A)) /
+#       (n * ((1 - A) * X1 + 25 * A) + Rmax)
+#   return(eq3_right)
+# }
 
 #' Calculate the function value and derivative for Willoughby Eqn. 3
 #'
@@ -312,11 +312,11 @@ solve_for_xi <- function(xi0 = 0.5, eq3_right, eps = 10e-4, itmax = 100){
 #' continuous profiles. Monthly Weather Review 134(4):1102-1120.
 #'
 #' @export
-calc_R1 <- function(Rmax, xi){
-  R2_minus_R1 <- ifelse(Rmax > 20, 25, 15)
-  R1 <- Rmax - xi * R2_minus_R1
-  return(R1)
-}
+# calc_R1 <- function(Rmax, xi){
+#   R2_minus_R1 <- ifelse(Rmax > 20, 25, 15)
+#   R1 <- Rmax - xi * R2_minus_R1
+#   return(R1)
+# }
 
 #' Calculate radius of maximum winds
 #'
@@ -348,10 +348,10 @@ calc_R1 <- function(Rmax, xi){
 #' continuous profiles. Monthly Weather Review 134(4):1102-1120.
 #'
 #' @export
-will7a <- function(vmax_gl, tclat){
-    Rmax <- 46.4 * exp(-0.0155 * vmax_gl + 0.0169 * abs(tclat))
-    return(Rmax)
-}
+# will7a <- function(vmax_gl, tclat){
+#     Rmax <- 46.4 * exp(-0.0155 * vmax_gl + 0.0169 * abs(tclat))
+#     return(Rmax)
+# }
 
 #' Calculate X1 for Willoughby model
 #'
@@ -383,10 +383,10 @@ will7a <- function(vmax_gl, tclat){
 #' continuous profiles. Monthly Weather Review 134(4):1102-1120.
 #'
 #' @export
-will10a <- function(vmax_gl, tclat){
-  X1 <- 317.1 - 2.026 * vmax_gl + 1.915 * abs(tclat)
-  return(X1)
-}
+# will10a <- function(vmax_gl, tclat){
+#   X1 <- 317.1 - 2.026 * vmax_gl + 1.915 * abs(tclat)
+#   return(X1)
+# }
 
 #' Calculate n for the Willoughby model
 #'
@@ -417,10 +417,10 @@ will10a <- function(vmax_gl, tclat){
 #' continuous profiles. Monthly Weather Review 134(4):1102-1120.
 #'
 #' @export
-will10b <- function(vmax_gl, tclat){
-  n <- 0.4067 + 0.0144 * vmax_gl - 0.0038 * abs(tclat)
-  return(n)
-}
+# will10b <- function(vmax_gl, tclat){
+#   n <- 0.4067 + 0.0144 * vmax_gl - 0.0038 * abs(tclat)
+#   return(n)
+# }
 
 #' Calculate A for Willoughby model
 #'
@@ -456,8 +456,8 @@ will10b <- function(vmax_gl, tclat){
 #' continuous profiles. Monthly Weather Review 134(4):1102-1120.
 #'
 #' @export
-will10c <- function(vmax_gl, tclat){
-  A <- 0.0696 + 0.0049 * vmax_gl - 0.0064 * abs(tclat)
-  A[A < 0 & !is.na(A)] <- 0
-  return(A)
-}
+# will10c <- function(vmax_gl, tclat){
+#   A <- 0.0696 + 0.0049 * vmax_gl - 0.0064 * abs(tclat)
+#   A[A < 0 & !is.na(A)] <- 0
+#   return(A)
+# }

@@ -48,6 +48,14 @@ test_that("Forward speed calculation correct for North Atlantic basin storm", {
                                   tclon_2 = storm$lon[2],
                                   time_2 = storm$time[2])
   expect_equal(round(for_speed, 1), 7.3)
+
+  # Check that distance function works for a vector
+  dist2 <- latlon_to_km(tclat_1 = storm$lat[c(1, 2)],
+                        tclon_1 = storm$lon[c(1, 2)],
+                        tclat_2 = storm$lat[c(2, 1)],
+                        tclon_2 = storm$lon[c(2, 1)]
+  )
+  expect_equal(round(dist2, 1), c(79.3, 79.3))
 })
 
 test_that("Forward speed calculation correct for Eastern Pacific basin storm", {

@@ -134,7 +134,11 @@ calc_grid_wind <- function(grid_point = stormwindmodel::county_points[1, ],
         grid_wind <- dplyr::mutate(with_wind_radii,
                       # Calculated distance from storm center to location
                       cdist = latlon_to_km(.data$tclat, .data$tclon,
-                                           grid_point$glat, grid_point$glon),
+                                           # Need the following to have the right type for Rcpp function latlon_to_km
+                                           rep(grid_point$glat,
+                                               times = nrow(with_wind_radii)),
+                                           rep(grid_point$glon,
+                                               times = nrow(with_wind_radii))),
                       # Calculate gradient winds at the point
                       wind_gl_aa = mapply(will1, cdist = .data$cdist,
                                           Rmax = .data$Rmax,
@@ -145,7 +149,8 @@ calc_grid_wind <- function(grid_point = stormwindmodel::county_points[1, ],
                       # calculate the gradient wind direction (gwd) at this
                       # grid point
                       gwd = calc_gwd(tclat = .data$tclat, tclon = .data$tclon,
-                                     glat = grid_point$glat, glon = grid_point$glon),
+                                     glat = grid_point$glat,
+                                     glon = grid_point$glon),
                       # Bring back to surface level (surface wind reduction factor)
                       wind_sfc_sym = mapply(gradient_to_surface,
                                             wind_gl_aa = .data$wind_gl_aa,

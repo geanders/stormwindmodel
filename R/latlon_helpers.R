@@ -37,24 +37,24 @@
 #'    }
 #'
 #' @export
-latlon_to_km <- function(tclat_1, tclon_1, tclat_2, tclon_2, Rearth = 6378.14){
-  tclat_1 <- degrees_to_radians(tclat_1)
-  tclon_1 <- degrees_to_radians(tclon_1)
-  tclat_2 <- degrees_to_radians(tclat_2)
-  tclon_2 <- degrees_to_radians(tclon_2)
-
-  delta_L <- tclon_1 - tclon_2
-  delta_tclat <- tclat_1 - tclat_2
-
-  hav_L <- sin(delta_L / 2) ^ 2
-  hav_tclat <- sin(delta_tclat / 2) ^ 2
-
-  hav_gamma <- hav_tclat + cos(tclat_1) * cos(tclat_2) * hav_L
-  gamma <- 2 * asin(sqrt(hav_gamma))
-
-  dist <- Rearth * gamma
-  return(dist)
-}
+# latlon_to_km <- function(tclat_1, tclon_1, tclat_2, tclon_2, Rearth = 6378.14){
+#   tclat_1 <- degrees_to_radians(tclat_1)
+#   tclon_1 <- degrees_to_radians(tclon_1)
+#   tclat_2 <- degrees_to_radians(tclat_2)
+#   tclon_2 <- degrees_to_radians(tclon_2)
+#
+#   delta_L <- tclon_1 - tclon_2
+#   delta_tclat <- tclat_1 - tclat_2
+#
+#   hav_L <- sin(delta_L / 2) ^ 2
+#   hav_tclat <- sin(delta_tclat / 2) ^ 2
+#
+#   hav_gamma <- hav_tclat + cos(tclat_1) * cos(tclat_2) * hav_L
+#   gamma <- 2 * asin(sqrt(hav_gamma))
+#
+#   dist <- Rearth * gamma
+#   return(dist)
+# }
 
 #' Calculate storm's forward speed
 #'
@@ -69,12 +69,12 @@ latlon_to_km <- function(tclat_1, tclon_1, tclat_2, tclon_2, Rearth = 6378.14){
 #'    the two observations, in meters per second.
 #'
 #' @export
-calc_forward_speed <- function(tclat_1, tclon_1, time_1, tclat_2, tclon_2, time_2){
-  dist <- latlon_to_km(tclat_1, tclon_1, tclat_2, tclon_2) * 1000
-  time <- as.numeric(difftime(time_2, time_1, units = "secs"))
-  tcspd <- dist / time
-  return(tcspd)
-}
+# calc_forward_speed <- function(tclat_1, tclon_1, time_1, tclat_2, tclon_2, time_2){
+#   dist <- latlon_to_km(tclat_1, tclon_1, tclat_2, tclon_2) * 1000
+#   time <- as.numeric(difftime(time_2, time_1, units = "secs"))
+#   tcspd <- dist / time
+#   return(tcspd)
+# }
 
 #' Calculate bearing from one location to another
 #'
@@ -115,20 +115,20 @@ calc_forward_speed <- function(tclat_1, tclon_1, time_1, tclat_2, tclon_2, time_
 #'    back within the 0--360 degree range.
 #'
 #' @export
-calc_bearing <- function(tclat_1, tclon_1, tclat_2, tclon_2){
-  tclat_1 <- degrees_to_radians(tclat_1)
-  tclon_1 <- degrees_to_radians(tclon_1)
-  tclat_2 <- degrees_to_radians(tclat_2)
-  tclon_2 <- degrees_to_radians(tclon_2)
-
-  S <- cos(tclat_2) * sin(tclon_1 - tclon_2)
-  C <- cos(tclat_1) * sin(tclat_2) - sin(tclat_1) * cos(tclat_2) * cos(tclon_1 - tclon_2)
-
-  theta_rad <- atan2(S, C)
-  theta <- radians_to_degrees(theta_rad) + 90
-  theta <- theta %% 360 # restrict to be between 0 and 360 degrees
-  return(theta)
-}
+# calc_bearing <- function(tclat_1, tclon_1, tclat_2, tclon_2){
+#   tclat_1 <- degrees_to_radians(tclat_1)
+#   tclon_1 <- degrees_to_radians(tclon_1)
+#   tclat_2 <- degrees_to_radians(tclat_2)
+#   tclon_2 <- degrees_to_radians(tclon_2)
+#
+#   S <- cos(tclat_2) * sin(tclon_1 - tclon_2)
+#   C <- cos(tclat_1) * sin(tclat_2) - sin(tclat_1) * cos(tclat_2) * cos(tclon_1 - tclon_2)
+#
+#   theta_rad <- atan2(S, C)
+#   theta <- stormwindmodel:::radians_to_degrees(theta_rad) + 90
+#   theta <- theta %% 360 # restrict to be between 0 and 360 degrees
+#   return(theta)
+# }
 
 #' Convert from degrees to radians
 #'
@@ -137,15 +137,15 @@ calc_bearing <- function(tclat_1, tclon_1, tclat_2, tclon_2){
 #' @param degrees A numeric vector with measurements in degrees.
 #'
 #' @return A numeric vector with measurement in radians.
-degrees_to_radians <- function(degrees){
-  degrees * pi / 180
-}
+# degrees_to_radians <- function(degrees){
+#   degrees * pi / 180
+# }
 
 #' Convert from radians to degrees
 #'
 #' @param radians A numeric vector with measurements in radians.
 #'
 #' @return A numeric vector with the measurement in degrees.
-radians_to_degrees <- function(radians){
-  radians * 180 / pi
-}
+# radians_to_degrees <- function(radians){
+#   radians * 180 / pi
+# }
