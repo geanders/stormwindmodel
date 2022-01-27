@@ -12,3 +12,4 @@
 ^devel_scripts/*$
 ^cran-comments\.md$
 ^CRAN-RELEASE$
+^old_vignettes/*$
