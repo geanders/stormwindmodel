@@ -1,0 +1,28 @@
+---
+title: "Test Vignette"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{my-vignette}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(eval = FALSE)
+```
+
+
+```{r message = FALSE, echo = FALSE}
+library(dplyr)
+```
+
+Simple test run to see if fresh vignettes will appear on website built using pkgdown website
+
+
+```{r}
+library(stormwindmodel)
+data("floyd_tracks")
+head(floyd_tracks)
+data("katrina_tracks")
+head(katrina_tracks)
+```
