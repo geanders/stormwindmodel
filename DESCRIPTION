@@ -59,7 +59,7 @@ Imports:
     tidyr (>= 1.1.2),
     weathermetrics (>= 1.2.2)
 LazyData: TRUE
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 Depends:
     R (>= 4.0)
 Suggests:
