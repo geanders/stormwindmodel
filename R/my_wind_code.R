@@ -97,6 +97,10 @@ add_wind_radii <- function(full_track = create_full_track()){
 #'    \code{\link{add_wind_radii}}.
 #' @param grid_point A one-row dataframe with the grid id, latitude, and
 #'    longitude for a single location for which you want to model winds.
+#' @param max_dist A numeric value giving (in kilometers) the maximum distance
+#'    from the storm's center to model storm-associated winds. Any value beyond
+#'    this distance will be automatically set to 0 m / s for storm-associated winds.
+#'    The default value is 2222.4 km (1200 nautical miles).
 #'
 #' @return A dataframe with date (\code{date}) and modeled wind speed
 #'    (\code{windspeed}, in m / s) at the grid point location for all storm
@@ -129,7 +133,8 @@ add_wind_radii <- function(full_track = create_full_track()){
 #'
 #' @export
 calc_grid_wind <- function(grid_point = stormwindmodel::county_points[1, ],
-                           with_wind_radii = add_wind_radii()){
+                           with_wind_radii = add_wind_radii(),
+                           max_dist = 2222.4){   # 2222.4 km equals 1200 n. miles
 
         grid_wind <- dplyr::mutate(with_wind_radii,
                       # Calculated distance from storm center to location
@@ -138,7 +143,15 @@ calc_grid_wind <- function(grid_point = stormwindmodel::county_points[1, ],
                                            rep(grid_point$glat,
                                                times = nrow(with_wind_radii)),
                                            rep(grid_point$glon,
-                                               times = nrow(with_wind_radii)))) %>%
+                                               times = nrow(with_wind_radii))))
+
+        #grid_wind_far <- grid_wind %>%
+          # dplyr::filter(.data$cdist > 2222.4) %>% # 1200 nautical miles
+          #dplyr::mutate(windspeed = 0) %>%
+          #dplyr::select(c(date, windspeed))
+
+        grid_wind_near <- grid_wind %>%
+          # dplyr::filter(.data$cdist <= 2222.4)  %>%
           dplyr::mutate(# Calculate gradient winds at the point
                       wind_gl_aa = mapply(will1, cdist = .data$cdist,
                                           Rmax = .data$Rmax,
@@ -165,6 +178,20 @@ calc_grid_wind <- function(grid_point = stormwindmodel::county_points[1, ],
                                                       .data$swd, .data$cdist,
                                                       .data$Rmax)) %>%
           dplyr::select(c(date, windspeed))
+
+        #grid_wind <- bind_rows(grid_wind_far, grid_wind_near) %>%
+         # arrange(date)
+        grid_wind <- grid_wind_near
+
+  # grid_wind <- tibble(date = with_wind_radii$date,
+  #                     windspeed = calc_grid_wind_cpp(glat = grid_point$glat, glon = grid_point$glon,
+  #                                                    max_dist = max_dist,
+  #                                                    tclat = with_wind_radii$tclat, tclon = with_wind_radii$tclon,
+  #                                                    Rmax = with_wind_radii$Rmax, R1 = with_wind_radii$R1,
+  #                                                    R2 = with_wind_radii$R2, vmax_gl = with_wind_radii$vmax_gl,
+  #                                                    n = with_wind_radii$n, A = with_wind_radii$A, X1 = with_wind_radii$X1,
+  #                                                    tcspd_u = with_wind_radii$tcspd_u, tcspd_v = with_wind_radii$tcspd_v))
+
         return(grid_wind)
 }
 
@@ -328,16 +355,83 @@ get_grid_winds <- function(hurr_track = stormwindmodel::floyd_tracks,
                            grid_df = stormwindmodel::county_points,
                            tint = 0.25,
                            gust_duration_cut = 20,
-                           sust_duration_cut = 20){
-        full_track <- create_full_track(hurr_track = hurr_track, tint = tint)
-        with_wind_radii <- add_wind_radii(full_track = full_track)
+                           sust_duration_cut = 20,
+                           max_dist = 2222.4){
 
-        grid_winds <- plyr::adply(grid_df, 1, calc_and_summarize_grid_wind,
-                                  with_wind_radii = with_wind_radii,
-                                  tint = tint,
-                                  gust_duration_cut = gust_duration_cut,
-                                  sust_duration_cut = sust_duration_cut)
+  grid_winds <- calc_grid_winds2(hurr_track = hurr_track,
+                                 grid_df = grid_df,
+                                 tint = tint,
+                                 max_dist = max_dist)
+  grid_winds_summary <- summarize_grid_winds(grid_winds = grid_winds,
+                                             gust_duration_cut = gust_duration_cut,
+                                             sust_duration_cut = sust_duration_cut,
+                                             tint = tint)
 
-        return(grid_winds)
+  return(grid_winds_summary)
 }
+# get_grid_winds <- function(hurr_track = stormwindmodel::floyd_tracks,
+#                            grid_df = stormwindmodel::county_points,
+#                            tint = 0.25,
+#                            gust_duration_cut = 20,
+#                            sust_duration_cut = 20){
+#         full_track <- create_full_track(hurr_track = hurr_track, tint = tint)
+#         with_wind_radii <- add_wind_radii(full_track = full_track)
+#
+#         grid_winds <- plyr::adply(grid_df, 1, calc_and_summarize_grid_wind,
+#                                   with_wind_radii = with_wind_radii,
+#                                   tint = tint,
+#                                   gust_duration_cut = gust_duration_cut,
+#                                   sust_duration_cut = sust_duration_cut)
+#
+#         return(grid_winds)
+# }
+
+#' @export
+calc_grid_winds2 <- function(hurr_track = stormwindmodel::floyd_tracks,
+                            grid_df = stormwindmodel::county_points,
+                            tint = 0.25,
+                            max_dist = 2222.4){
+
+  full_track <- create_full_track(hurr_track = hurr_track, tint = tint)
+  with_wind_radii <- add_wind_radii(full_track = full_track)
+
+  grid_winds <- stormwindmodel:::calc_grid_wind_cpp2(glat = grid_df$glat, glon = grid_df$glon,
+                                    max_dist =  max_dist,
+                                    tclat = with_wind_radii$tclat, tclon = with_wind_radii$tclon,
+                                    Rmax = with_wind_radii$Rmax, R1 = with_wind_radii$R1,
+                                    R2 = with_wind_radii$R2, vmax_gl = with_wind_radii$vmax_gl,
+                                    n = with_wind_radii$n, A = with_wind_radii$A, X1 = with_wind_radii$X1,
+                                    tcspd_u = with_wind_radii$tcspd_u, tcspd_v = with_wind_radii$tcspd_v)
+  colnames(grid_winds) <- as.character(grid_df$gridid)
+  rownames(grid_winds) <- as.character(with_wind_radii$date)
+
+  return(grid_winds)
+}
+
+summarize_grid_winds <- function(grid_winds,
+                                 gust_duration_cut = 20,
+                                 sust_duration_cut = 20,
+                                 tint = 0.25){
+
+  calc_sust_dur <- function(wind){
+    60 * tint * sum(wind > sust_duration_cut, na.rm = TRUE)
+  }
+
+  calc_gust_dur <- function(wind){
+    60 * tint * sum(wind > gust_duration_cut, na.rm = TRUE)
+  }
+
+  grid_wind_summary <- dplyr::tibble(gridid = colnames(grid_winds),
+                                     date_time_max_wind = rownames(grid_winds)[apply(grid_winds, MARGIN = 2, FUN = which.max)],
+                                     vmax_sust = apply(grid_winds, MARGIN = 2, FUN = max, na.rm = TRUE),
+                                     vmax_gust = vmax_sust * 1.49,
+                                     sust_dur = apply(grid_winds, MARGIN = 2, FUN = calc_sust_dur),
+                                     gust_dur = apply(grid_winds, MARGIN = 2, FUN = calc_gust_dur)
+                                     ) %>%
+    mutate(date_time_max_wind = ifelse(vmax_sust == 0, NA, date_time_max_wind),
+           date_time_max_wind = lubridate::ymd_hms(date_time_max_wind))
+
+  return(grid_wind_summary)
+}
+
 

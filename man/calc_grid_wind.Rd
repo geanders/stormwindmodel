@@ -6,7 +6,8 @@
 \usage{
 calc_grid_wind(
   grid_point = stormwindmodel::county_points[1, ],
-  with_wind_radii = add_wind_radii()
+  with_wind_radii = add_wind_radii(),
+  max_dist = 2222.4
 )
 }
 \arguments{
@@ -16,6 +17,11 @@ longitude for a single location for which you want to model winds.}
 \item{with_wind_radii}{A dataframe of storm tracks, including inputs and
 parameters for the Willoughby wind model, as created by
 \code{\link{add_wind_radii}}.}
+
+\item{max_dist}{A numeric value giving (in kilometers) the maximum distance
+from the storm's center to model storm-associated winds. Any value beyond
+this distance will be automatically set to 0 m / s for storm-associated winds.
+The default value is 2222.4 km (1200 nautical miles).}
 }
 \value{
 A dataframe with date (\code{date}) and modeled wind speed

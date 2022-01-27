@@ -9,7 +9,8 @@ get_grid_winds(
   grid_df = stormwindmodel::county_points,
   tint = 0.25,
   gust_duration_cut = 20,
-  sust_duration_cut = 20
+  sust_duration_cut = 20,
+  max_dist = 2222.4
 )
 }
 \arguments{
@@ -40,6 +41,11 @@ were above this speed at the location.}
 cutoff point for determining the duration of gust winds. The function
 will calculate the minutes during the storm when surface-level gust winds
 were above this speed at the location.}
+
+\item{max_dist}{A numeric value giving (in kilometers) the maximum distance
+from the storm's center to model storm-associated winds. Any value beyond
+this distance will be automatically set to 0 m / s for storm-associated winds.
+The default value is 2222.4 km (1200 nautical miles).}
 }
 \value{
 The dataframe of locations input, with the following columns of wind
