@@ -167,7 +167,7 @@ NumericVector interpolate_line(NumericVector x, NumericVector y, NumericVector n
   NumericVector b = calc_linear_coefs(x, y);
 
   for(i = 0; i < n; ++i){
-    if(!(new_x[i] >= x[l] && new_x[i] <= x[l])){  // Unless the l is the same as for the last new_x,
+    if(!(new_x[i] >= x[l] && l < (m - 1) && new_x[i] <= x[l + 1])){  // Unless the l is the same as for the last new_x, (make sure l isn't at its max when you check, so you won't subscript outside of x)
       l = find_x_section(new_x[i], x);               // find the index of the lower bound of section
     }
     if(l == -1 || l == (m - 1)){                  // For new x's outside the original x
