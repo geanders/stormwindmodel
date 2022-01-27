@@ -161,7 +161,7 @@ bench::mark(find_x_section(new_x = new_value, x = existing_values))
 NumericVector interpolate_line(NumericVector x, NumericVector y, NumericVector new_x) {
   int m = x.size();
   int n = new_x.size();
-  int i, l;
+  int i, l = 0;
   NumericVector new_y(n);
 
   NumericVector b = calc_linear_coefs(x, y);
