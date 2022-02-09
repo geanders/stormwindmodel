@@ -204,6 +204,8 @@ knitr::kable(var_names, col.names = c("R variable", "Expression in equations",
 
 The tropical cyclone best tracks have observations every six hours (plus, for some, an observation at landfall). Our package has a function called `create_full_track` that imputes both locations (latitude and longitude) and intensity (maximum wind speed) from the hurricane tracks data to a finer time resolution (default is 15 minutes, but you can also select other values using the `tint` argument). This imputation uses a natural cubic spline, with the degrees of freedom set as the number of timed observations for the storm in the input data (typically best tracks data) divided by two. The option `tint` in this function gives the time interval you want to use, in hours (e.g., 0.25 for 15 minutes). 
 
+Note: This code assumes that the tracking data read has been measured in knots, at 10 m above surface level, and taken at a 1-minute average period.
+
 ```{r}
 stormwindmodel::create_full_track
 ```

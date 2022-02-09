@@ -306,11 +306,12 @@ calc_and_summarize_grid_wind <- function(grid_point = stormwindmodel::county_poi
 #'
 #' This function inputs a storm track and a dataset of locations and calculates
 #' highest wind speeds (sustained and maximum) and duration of winds above a
-#' certain speed at each location. The dataset of locations can
-#' either be a regularly-spaced grid or can be the central points of locations,
-#' like counties or cities. For counties in the eastern half of the United
-#' States, the \code{county_points} dataset that comes with the package can
-#' be used as the \code{grid_point} input.
+#' certain speed at each location. It is assumed that track data entered has been
+#' measured in knots, at 10 m above surface level, and with 1-minute averaging
+#' period. The dataset of locations can either be a regularly-spaced grid or can
+#' be the central points of locations, like counties or cities. For counties in
+#' the eastern half of the United States, the \code{county_points} dataset that
+#' comes with the package can be used as the \code{grid_point} input.
 #'
 #' @inheritParams create_full_track
 #' @inheritParams calc_grid_wind

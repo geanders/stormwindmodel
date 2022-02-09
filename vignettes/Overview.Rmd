@@ -56,7 +56,7 @@ You can use a different dataset of grid points to model winds at other U.S. loca
 
 ## Basic example
 
-The main function of this package is `get_grid_winds`. It inputs storm tracks for a tropical cyclone (`hurr_track`) and a dataframe with grid point locations (`grid_df`). It models winds during the tropical storm at each grid point and outputs summaries of wind during the storm at each grid point from the storm. The wind measurements generated for each grid point are: 
+The main function of this package is `get_grid_winds`. It inputs storm tracks for a tropical cyclone (`hurr_track`) and a dataframe with grid point locations (`grid_df`). It models winds during the tropical storm at each grid point and outputs summaries of wind during the storm at each grid point from the storm. The code assumes that tracking data entered is in knots, at 10 m above surface level, and measured with a 1-minute averaging period. The wind measurements generated for each grid point are: 
 
 - `vmax_gust`: Maximum 10-m 1-minute gust wind experienced at the grid point during the storm
 - `vmax_sust`: Maximum 10-m 1-minute sustained wind experienced at the grid point during the storm
@@ -95,7 +95,10 @@ You can input the track for any Atlantic Basin tropical storm into `get_grid_win
     + `date`: A character vector with date and time (in UTC), expressed as YYYYMMDDHHMM. 
     + `latitude`: A numeric vector with latitude in decimal degrees.
     + `longitude`: A numeric vector with longitude in decimal degrees.
-    + `wind`: A numeric vector with maximum storm wind speed in knots
+    + `wind`: A numeric vector with maximum storm wind speed in knots.
+- Data is at 10 m above surface level and measured with a 1-minute averaging period.
+
+If you choose to use IBTrACS (https://www.ncdc.noaa.gov/ibtracs/) to source track data, it is best to use the column called "USA WIND". This column gives the maximum sustained surface windspeed in knots. This specific column in the data uses 1-minute averaging periods at 10 m above surface level, measurements that are assumed by the code in this package.
 
 For the grid point locations at which to model, you can input a dataframe with grid points anywhere in the eastern half of the United States. For example, you may want to map wind speeds for Hurricane Katrina by census tract in Orleans Parish, LA. The following code shows how a user could do that with the `stormwindmodel` package. 
 
