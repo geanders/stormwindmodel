@@ -319,9 +319,9 @@ calc_and_summarize_grid_wind <- function(grid_point = stormwindmodel::county_poi
 #' @param grid_df A dataframe of locations at which to calculate wind characteristics.
 #'    This dataframe must include columns for latitude and longitude for each
 #'    point, and these columns must be named \code{glat} and \code{glon}.
-#'    The latitudes and longitudes should be in decimal degrees, with longitudes in the
-#'    Western hemisphere (so, almost all those for Atlantic basin storms)
-#'    expressed as negative values.
+#'    The latitudes and longitudes should be in decimal degrees, with longitudes
+#'    being entered in degrees East. Therefore Western hemisphere (so, almost all
+#'    those for Atlantic basin storms) should be expressed as negative values.
 #'
 #' @return The dataframe of locations input, with the following columns of wind
 #' characteristics added for each location:

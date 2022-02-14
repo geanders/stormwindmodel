@@ -12,7 +12,7 @@
 #' @param hurr_track Dataframe with hurricane track data for a single
 #'    storm. The dataframe must include columns for date-time (year, month, day,
 #'    hour, minute; e.g., "198808051800" for August 5, 1988, 18:00 UTC),
-#'    latitude, longitude, and wind speed (in knots). The column
+#'    latitude, longitude (in degrees East), and wind speed (in knots). The column
 #'    names for each of these must be \code{date}, \code{latitude},
 #'    \code{longitude}, and \code{wind}. See the example \code{\link{floyd_tracks}}
 #'    dataset for an example of the required format.

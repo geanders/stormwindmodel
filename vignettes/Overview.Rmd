@@ -94,7 +94,8 @@ You can input the track for any Atlantic Basin tropical storm into `get_grid_win
 - Has the following columns: 
     + `date`: A character vector with date and time (in UTC), expressed as YYYYMMDDHHMM. 
     + `latitude`: A numeric vector with latitude in decimal degrees.
-    + `longitude`: A numeric vector with longitude in decimal degrees.
+    + `longitude`: A numeric vector with longitude in decimal degrees, in
+                  degrees East.
     + `wind`: A numeric vector with maximum storm wind speed in knots.
 - Data is at 10 m above surface level and measured with a 1-minute averaging period.
 
