@@ -37,16 +37,25 @@ double calc_distance(double tclat, double tclon,
 /*** R
 # Check the function
 
+# Floyd near landfall
 tc_lat <- 33.7 * pi / 180
 tc_lon <- -78.0 * pi / 180
 
+# Dare County
 glat <- 35.90756 * pi / 180
 glon <- -75.67488 * pi / 180
 
 expected_distance <- 324.5
 calculated_distance <- calc_distance(tclat = tc_lat, tclon = tc_lon,
-                                     glat = glat, glon = glon)
+                                     glat = glat, glon = glon, Rearth = 6371)
 
+# Miami-Dade County
+glat <- 25.77456 * pi / 180
+glon <- -80.29889 * pi / 180
+
+expected_distance <- 908.7
+calculated_distance <- calc_distance(tclat = tc_lat, tclon = tc_lon,
+                                     glat = glat, glon = glon, Rearth = 6371)
 */
 
 // Calculate equation 1a from Willoughby
