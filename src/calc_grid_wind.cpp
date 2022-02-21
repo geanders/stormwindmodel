@@ -96,9 +96,12 @@ double will2(double r, double R1, double R2) {
 }
 
 // Calculate equation 1 from Willoughby
+// Calculate equation 1 from Willoughby
+//' @export
+// [[Rcpp::export]]
 double will1new(double cdist, double Rmax, double R1,
-                    double R2, double vmax_gl, double n,
-                    double A, double X1, double X2 = 25){
+                double R2, double vmax_gl, double n,
+                double A, double X1, double X2 = 25){
 
   double wind_gl_aa;
   double Vi, Vo, w;
@@ -123,6 +126,23 @@ double will1new(double cdist, double Rmax, double R1,
 
   return wind_gl_aa;
 }
+
+/*** R
+# Check that the function to calculate slopes for linear interpolation is working as expected
+
+data("floyd_tracks")
+floyd_tracks <- create_full_track(floyd_tracks)
+with_wind <- add_wind_radii(floyd_tracks)
+test <- vector()
+
+
+test[i] <- will1new(cdist = with_wind[1,]$cdist, Rmax = with_wind[1,]$Rmax, R1 = with_wind[1,]$R1, R2 = with_wind[1,]$R2,
+                    vmax_gl = with_wind[1,]$vmax_gl, n = with_wind[1,]$n, A = with_wind[1,]$A,
+                    X1 = with_wind[1,]$X1)
+
+
+
+*/
 
 // Calculate bearing from one lat/long to another
 double calc_bearing(double tclat_1, double tclon_1,
