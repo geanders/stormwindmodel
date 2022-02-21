@@ -133,10 +133,10 @@ double will1new(double cdist, double Rmax, double R1,
 data("floyd_tracks")
 floyd_tracks <- create_full_track(floyd_tracks)
 with_wind <- add_wind_radii(floyd_tracks)
-test <- vector()
 
 
-test[i] <- will1new(cdist = with_wind[1,]$cdist, Rmax = with_wind[1,]$Rmax, R1 = with_wind[1,]$R1, R2 = with_wind[1,]$R2,
+
+test <- will1new(cdist = test_data, Rmax = with_wind[1,]$Rmax, R1 = with_wind[1,]$R1, R2 = with_wind[1,]$R2,
                     vmax_gl = with_wind[1,]$vmax_gl, n = with_wind[1,]$n, A = with_wind[1,]$A,
                     X1 = with_wind[1,]$X1)
 
