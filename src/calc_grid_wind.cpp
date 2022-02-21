@@ -2,7 +2,19 @@
 #include <math.h>
 using namespace Rcpp;
 
-// Calculate distance between two latitude / longitude points
+//' Calculate distance between two latitude / longitude points
+//'
+//' @param tclat A numeric value with the latitude of the tropical cyclone's center
+//'   in radians
+//' @param tclon A numeric value with the longitude of the tropical cyclone's center
+//'   in radians
+//' @param glat A numeric value with the latitude of the grid point in radians
+//' @param glon A numeric value with the longitude of the grid point in radians
+//' @param Rearth A numeric value with the radius of the earth in kilometers
+//' @return A numeric value with the distance (in kilometers) from the tropical
+//'   cyclone center to the grid point.
+//' @export
+// [[Rcpp::export]]
 double calc_distance(double tclat, double tclon,
                  double glat, double glon,
                  double Rearth =  6378.14) {
@@ -21,6 +33,21 @@ double calc_distance(double tclat, double tclon,
 
   return dist;
 }
+
+/*** R
+# Check the function
+
+tc_lat <- 33.7 * pi / 180
+tc_lon <- -78.0 * pi / 180
+
+glat <- 35.90756 * pi / 180
+glon <- -75.67488 * pi / 180
+
+expected_distance <- 324.5
+calculated_distance <- calc_distance(tclat = tc_lat, tclon = tc_lon,
+                                     glat = glat, glon = glon)
+
+*/
 
 // Calculate equation 1a from Willoughby
 double will1a(double vmax_gl, double r,

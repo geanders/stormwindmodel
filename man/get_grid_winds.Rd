@@ -17,7 +17,7 @@ get_grid_winds(
 \item{hurr_track}{Dataframe with hurricane track data for a single
 storm. The dataframe must include columns for date-time (year, month, day,
 hour, minute; e.g., "198808051800" for August 5, 1988, 18:00 UTC),
-latitude, longitude, and wind speed (in knots). The column
+latitude, longitude (in degrees East), and wind speed (in knots). The column
 names for each of these must be \code{date}, \code{latitude},
 \code{longitude}, and \code{wind}. See the example \code{\link{floyd_tracks}}
 dataset for an example of the required format.}
@@ -25,9 +25,9 @@ dataset for an example of the required format.}
 \item{grid_df}{A dataframe of locations at which to calculate wind characteristics.
 This dataframe must include columns for latitude and longitude for each
 point, and these columns must be named \code{glat} and \code{glon}.
-The latitudes and longitudes should be in decimal degrees, with longitudes in the
-Western hemisphere (so, almost all those for Atlantic basin storms)
-expressed as negative values.}
+The latitudes and longitudes should be in decimal degrees, with longitudes
+being entered in degrees East. Therefore Western hemisphere (so, almost all
+those for Atlantic basin storms) should be expressed as negative values.}
 
 \item{tint}{Interval (in hours) to which to interpolate the tracks. The
 default is 0.25 (i.e., 15 minutes).}
@@ -68,11 +68,12 @@ characteristics added for each location:
 \description{
 This function inputs a storm track and a dataset of locations and calculates
 highest wind speeds (sustained and maximum) and duration of winds above a
-certain speed at each location. The dataset of locations can
-either be a regularly-spaced grid or can be the central points of locations,
-like counties or cities. For counties in the eastern half of the United
-States, the \code{county_points} dataset that comes with the package can
-be used as the \code{grid_point} input.
+certain speed at each location. It is assumed that track data entered has been
+measured in knots, at 10 m above surface level, and with 1-minute averaging
+period. The dataset of locations can either be a regularly-spaced grid or can
+be the central points of locations, like counties or cities. For counties in
+the eastern half of the United States, the \code{county_points} dataset that
+comes with the package can be used as the \code{grid_point} input.
 }
 \note{
 This function can take a few minutes to run, depending on the number

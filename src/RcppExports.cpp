@@ -10,6 +10,21 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
+// calc_distance
+double calc_distance(double tclat, double tclon, double glat, double glon, double Rearth);
+RcppExport SEXP _stormwindmodel_calc_distance(SEXP tclatSEXP, SEXP tclonSEXP, SEXP glatSEXP, SEXP glonSEXP, SEXP RearthSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type tclat(tclatSEXP);
+    Rcpp::traits::input_parameter< double >::type tclon(tclonSEXP);
+    Rcpp::traits::input_parameter< double >::type glat(glatSEXP);
+    Rcpp::traits::input_parameter< double >::type glon(glonSEXP);
+    Rcpp::traits::input_parameter< double >::type Rearth(RearthSEXP);
+    rcpp_result_gen = Rcpp::wrap(calc_distance(tclat, tclon, glat, glon, Rearth));
+    return rcpp_result_gen;
+END_RCPP
+}
 // calc_grid_wind_cpp
 NumericVector calc_grid_wind_cpp(double glat, double glon, double max_dist, NumericVector tclat, NumericVector tclon, NumericVector Rmax, NumericVector R1, NumericVector R2, NumericVector vmax_gl, NumericVector n, NumericVector A, NumericVector X1, NumericVector tcspd_u, NumericVector tcspd_v);
 RcppExport SEXP _stormwindmodel_calc_grid_wind_cpp(SEXP glatSEXP, SEXP glonSEXP, SEXP max_distSEXP, SEXP tclatSEXP, SEXP tclonSEXP, SEXP RmaxSEXP, SEXP R1SEXP, SEXP R2SEXP, SEXP vmax_glSEXP, SEXP nSEXP, SEXP ASEXP, SEXP X1SEXP, SEXP tcspd_uSEXP, SEXP tcspd_vSEXP) {
@@ -339,6 +354,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_stormwindmodel_calc_distance", (DL_FUNC) &_stormwindmodel_calc_distance, 5},
     {"_stormwindmodel_calc_grid_wind_cpp", (DL_FUNC) &_stormwindmodel_calc_grid_wind_cpp, 14},
     {"_stormwindmodel_calc_grid_wind_cpp2", (DL_FUNC) &_stormwindmodel_calc_grid_wind_cpp2, 14},
     {"_stormwindmodel_calc_linear_coefs", (DL_FUNC) &_stormwindmodel_calc_linear_coefs, 2},
