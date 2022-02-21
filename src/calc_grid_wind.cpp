@@ -95,8 +95,27 @@ double will2(double r, double R1, double R2) {
   return w;
 }
 
-// Calculate equation 1 from Willoughby
-// Calculate equation 1 from Willoughby
+//' Calculate gradient wind speed using equation 1 from Willoughby
+//'
+//' @param cdist A numeric value with the distance between the grid point and the
+//'   center of the storm (in km)
+//' @param Rmax A numeric value with the radius at which max winds occur
+//'   (in km from the center of the storm)
+//' @param R1 A numeric value with the lower boundary of the transition zone (in
+//'   km from the storm center)
+//' @param R2 A numeric value with the upper boundary of the transition zone (in
+//'   km from the storm center)
+//' @param vmax_gl A numeric value with the maximum gradient level 1-minute
+//'   sustained wind, in (m/s)
+//' @param A A numeric value as a parameter for the Willoughby model
+//' @param r A numeric value with the radius from the storm center to the grid
+//'   point (in km)
+//' @param Rmax A numeric value with the radius at which the maximum wind occurs
+//'   (in km)
+//' @param X1 A numeric value as a parameter for the Willoughby model
+//' @param X2 A numeric value as a parameter for the Willoughby model, set to 25
+//'   (Willoughby, Darling, and Rahn 2006)
+//' @return wind_gl_aa A numeric value ...
 //' @export
 // [[Rcpp::export]]
 double will1new(double cdist, double Rmax, double R1,
@@ -128,13 +147,11 @@ double will1new(double cdist, double Rmax, double R1,
 }
 
 /*** R
-# Check that the function to calculate slopes for linear interpolation is working as expected
+# Check function
 
 data("floyd_tracks")
 floyd_tracks <- create_full_track(floyd_tracks)
 with_wind <- add_wind_radii(floyd_tracks)
-
-
 
 test <- will1new(cdist = test_data, Rmax = with_wind[1,]$Rmax, R1 = with_wind[1,]$R1, R2 = with_wind[1,]$R2,
                     vmax_gl = with_wind[1,]$vmax_gl, n = with_wind[1,]$n, A = with_wind[1,]$A,

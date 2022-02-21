@@ -296,7 +296,7 @@ location data remain within -180 to 180 for longitude:
 
 Next, this imputed track is input to a function that adds inputs and model parameters for each observation that are required for the model later used to estimate wind speed at each grid point [@willoughby2006parametric]. This process is done using the `add_wind_radii` function. For the Hurricane Floyd example, here is an example of running the code and the first three and last three line of output: 
 
-```{r eval = c(3:4), echo = c(1, 4)}
+```{r eval = FALSE}
 library(dplyr)
 library(stormwindmodel)
 with_wind_radii <- stormwindmodel::add_wind_radii(full_track = full_track)
@@ -993,7 +993,7 @@ grid_winds_katrina <- get_grid_winds(hurr_track = katrina_tracks,
 ```
 
 
-```{r echo = c(3), eval = c(2:3)}
+```{r, eval = FALSE}
 save(grid_winds_katrina, file = "data/grid_winds_katrina.Rdata")
 load("data/grid_winds_katrina.Rdata")
 head(grid_winds_katrina)
