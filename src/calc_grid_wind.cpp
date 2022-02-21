@@ -144,13 +144,24 @@ test[i] <- will1new(cdist = with_wind[1,]$cdist, Rmax = with_wind[1,]$Rmax, R1 =
 
 */
 
-// Calculate bearing from one lat/long to another
-double calc_bearing(double tclat_1, double tclon_1,
-                    double tclat_2, double tclon_2) {
+//' Calculate bearing from one lat/long to another for a single point
+//'
+//' @param tclat A numeric value with the latitude of the tropical cyclone's center
+//'   in radians
+//' @param tclon A numeric value with the longitude of the tropical cyclone's center
+//'   in radians
+//' @param glat A numeric value with the latitude of the grid point in radians
+//' @param glon A numeric value with the longitude of the grid point in radians
+//' @return A numeric value with the bearing from the storm's center to the grid point
+//'   in polar coordinates
+//' @export
+// [[Rcpp::export]]
+double calc_bearing_single(double tclat, double tclon,
+                           double glat, double glon) {
 
-  double S = cos(tclat_2) * sin(tclon_1 - tclon_2);
-  double C = cos(tclat_1) * sin(tclat_2) - sin(tclat_1) *
-    cos(tclat_2) * cos(tclon_1 - tclon_2);
+  double S = cos(glat) * sin(tclon - glon);
+  double C = cos(tclat) * sin(glat) - sin(tclat) *
+    cos(glat) * cos(tclon - glon);
 
   double theta_rad = atan2(S, C);
 
@@ -167,7 +178,7 @@ double calc_gwd(double tclat, double tclon, double glat, double glon) {
 
   // calculate the gradient wind direction (gwd) at the
   // grid point
-  double chead = calc_bearing(tclat, tclon, glat, glon);
+  double chead = calc_bearing_single(tclat, tclon, glat, glon);
 
   // Cyclonic winds will be perpendicular to the bearing
   // from the storm to the grid point. In the Northern
