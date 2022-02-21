@@ -3,6 +3,8 @@ pkgdown: 2.0.2
 pkgdown_sha: ~
 articles:
   my-vignette: my-vignette.html
+  Overview: Overview.html
+  retest-vignette: retest-vignette.html
   test-vignette2: test-vignette2.html
-last_built: 2022-01-27T19:46Z
+last_built: 2022-02-03T23:26Z
 

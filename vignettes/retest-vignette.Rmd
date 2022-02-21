@@ -1,8 +1,8 @@
 ---
-title: "test-vignette2"
+title: "retest-vignette"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{test-vignette2}
+  %\VignetteIndexEntry{retest-vignette}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 pkgdown:
@@ -16,4 +16,8 @@ knitr::opts_chunk$set(
 )
 ```
 
-Test for pkgdown website. Seeing if multiple fresh vignettes work
+```{r setup}
+library(stormwindmodel)
+```
+ 
+ Test to ensure markdown works to html

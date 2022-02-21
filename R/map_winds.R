@@ -63,6 +63,9 @@ map_wind <- function(grid_winds, value = "vmax_sust", break_point = NULL,
     } else if(wind_metric == "knots"){
       breaks <- c(0, 34, 50, 64, 100)
       exposure_palette <- c("#FEE0D2", "#FC9272", "#DE2D26")
+    } else if (wind_metric == "mph") {
+      breaks <- c(0, 40, 60, 75, 115)
+      exposure_palette <- c("#FEE0D2", "#FC9272", "#DE2D26")
     }
     palette_name <- "Reds"
 
