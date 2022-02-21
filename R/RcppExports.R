@@ -17,6 +17,11 @@ calc_distance <- function(tclat, tclon, glat, glon, Rearth = 6378.14) {
     .Call(`_stormwindmodel_calc_distance`, tclat, tclon, glat, glon, Rearth)
 }
 
+#' @export
+will1new <- function(cdist, Rmax, R1, R2, vmax_gl, n, A, X1, X2 = 25) {
+    .Call(`_stormwindmodel_will1new`, cdist, Rmax, R1, R2, vmax_gl, n, A, X1, X2)
+}
+
 calc_grid_wind_cpp <- function(glat, glon, max_dist, tclat, tclon, Rmax, R1, R2, vmax_gl, n, A, X1, tcspd_u, tcspd_v) {
     .Call(`_stormwindmodel_calc_grid_wind_cpp`, glat, glon, max_dist, tclat, tclon, Rmax, R1, R2, vmax_gl, n, A, X1, tcspd_u, tcspd_v)
 }
