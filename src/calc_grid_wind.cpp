@@ -208,7 +208,7 @@ calc_bearing_single(tc_location[1], tc_location[2],
                     grid_location[1], grid_location[2])
 */
 
-// Calculate gradiant wind direction at a point
+// Calculate gradient wind direction at a point
 double calc_gwd(double tclat, double tclon, double glat, double glon) {
 
   double gwd;
