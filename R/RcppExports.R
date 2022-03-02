@@ -17,9 +17,45 @@ calc_distance <- function(tclat, tclon, glat, glon, Rearth = 6378.14) {
     .Call(`_stormwindmodel_calc_distance`, tclat, tclon, glat, glon, Rearth)
 }
 
+#' Calculate gradient wind speed using equation 1 from Willoughby
+#'
+#' @param cdist A numeric value with the distance between the grid point and the
+#'   center of the storm (in km)
+#' @param Rmax A numeric value with the radius at which max winds occur
+#'   (in km from the center of the storm)
+#' @param R1 A numeric value with the lower boundary of the transition zone (in
+#'   km from the storm center)
+#' @param R2 A numeric value with the upper boundary of the transition zone (in
+#'   km from the storm center)
+#' @param vmax_gl A numeric value with the maximum gradient level 1-minute
+#'   sustained wind, in (m/s)
+#' @param A A numeric value as a parameter for the Willoughby model
+#' @param r A numeric value with the radius from the storm center to the grid
+#'   point (in km)
+#' @param Rmax A numeric value with the radius at which the maximum wind occurs
+#'   (in km)
+#' @param X1 A numeric value as a parameter for the Willoughby model
+#' @param X2 A numeric value as a parameter for the Willoughby model, set to 25
+#'   (Willoughby, Darling, and Rahn 2006)
+#' @return wind_gl_aa A numeric value ...
 #' @export
 will1new <- function(cdist, Rmax, R1, R2, vmax_gl, n, A, X1, X2 = 25) {
     .Call(`_stormwindmodel_will1new`, cdist, Rmax, R1, R2, vmax_gl, n, A, X1, X2)
+}
+
+#' Calculate bearing from one lat/long to another for a single point
+#'
+#' @param tclat A numeric value with the latitude of the tropical cyclone's center
+#'   in radians
+#' @param tclon A numeric value with the longitude of the tropical cyclone's center
+#'   in radians
+#' @param glat A numeric value with the latitude of the grid point in radians
+#' @param glon A numeric value with the longitude of the grid point in radians
+#' @return A numeric value with the bearing from the storm's center to the grid point
+#'   in polar coordinates
+#' @export
+calc_bearing_single <- function(tclat, tclon, glat, glon) {
+    .Call(`_stormwindmodel_calc_bearing_single`, tclat, tclon, glat, glon)
 }
 
 calc_grid_wind_cpp <- function(glat, glon, max_dist, tclat, tclon, Rmax, R1, R2, vmax_gl, n, A, X1, tcspd_u, tcspd_v) {
@@ -162,47 +198,6 @@ NULL
 #' @export
 NULL
 
-#' Calculate bearing from one location to another
-#'
-#' Calculates the bearing of a second location, as seen from
-#' the first location, based on latitude and longitude coordinates for both
-#' locations.
-#'
-#' @inheritParams latlon_to_km
-#'
-#' @return A numeric vector giving the direction of the second location from the first location,
-#'    in degrees. A direction of 0 degrees indicates the second location is
-#'    due east of the first, 90 degrees indicates the second location is due
-#'    north of the first, etc (i.e., polar, rather than meteorological, coordinate system).
-#'
-#' @details This function uses the following equations to calculate the bearing
-#'    from one latitude-longitude pair to another:
-#'
-#'    \deqn{S = cos(\phi_2) * sin(L_1 - L_2)}{
-#'    S = cos(\phi2) * sin(L1 - L1)}
-#'
-#'    \deqn{C = cos(\phi_1) * sin(\phi_2) - sin(\phi_1) * cos(\phi_2) * cos(L_1 - L_2)}{
-#'    C = cos(\phi1) * sin(\phi2) - sin(\phi1) * cos(\phi2) * cos(L1 - L2)}
-#'
-#'    \deqn{\theta = atan2(S, C) * \frac{180}{\pi} + 90}
-#'
-#'    where:
-#'    \itemize{
-#'      \item{\eqn{\phi_1}{\phi1}: Latitude of first location, in radians}
-#'      \item{\eqn{L_1}{L1}: Longitude of first location, in radians}
-#'      \item{\eqn{\phi_2}{\phi2}: Latitude of second location, in radians}
-#'      \item{\eqn{L_2}{L2}: Longitude of second location, in radians}
-#'      \item{\eqn{S, C}: Intermediary results}
-#'      \item{\eqn{\theta}: Direction of the storm movement, in degrees}
-#'    }
-#'
-#'    In cases where this equation results in values below 0 degrees or above
-#'    360 degrees, the function applies modular arithmetic to bring the value
-#'    back within the 0--360 degree range.
-#'
-#' @export
-NULL
-
 radians_to_degrees <- function(radians) {
     .Call(`_stormwindmodel_radians_to_degrees`, radians)
 }
@@ -219,6 +214,45 @@ calc_forward_speed <- function(tclat_1, tclon_1, time_1, tclat_2, tclon_2, time_
     .Call(`_stormwindmodel_calc_forward_speed`, tclat_1, tclon_1, time_1, tclat_2, tclon_2, time_2)
 }
 
+#' Calculate bearing from one location to another
+#'
+#' Calculates the bearing of a second location, as seen from
+#' the first location, based on latitude and longitude coordinates for both
+#' locations.
+#'
+#' @inheritParams latlon_to_km
+#'
+#' @return A numeric vector giving the direction of the second location from the first location,
+#'    in degrees. A direction of 0 degrees indicates the second location is
+#'    due east of the first, 90 degrees indicates the second location is due
+#'    north of the first, etc (i.e., polar, rather than meteorological, coordinate system).
+#'
+#' @details This function uses the following equations to calculate the bearing
+#'    from one latitude-longitude pair to another:
+#'
+#'    \deqn{S = cos(\phi_2) * sin(L_2 - L_1)}{
+#'    S = cos(\phi2) * sin(L2 - L1)}
+#'
+#'    \deqn{C = cos(\phi_1) * sin(\phi_2) - sin(\phi_1) * cos(\phi_2) * cos(L_2 - L_1)}{
+#'    C = cos(\phi1) * sin(\phi2) - sin(\phi1) * cos(\phi2) * cos(L2 - L1)}
+#'
+#'    \deqn{\theta = 90 - atan2(S, C) * \frac{180}{\pi}}
+#'
+#'    where:
+#'    \itemize{
+#'      \item{\eqn{\phi_1}{\phi1}: Latitude of first location, in radians}
+#'      \item{\eqn{L_1}{L1}: Longitude of first location, in radians}
+#'      \item{\eqn{\phi_2}{\phi2}: Latitude of second location, in radians}
+#'      \item{\eqn{L_2}{L2}: Longitude of second location, in radians}
+#'      \item{\eqn{S, C}: Intermediary results}
+#'      \item{\eqn{\theta}: Direction of the storm movement, in degrees}
+#'    }
+#'
+#'    In cases where this equation results in values below 0 degrees or above
+#'    360 degrees, the function applies modular arithmetic to bring the value
+#'    back within the 0--360 degree range.
+#'
+#' @export
 calc_bearing <- function(tclat_1, tclon_1, tclat_2, tclon_2) {
     .Call(`_stormwindmodel_calc_bearing`, tclat_1, tclon_1, tclat_2, tclon_2)
 }

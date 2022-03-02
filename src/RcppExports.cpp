@@ -44,6 +44,20 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// calc_bearing_single
+double calc_bearing_single(double tclat, double tclon, double glat, double glon);
+RcppExport SEXP _stormwindmodel_calc_bearing_single(SEXP tclatSEXP, SEXP tclonSEXP, SEXP glatSEXP, SEXP glonSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type tclat(tclatSEXP);
+    Rcpp::traits::input_parameter< double >::type tclon(tclonSEXP);
+    Rcpp::traits::input_parameter< double >::type glat(glatSEXP);
+    Rcpp::traits::input_parameter< double >::type glon(glonSEXP);
+    rcpp_result_gen = Rcpp::wrap(calc_bearing_single(tclat, tclon, glat, glon));
+    return rcpp_result_gen;
+END_RCPP
+}
 // calc_grid_wind_cpp
 NumericVector calc_grid_wind_cpp(double glat, double glon, double max_dist, NumericVector tclat, NumericVector tclon, NumericVector Rmax, NumericVector R1, NumericVector R2, NumericVector vmax_gl, NumericVector n, NumericVector A, NumericVector X1, NumericVector tcspd_u, NumericVector tcspd_v);
 RcppExport SEXP _stormwindmodel_calc_grid_wind_cpp(SEXP glatSEXP, SEXP glonSEXP, SEXP max_distSEXP, SEXP tclatSEXP, SEXP tclonSEXP, SEXP RmaxSEXP, SEXP R1SEXP, SEXP R2SEXP, SEXP vmax_glSEXP, SEXP nSEXP, SEXP ASEXP, SEXP X1SEXP, SEXP tcspd_uSEXP, SEXP tcspd_vSEXP) {
@@ -375,6 +389,7 @@ END_RCPP
 static const R_CallMethodDef CallEntries[] = {
     {"_stormwindmodel_calc_distance", (DL_FUNC) &_stormwindmodel_calc_distance, 5},
     {"_stormwindmodel_will1new", (DL_FUNC) &_stormwindmodel_will1new, 9},
+    {"_stormwindmodel_calc_bearing_single", (DL_FUNC) &_stormwindmodel_calc_bearing_single, 4},
     {"_stormwindmodel_calc_grid_wind_cpp", (DL_FUNC) &_stormwindmodel_calc_grid_wind_cpp, 14},
     {"_stormwindmodel_calc_grid_wind_cpp2", (DL_FUNC) &_stormwindmodel_calc_grid_wind_cpp2, 14},
     {"_stormwindmodel_calc_linear_coefs", (DL_FUNC) &_stormwindmodel_calc_linear_coefs, 2},
