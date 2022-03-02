@@ -176,17 +176,37 @@ test <- will1new(cdist = test_data, Rmax = with_wind[1,]$Rmax, R1 = with_wind[1,
 double calc_bearing_single(double tclat, double tclon,
                            double glat, double glon) {
 
-  double S = cos(glat) * sin(tclon - glon);
+  double S = cos(glat) * sin(glon - tclon);
   double C = cos(tclat) * sin(glat) - sin(tclat) *
-    cos(glat) * cos(tclon - glon);
+    cos(glat) * cos(glon - tclon);
 
   double theta_rad = atan2(S, C);
 
-  double theta = (theta_rad * 180.0 / M_PI) + 90.0; // get in polar coordinate conventions
+  double theta = (theta_rad * 180.0 / M_PI);
+
+  // The previous result is in a coordinate system where north is 0 degrees,
+  // east is 90 degrees, and so on. Convert to a coordinate system where 0 degrees
+  // is due east, 90 degrees is due north, and so on.
+  theta = 90 - theta;
+
   theta = fmod(theta + 360.0, 360.0); // restrict to be between 0 and 360 degrees
 
   return theta;
 }
+
+/*** R
+tc_location <- c(39.099912, -94.581213) * pi / 180
+grid_location <- c(38.627089, -90.200203) * pi / 180
+expected_bearing <- c(353.49)
+calc_bearing_single(tc_location[1], tc_location[2],
+                    grid_location[1], grid_location[2])
+
+tc_location <- c(29.1, -93.15) * pi / 180
+grid_location <- c(29.8, -93.3) * pi / 180
+expected_bearing <- c(100.53)
+calc_bearing_single(tc_location[1], tc_location[2],
+                    grid_location[1], grid_location[2])
+*/
 
 // Calculate gradiant wind direction at a point
 double calc_gwd(double tclat, double tclon, double glat, double glon) {

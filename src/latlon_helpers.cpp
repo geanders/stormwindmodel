@@ -167,13 +167,13 @@ stormwindmodel:::calc_forward_speed(c(24, 24.3),
 //' @details This function uses the following equations to calculate the bearing
 //'    from one latitude-longitude pair to another:
 //'
-//'    \deqn{S = cos(\phi_2) * sin(L_1 - L_2)}{
-//'    S = cos(\phi2) * sin(L1 - L1)}
+//'    \deqn{S = cos(\phi_2) * sin(L_2 - L_1)}{
+//'    S = cos(\phi2) * sin(L2 - L1)}
 //'
-//'    \deqn{C = cos(\phi_1) * sin(\phi_2) - sin(\phi_1) * cos(\phi_2) * cos(L_1 - L_2)}{
-//'    C = cos(\phi1) * sin(\phi2) - sin(\phi1) * cos(\phi2) * cos(L1 - L2)}
+//'    \deqn{C = cos(\phi_1) * sin(\phi_2) - sin(\phi_1) * cos(\phi_2) * cos(L_2 - L_1)}{
+//'    C = cos(\phi1) * sin(\phi2) - sin(\phi1) * cos(\phi2) * cos(L2 - L1)}
 //'
-//'    \deqn{\theta = atan2(S, C) * \frac{180}{\pi} + 90}
+//'    \deqn{\theta = 90 - atan2(S, C) * \frac{180}{\pi}}
 //'
 //'    where:
 //'    \itemize{
@@ -190,7 +190,6 @@ stormwindmodel:::calc_forward_speed(c(24, 24.3),
 //'    back within the 0--360 degree range.
 //'
 //' @export
-
 // [[Rcpp::export]]
 NumericVector calc_bearing(NumericVector tclat_1, NumericVector tclon_1,
                           NumericVector tclat_2, NumericVector tclon_2) {
@@ -199,9 +198,9 @@ NumericVector calc_bearing(NumericVector tclat_1, NumericVector tclon_1,
   tclat_2 = degrees_to_radians(tclat_2);
   tclon_2 = degrees_to_radians(tclon_2);
 
-  NumericVector S = cos(tclat_2) * sin(tclon_1 - tclon_2);
+  NumericVector S = cos(tclat_2) * sin(tclon_2 - tclon_1);
   NumericVector C = cos(tclat_1) * sin(tclat_2) - sin(tclat_1) *
-    cos(tclat_2) * cos(tclon_1 - tclon_2);
+    cos(tclat_2) * cos(tclon_2 - tclon_1);
 
   int n = tclat_1.size();
   NumericVector theta_rad(n);
@@ -210,7 +209,7 @@ NumericVector calc_bearing(NumericVector tclat_1, NumericVector tclon_1,
     theta_rad[i] = atan2(S[i], C[i]);
   }
 
-  NumericVector theta1 = radians_to_degrees(theta_rad) + 90.0;
+  NumericVector theta1 = 90 - radians_to_degrees(theta_rad);
   NumericVector theta(n);
 
   for(int i = 0; i < n; i++){
@@ -223,8 +222,8 @@ NumericVector calc_bearing(NumericVector tclat_1, NumericVector tclon_1,
 // Test
 
 /*** R
-calc_bearing(c(29.1, 24.3),
-             c(-93.15, -80.3),
-             c(29.8, 24.0),
-             c(-93.3, -80.1))
+stormwindmodel:::calc_bearing(c(29.1, 24.3),
+                              c(-93.15, -80.3),
+                              c(29.8, 24.0),
+                              c(-93.3, -80.1))
 ***/
