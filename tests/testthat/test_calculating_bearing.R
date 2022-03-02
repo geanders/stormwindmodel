@@ -42,7 +42,20 @@ test_that("Bearing calculation correct for North Atlantic basin storm", {
                        tclat_2 = storm$lat[2],
                        tclon_2 = storm$lon[2]
   )
-  expect_equal(round(bear), 101)
+  expect_lt(bear, 101 + 1)
+  expect_gt(bear, 101 - 1)
+})
+
+test_that("Bearing calculation correct for North Atlantic basin storm using calc_bearning_single", {
+  storm <- example_storms2 %>%
+    filter(basin == "North Atlantic")
+  bear <- calc_bearing_single(tclat = storm$lat[1] * pi / 180,
+                              tclon = storm$lon[1] * pi / 180,
+                              glat = storm$lat[2] * pi / 180,
+                              glon = storm$lon[2] * pi / 180
+  )
+  expect_lt(bear, 101 + 1)
+  expect_gt(bear, 101 - 1)
 })
 
 test_that("Bearing calculation correct for Eastern Pacific basin storm", {
@@ -53,7 +66,20 @@ test_that("Bearing calculation correct for Eastern Pacific basin storm", {
                        tclat_2 = storm$lat[2],
                        tclon_2 = storm$lon[2]
   )
-  expect_equal(round(bear), 154)
+  expect_lt(bear, 154 + 1)
+  expect_gt(bear, 154 - 1)
+})
+
+test_that("Bearing calculation correct for Eastern Pacific basin storm using calc_bearning_single", {
+  storm <- example_storms2 %>%
+    filter(basin == "Eastern Pacific")
+  bear <- calc_bearing_single(tclat = storm$lat[1] * pi / 180,
+                              tclon = storm$lon[1] * pi / 180,
+                              glat = storm$lat[2] * pi / 180,
+                              glon = storm$lon[2] * pi / 180
+  )
+  expect_lt(bear, 154 + 1)
+  expect_gt(bear, 154 - 1)
 })
 
 test_that("Bearing calculation correct for Western Pacific basin storm", {
@@ -64,7 +90,20 @@ test_that("Bearing calculation correct for Western Pacific basin storm", {
                        tclat_2 = storm$lat[2],
                        tclon_2 = storm$lon[2]
   )
-  expect_equal(round(bear), 93)
+  expect_lt(bear, 93 + 1)
+  expect_gt(bear, 93 - 1)
+})
+
+test_that("Bearing calculation correct for Western Pacific basin storm using calc_bearning_single", {
+  storm <- example_storms2 %>%
+    filter(basin == "Western Pacific")
+  bear <- calc_bearing_single(tclat = storm$lat[1] * pi / 180,
+                              tclon = storm$lon[1] * pi / 180,
+                              glat = storm$lat[2] * pi / 180,
+                              glon = storm$lon[2] * pi / 180
+  )
+  expect_lt(bear, 93 + 1)
+  expect_gt(bear, 93 - 1)
 })
 
 test_that("Bearing calculation correct for Northern Indian basin storm", {
@@ -75,7 +114,20 @@ test_that("Bearing calculation correct for Northern Indian basin storm", {
                        tclat_2 = storm$lat[2],
                        tclon_2 = storm$lon[2]
   )
-  expect_equal(round(bear), 67)
+  expect_lt(bear, 67 + 1)
+  expect_gt(bear, 67 - 1)
+})
+
+test_that("Bearing calculation correct for Northern Indian basin storm using calc_bearning_single", {
+  storm <- example_storms2 %>%
+    filter(basin == "Northern Indian")
+  bear <- calc_bearing_single(tclat = storm$lat[1] * pi / 180,
+                              tclon = storm$lon[1] * pi / 180,
+                              glat = storm$lat[2] * pi / 180,
+                              glon = storm$lon[2] * pi / 180
+  )
+  expect_lt(bear, 67 + 1)
+  expect_gt(bear, 67 - 1)
 })
 
 test_that("Bearing calculation correct for Southern Indian basin storm", {
@@ -86,7 +138,20 @@ test_that("Bearing calculation correct for Southern Indian basin storm", {
                        tclat_2 = storm$lat[2],
                        tclon_2 = storm$lon[2]
   )
-  expect_equal(round(bear), 249)
+  expect_lt(bear, 249 + 1)
+  expect_gt(bear, 249 - 1)
+})
+
+test_that("Bearing calculation correct for Southern Indian basin storm using calc_bearning_single", {
+  storm <- example_storms2 %>%
+    filter(basin == "Southern Indian")
+  bear <- calc_bearing_single(tclat = storm$lat[1] * pi / 180,
+                              tclon = storm$lon[1] * pi / 180,
+                              glat = storm$lat[2] * pi / 180,
+                              glon = storm$lon[2] * pi / 180
+  )
+  expect_lt(bear, 249 + 1)
+  expect_gt(bear, 249 - 1)
 })
 
 test_that("Bearing calculation correct for Southern Pacific basin storm", {
@@ -97,7 +162,20 @@ test_that("Bearing calculation correct for Southern Pacific basin storm", {
                        tclat_2 = storm$lat[2],
                        tclon_2 = storm$lon[2]
   )
-  expect_equal(round(bear), 292)
+  expect_lt(bear, 292 + 1)
+  expect_gt(bear, 292 - 1)
+})
+
+test_that("Bearing calculation correct for Southern Pacific basin storm using calc_bearning_single", {
+  storm <- example_storms2 %>%
+    filter(basin == "Southern Pacific")
+  bear <- calc_bearing_single(tclat = storm$lat[1] * pi / 180,
+                              tclon = storm$lon[1] * pi / 180,
+                              glat = storm$lat[2] * pi / 180,
+                              glon = storm$lon[2] * pi / 180
+  )
+  expect_lt(bear, 292 + 1)
+  expect_gt(bear, 292 - 1)
 })
 
 test_that("Bearing calculation correct for Southern Atlantic basin storm", {
@@ -108,7 +186,20 @@ test_that("Bearing calculation correct for Southern Atlantic basin storm", {
                        tclat_2 = storm$lat[2],
                        tclon_2 = storm$lon[2]
   )
-  expect_equal(round(bear), 142)
+  expect_lt(bear, 142 + 1)
+  expect_gt(bear, 142 - 1)
+})
+
+test_that("Bearing calculation correct for Southern Atlantic basin storm using calc_bearning_single", {
+  storm <- example_storms2 %>%
+    filter(basin == "Southern Atlantic")
+  bear <- calc_bearing_single(tclat = storm$lat[1] * pi / 180,
+                              tclon = storm$lon[1] * pi / 180,
+                              glat = storm$lat[2] * pi / 180,
+                              glon = storm$lon[2] * pi / 180
+  )
+  expect_lt(bear, 142 + 1)
+  expect_gt(bear, 142 - 1)
 })
 
 test_that("Bearing calculation correct for crossing prime meridian", {
@@ -119,7 +210,20 @@ test_that("Bearing calculation correct for crossing prime meridian", {
                        tclat_2 = storm$lat[2],
                        tclon_2 = storm$lon[2]
   )
-  expect_equal(round(bear), 42)
+  expect_lt(bear, 42 + 1)
+  expect_gt(bear, 42 - 1)
+})
+
+test_that("Bearing calculation correct for crossing prime meridian using calc_bearning_single", {
+  storm <- example_storms2 %>%
+    filter(basin == "crossed prime meridian")
+  bear <- calc_bearing_single(tclat = storm$lat[1] * pi / 180,
+                              tclon = storm$lon[1] * pi / 180,
+                              glat = storm$lat[2] * pi / 180,
+                              glon = storm$lon[2] * pi / 180
+  )
+  expect_lt(bear, 42 + 1)
+  expect_gt(bear, 42 - 1)
 })
 
 test_that("Bearing calculation correct for crossing international date line", {
@@ -130,7 +234,20 @@ test_that("Bearing calculation correct for crossing international date line", {
                        tclat_2 = storm$lat[2],
                        tclon_2 = storm$lon[2]
   )
-  expect_equal(round(bear), 346)
+  expect_lt(bear, 346 + 1)
+  expect_gt(bear, 346 - 1)
+})
+
+test_that("Bearing calculation correct for crossing international date line using calc_bearning_single", {
+  storm <- example_storms2 %>%
+    filter(basin == "crossed international date line")
+  bear <- calc_bearing_single(tclat = storm$lat[1] * pi / 180,
+                              tclon = storm$lon[1] * pi / 180,
+                              glat = storm$lat[2] * pi / 180,
+                              glon = storm$lon[2] * pi / 180
+  )
+  expect_lt(bear, 346 + 1)
+  expect_gt(bear, 346 - 1)
 })
 
 test_that("Bearing calculation correct for crossing international date line, IBTrACS conventions", {
@@ -141,5 +258,18 @@ test_that("Bearing calculation correct for crossing international date line, IBT
                        tclat_2 = storm$lat[2],
                        tclon_2 = storm$lon[2]
   )
-  expect_equal(round(bear), 346)
+  expect_lt(bear, 346 + 1)
+  expect_gt(bear, 346 - 1)
+})
+
+test_that("Bearing calculation correct for crossing international date line, IBTrACS conventions, using calc_bearning_single", {
+  storm <- example_storms2 %>%
+    filter(basin == "crossed international date line IBTrACS")
+  bear <- calc_bearing_single(tclat = storm$lat[1] * pi / 180,
+                              tclon = storm$lon[1] * pi / 180,
+                              glat = storm$lat[2] * pi / 180,
+                              glon = storm$lon[2] * pi / 180
+  )
+  expect_lt(bear, 346 + 1)
+  expect_gt(bear, 346 - 1)
 })
