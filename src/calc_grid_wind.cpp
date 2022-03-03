@@ -58,6 +58,42 @@ context("Check C++ calc_distance function") {
 
     expect_true(round(calculated_distance) == 909);
   }
+
+  test_that("Distance across the prime meridian is correct") {
+    double ophelia_lat_1 = 65.60 * M_PI / 180.0;
+    double ophelia_lon_1 = -1.0 * M_PI / 180.0;
+    double ophelia_lat_2 = 66.60 * M_PI / 180.0;
+    double ophelia_lon_2 = 1.90 * M_PI / 180.0;
+
+    double calculated_distance = calc_distance(ophelia_lat_1, ophelia_lon_1,
+                                               ophelia_lat_2, ophelia_lon_2);
+
+    expect_true(round(calculated_distance) == 172);
+  }
+
+  test_that("Distance across the international date line is correct") {
+    double harold_lat_1 = -20.11 * M_PI / 180.0;
+    double harold_lon_1 = 179.70 * M_PI / 180.0;
+    double harold_lat_2 = -20.60 * M_PI / 180.0;
+    double harold_lon_2 = -178.1 * M_PI / 180.0;
+
+    double calculated_distance = calc_distance(harold_lat_1, harold_lon_1,
+                                               harold_lat_2, harold_lon_2);
+
+    expect_true(round(calculated_distance) == 236);
+  }
+
+  test_that("Distance across the international date line is correct using IBTrACS conventions") {
+    double harold_lat_1 = -20.11 * M_PI / 180.0;
+    double harold_lon_1 = 179.70 * M_PI / 180.0;
+    double harold_lat_2 = -20.60 * M_PI / 180.0;
+    double harold_lon_2 = 181.90 * M_PI / 180.0;
+
+    double calculated_distance = calc_distance(harold_lat_1, harold_lon_1,
+                                               harold_lat_2, harold_lon_2);
+
+    expect_true(round(calculated_distance) == 236);
+  }
 }
 
 // Calculate equation 1a from Willoughby
