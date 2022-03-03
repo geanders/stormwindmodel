@@ -4,7 +4,7 @@
 \alias{calc_distance}
 \title{Calculate distance between two latitude / longitude points}
 \usage{
-calc_distance(tclat, tclon, glat, glon, Rearth = 6378.14)
+calc_distance(tclat, tclon, glat, glon, Rearth = 6371)
 }
 \arguments{
 \item{tclat}{A numeric value with the latitude of the tropical cyclone's center

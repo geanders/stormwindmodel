@@ -1,5 +1,6 @@
 #include <Rcpp.h>
 #include <math.h>
+#include <testthat.h>
 using namespace Rcpp;
 
 //' Calculate distance between two latitude / longitude points
@@ -13,11 +14,10 @@ using namespace Rcpp;
 //' @param Rearth A numeric value with the radius of the earth in kilometers
 //' @return A numeric value with the distance (in kilometers) from the tropical
 //'   cyclone center to the grid point.
-//' @export
 // [[Rcpp::export]]
 double calc_distance(double tclat, double tclon,
                  double glat, double glon,
-                 double Rearth =  6378.14) {
+                 double Rearth =  6371) {
 
   double delta_L = tclon - glon;
   double delta_tclat = tclat - glat;
@@ -34,29 +34,31 @@ double calc_distance(double tclat, double tclon,
   return dist;
 }
 
-/*** R
-# Check the function
+context("Check C++ calc_distance function") {
+  test_that("Floyd to Dare Co distance is correct") {
+    double floyd_lat = 33.7 * M_PI / 180.0;
+    double floyd_lon = -78.0 * M_PI / 180.0;
+    double dare_lat = 35.90756 * M_PI / 180.0;
+    double dare_lon = -75.67488 * M_PI / 180.0;
 
-# Floyd near landfall
-tc_lat <- 33.7 * pi / 180
-tc_lon <- -78.0 * pi / 180
+    double calculated_distance = calc_distance(floyd_lat, floyd_lon,
+                                               dare_lat, dare_lon);
 
-# Dare County
-glat <- 35.90756 * pi / 180
-glon <- -75.67488 * pi / 180
+    expect_true(round(calculated_distance) == 325);
+  }
 
-expected_distance <- 324.5
-calculated_distance <- calc_distance(tclat = tc_lat, tclon = tc_lon,
-                                     glat = glat, glon = glon, Rearth = 6371)
+  test_that("Floyd to Miami-Dade Co distance is correct") {
+    double floyd_lat = 33.7 * M_PI / 180.0;
+    double floyd_lon = -78.0 * M_PI / 180.0;
+    double miami_lat = 25.77456 * M_PI / 180.0;
+    double miami_lon = -80.29889 * M_PI / 180.0;
 
-# Miami-Dade County
-glat <- 25.77456 * pi / 180
-glon <- -80.29889 * pi / 180
+    double calculated_distance = calc_distance(floyd_lat, floyd_lon,
+                                               miami_lat, miami_lon);
 
-expected_distance <- 908.7
-calculated_distance <- calc_distance(tclat = tc_lat, tclon = tc_lon,
-                                     glat = glat, glon = glon, Rearth = 6371)
-*/
+    expect_true(round(calculated_distance) == 909);
+  }
+}
 
 // Calculate equation 1a from Willoughby
 double will1a(double vmax_gl, double r,

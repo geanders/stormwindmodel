@@ -12,8 +12,7 @@
 #' @param Rearth A numeric value with the radius of the earth in kilometers
 #' @return A numeric value with the distance (in kilometers) from the tropical
 #'   cyclone center to the grid point.
-#' @export
-calc_distance <- function(tclat, tclon, glat, glon, Rearth = 6378.14) {
+calc_distance <- function(tclat, tclon, glat, glon, Rearth = 6371) {
     .Call(`_stormwindmodel_calc_distance`, tclat, tclon, glat, glon, Rearth)
 }
 

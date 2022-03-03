@@ -400,6 +400,8 @@ BEGIN_RCPP
 END_RCPP
 }
 
+RcppExport SEXP run_testthat_tests(SEXP);
+
 static const R_CallMethodDef CallEntries[] = {
     {"_stormwindmodel_calc_distance", (DL_FUNC) &_stormwindmodel_calc_distance, 5},
     {"_stormwindmodel_will1new", (DL_FUNC) &_stormwindmodel_will1new, 9},
@@ -428,6 +430,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_stormwindmodel_will10b", (DL_FUNC) &_stormwindmodel_will10b, 2},
     {"_stormwindmodel_will10c", (DL_FUNC) &_stormwindmodel_will10c, 2},
     {"_stormwindmodel_will1", (DL_FUNC) &_stormwindmodel_will1, 9},
+    {"run_testthat_tests", (DL_FUNC) &run_testthat_tests, 1},
     {NULL, NULL, 0}
 };
 
