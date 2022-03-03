@@ -72,7 +72,10 @@ Suggests:
     sf (>= 0.9.7),
     sp (>= 1.4.5),
     testthat (>= 3.0.2),
-    viridis (>= 0.5.1)
-LinkingTo: Rcpp
+    viridis (>= 0.5.1), 
+    xml2
+LinkingTo: 
+    Rcpp, 
+    testthat
 VignetteBuilder: knitr
 Config/testthat/edition: 3
