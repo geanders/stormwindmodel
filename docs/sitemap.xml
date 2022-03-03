@@ -4,6 +4,9 @@
     <loc>/404.html</loc>
   </url>
   <url>
+    <loc>/articles/Details.html</loc>
+  </url>
+  <url>
     <loc>/articles/index.html</loc>
   </url>
   <url>
@@ -41,6 +44,15 @@
   </url>
   <url>
     <loc>/reference/calc_and_summarize_grid_wind.html</loc>
+  </url>
+  <url>
+    <loc>/reference/calc_bearing.html</loc>
+  </url>
+  <url>
+    <loc>/reference/calc_bearing_single.html</loc>
+  </url>
+  <url>
+    <loc>/reference/calc_distance.html</loc>
   </url>
   <url>
     <loc>/reference/calc_gradient_speed.html</loc>
@@ -104,6 +116,9 @@
   </url>
   <url>
     <loc>/reference/summarize_grid_wind.html</loc>
+  </url>
+  <url>
+    <loc>/reference/will1new.html</loc>
   </url>
   <url>
     <loc>/reference/will3_deriv_func.html</loc>

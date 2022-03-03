@@ -254,7 +254,15 @@ double gradient_to_surface_new(double wind_gl_aa, double cdist) {
   return wind_sfc_sym;
 }
 
-// Add inflow to direction of surface winds
+//' Add inflow to direction of surface winds
+//' @param gwd A numeric value with the gradient wind direction in degrees
+//' @param cdist A numeric value with the radius from the storm's center to the
+//' grid point in kilometers
+//' @param Rmax A numeric value with radius at which maximum winds occur in kilometers
+//' @param tclat A numeric value with latitude in radians
+//' @return swd A numeric value with the surface wind direction in degrees
+//' @export
+// [[Rcpp::export]]
 double add_inflow(double gwd, double cdist, double Rmax, double tclat) {
   double inflow_angle, swd;
 
@@ -284,6 +292,18 @@ double add_inflow(double gwd, double cdist, double Rmax, double tclat) {
 
   return swd;
 }
+
+/*** R
+#check function
+gwd_test <- 20
+cdist_test <- 135
+Rmax_test <- 100
+tc_location <- c(-29.1, -93.15) * pi / 180
+
+add_inflow(gwd_test,cdist_test, Rmax_test, tc_location[1])
+
+*/
+
 
 // Add in forward speed of the storm
 double add_forward_speed(double wind_sfc_sym, double tcspd_u, double tcspd_v, double swd,

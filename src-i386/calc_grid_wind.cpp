@@ -2,7 +2,19 @@
 #include <math.h>
 using namespace Rcpp;
 
-// Calculate distance between two latitude / longitude points
+//' Calculate distance between two latitude / longitude points
+//'
+//' @param tclat A numeric value with the latitude of the tropical cyclone's center
+//'   in radians
+//' @param tclon A numeric value with the longitude of the tropical cyclone's center
+//'   in radians
+//' @param glat A numeric value with the latitude of the grid point in radians
+//' @param glon A numeric value with the longitude of the grid point in radians
+//' @param Rearth A numeric value with the radius of the earth in kilometers
+//' @return A numeric value with the distance (in kilometers) from the tropical
+//'   cyclone center to the grid point.
+//' @export
+// [[Rcpp::export]]
 double calc_distance(double tclat, double tclon,
                  double glat, double glon,
                  double Rearth =  6378.14) {
@@ -21,6 +33,30 @@ double calc_distance(double tclat, double tclon,
 
   return dist;
 }
+
+/*** R
+# Check the function
+
+# Floyd near landfall
+tc_lat <- 33.7 * pi / 180
+tc_lon <- -78.0 * pi / 180
+
+# Dare County
+glat <- 35.90756 * pi / 180
+glon <- -75.67488 * pi / 180
+
+expected_distance <- 324.5
+calculated_distance <- calc_distance(tclat = tc_lat, tclon = tc_lon,
+                                     glat = glat, glon = glon, Rearth = 6371)
+
+# Miami-Dade County
+glat <- 25.77456 * pi / 180
+glon <- -80.29889 * pi / 180
+
+expected_distance <- 908.7
+calculated_distance <- calc_distance(tclat = tc_lat, tclon = tc_lon,
+                                     glat = glat, glon = glon, Rearth = 6371)
+*/
 
 // Calculate equation 1a from Willoughby
 double will1a(double vmax_gl, double r,
@@ -59,10 +95,32 @@ double will2(double r, double R1, double R2) {
   return w;
 }
 
-// Calculate equation 1 from Willoughby
+//' Calculate gradient wind speed using equation 1 from Willoughby
+//'
+//' @param cdist A numeric value with the distance between the grid point and the
+//'   center of the storm (in km)
+//' @param Rmax A numeric value with the radius at which max winds occur
+//'   (in km from the center of the storm)
+//' @param R1 A numeric value with the lower boundary of the transition zone (in
+//'   km from the storm center)
+//' @param R2 A numeric value with the upper boundary of the transition zone (in
+//'   km from the storm center)
+//' @param vmax_gl A numeric value with the maximum gradient level 1-minute
+//'   sustained wind, in (m/s)
+//' @param A A numeric value as a parameter for the Willoughby model
+//' @param r A numeric value with the radius from the storm center to the grid
+//'   point (in km)
+//' @param Rmax A numeric value with the radius at which the maximum wind occurs
+//'   (in km)
+//' @param X1 A numeric value as a parameter for the Willoughby model
+//' @param X2 A numeric value as a parameter for the Willoughby model, set to 25
+//'   (Willoughby, Darling, and Rahn 2006)
+//' @return wind_gl_aa A numeric value ...
+//' @export
+// [[Rcpp::export]]
 double will1new(double cdist, double Rmax, double R1,
-                    double R2, double vmax_gl, double n,
-                    double A, double X1, double X2 = 25){
+                double R2, double vmax_gl, double n,
+                double A, double X1, double X2 = 25){
 
   double wind_gl_aa;
   double Vi, Vo, w;
@@ -88,30 +146,76 @@ double will1new(double cdist, double Rmax, double R1,
   return wind_gl_aa;
 }
 
-// Calculate bearing from one lat/long to another
-double calc_bearing(double tclat_1, double tclon_1,
-                    double tclat_2, double tclon_2) {
+/*** R
+# Check function
 
-  double S = cos(tclat_2) * sin(tclon_1 - tclon_2);
-  double C = cos(tclat_1) * sin(tclat_2) - sin(tclat_1) *
-    cos(tclat_2) * cos(tclon_1 - tclon_2);
+data("floyd_tracks")
+floyd_tracks <- create_full_track(floyd_tracks)
+with_wind <- add_wind_radii(floyd_tracks)
+
+test <- will1new(cdist = test_data, Rmax = with_wind[1,]$Rmax, R1 = with_wind[1,]$R1, R2 = with_wind[1,]$R2,
+                    vmax_gl = with_wind[1,]$vmax_gl, n = with_wind[1,]$n, A = with_wind[1,]$A,
+                    X1 = with_wind[1,]$X1)
+
+
+
+*/
+
+//' Calculate bearing from one lat/long to another for a single point
+//'
+//' @param tclat A numeric value with the latitude of the tropical cyclone's center
+//'   in radians
+//' @param tclon A numeric value with the longitude of the tropical cyclone's center
+//'   in radians
+//' @param glat A numeric value with the latitude of the grid point in radians
+//' @param glon A numeric value with the longitude of the grid point in radians
+//' @return A numeric value with the bearing from the storm's center to the grid point
+//'   in polar coordinates
+//' @export
+// [[Rcpp::export]]
+double calc_bearing_single(double tclat, double tclon,
+                           double glat, double glon) {
+
+  double S = cos(glat) * sin(glon - tclon);
+  double C = cos(tclat) * sin(glat) - sin(tclat) *
+    cos(glat) * cos(glon - tclon);
 
   double theta_rad = atan2(S, C);
 
-  double theta = (theta_rad * 180.0 / M_PI) + 90.0; // get in polar coordinate conventions
+  double theta = (theta_rad * 180.0 / M_PI);
+
+  // The previous result is in a coordinate system where north is 0 degrees,
+  // east is 90 degrees, and so on. Convert to a coordinate system where 0 degrees
+  // is due east, 90 degrees is due north, and so on.
+  theta = 90 - theta;
+
   theta = fmod(theta + 360.0, 360.0); // restrict to be between 0 and 360 degrees
 
   return theta;
 }
 
-// Calculate gradiant wind direction at a point
+/*** R
+tc_location <- c(39.099912, -94.581213) * pi / 180
+grid_location <- c(38.627089, -90.200203) * pi / 180
+expected_bearing <- c(353.49)
+calc_bearing_single(tc_location[1], tc_location[2],
+                    grid_location[1], grid_location[2])
+
+tc_location <- c(29.1, -93.15) * pi / 180
+grid_location <- c(29.8, -93.3) * pi / 180
+expected_bearing <- c(100.53)
+calc_bearing_single(tc_location[1], tc_location[2],
+                    grid_location[1], grid_location[2])
+*/
+
+// Calculate gradient wind direction at a point
 double calc_gwd(double tclat, double tclon, double glat, double glon) {
 
   double gwd;
 
   // calculate the gradient wind direction (gwd) at the
   // grid point
-  double chead = calc_bearing(tclat, tclon, glat, glon);
+  double chead = calc_bearing_single(tclat, tclon, glat, glon);
 
   // Cyclonic winds will be perpendicular to the bearing
   // from the storm to the grid point. In the Northern
@@ -150,7 +254,15 @@ double gradient_to_surface_new(double wind_gl_aa, double cdist) {
   return wind_sfc_sym;
 }
 
-// Add inflow to direction of surface winds
+//' Add inflow to direction of surface winds
+//' @param gwd A numeric value with the gradient wind direction in degrees
+//' @param cdist A numeric value with the radius from the storm's center to the
+//' grid point in kilometers
+//' @param Rmax A numeric value with radius at which maximum winds occur in kilometers
+//' @param tclat A numeric value with latitude in radians
+//' @return swd A numeric value with the surface wind direction in degrees
+//' @export
+// [[Rcpp::export]]
 double add_inflow(double gwd, double cdist, double Rmax, double tclat) {
   double inflow_angle, swd;
 
@@ -180,6 +292,18 @@ double add_inflow(double gwd, double cdist, double Rmax, double tclat) {
 
   return swd;
 }
+
+/*** R
+#check function
+gwd_test <- 20
+cdist_test <- 135
+Rmax_test <- 100
+tc_location <- c(-29.1, -93.15) * pi / 180
+
+add_inflow(gwd_test,cdist_test, Rmax_test, tc_location[1])
+
+*/
+
 
 // Add in forward speed of the storm
 double add_forward_speed(double wind_sfc_sym, double tcspd_u, double tcspd_v, double swd,

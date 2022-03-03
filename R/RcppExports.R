@@ -58,6 +58,18 @@ calc_bearing_single <- function(tclat, tclon, glat, glon) {
     .Call(`_stormwindmodel_calc_bearing_single`, tclat, tclon, glat, glon)
 }
 
+#' Add inflow to direction of surface winds
+#' @param gwd A numeric value with the gradient wind direction in degrees
+#' @param cdist A numeric value with the radius from the storm's center to the
+#' grid point in kilometers
+#' @param Rmax A numeric value with radius at which maximum winds occur in kilometers
+#' @param tclat A numeric value with latitude in radians
+#' @return swd A numeric value with the surface wind direction in degrees
+#' @export
+add_inflow <- function(gwd, cdist, Rmax, tclat) {
+    .Call(`_stormwindmodel_add_inflow`, gwd, cdist, Rmax, tclat)
+}
+
 calc_grid_wind_cpp <- function(glat, glon, max_dist, tclat, tclon, Rmax, R1, R2, vmax_gl, n, A, X1, tcspd_u, tcspd_v) {
     .Call(`_stormwindmodel_calc_grid_wind_cpp`, glat, glon, max_dist, tclat, tclon, Rmax, R1, R2, vmax_gl, n, A, X1, tcspd_u, tcspd_v)
 }
