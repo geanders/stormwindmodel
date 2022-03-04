@@ -15,7 +15,7 @@ in degrees. Due east is 0 degrees, due north 90 degrees, etc.}
 \item{cdist}{A numeric vector giving radius (in kilometers) from the storm
 center to the location being modeled.}
 
-\item{Rmax}{A numeric value with radius at which maximum winds occur in kilometers}
+\item{Rmax}{A numeric value with the radius at which maximum winds occur in kilometers}
 
 \item{tclat}{A numeric value with latitude in radians}
 }

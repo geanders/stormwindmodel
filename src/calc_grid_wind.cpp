@@ -258,7 +258,7 @@ double gradient_to_surface_new(double wind_gl_aa, double cdist) {
 //' @param gwd A numeric value with the gradient wind direction in degrees
 //' @param cdist A numeric value with the radius from the storm's center to the
 //' grid point in kilometers
-//' @param Rmax A numeric value with radius at which maximum winds occur in kilometers
+//' @param Rmax A numeric value with the radius at which maximum winds occur in kilometers
 //' @param tclat A numeric value with latitude in radians
 //' @return swd A numeric value with the surface wind direction in degrees
 //' @export
@@ -305,7 +305,21 @@ add_inflow(gwd_test,cdist_test, Rmax_test, tc_location[1])
 */
 
 
-// Add in forward speed of the storm
+//' Add in forward speed of the storm
+//' @param wind_sfc_sym A numeric value with the estimated symmetric surface
+//' wind speed at the grid point, in meters / second
+//' @param tcspd_u A numeric value with the u-component of the tropical cyclone
+//' speed in meters / second
+//' @param tcspd_v A numeric value with the v-component of the tropical cyclone
+//' speed in meters / second
+//' @param swd A numeric value with the surface wind direction in degrees
+//' @param cdist A numeric value with the radius from the storm's center to the
+//' grid point in kilometers
+//' @param Rmax A numeric value with the radius at which maximum winds occur in kilometers
+//' @return windspeed A numeric value with the asymmetric surface windspeed at the
+//' location, in meters/second
+//' @export
+// [[Rcpp::export]]
 double add_forward_speed(double wind_sfc_sym, double tcspd_u, double tcspd_v, double swd,
                          double cdist, double Rmax) {
   // Calculate u- and v-components of surface wind speed
@@ -328,6 +342,25 @@ double add_forward_speed(double wind_sfc_sym, double tcspd_u, double tcspd_v, do
 
   return windspeed;
 }
+/*** R
+wind <- 35
+tcu_test <- 16
+tcv_test <- -2
+swd <- 40
+cdist_test <- 55
+Rmax <- 70
+add_forward_speed(wind, tcu_test, tcv_test, swd, cdist_test, Rmax)
+
+#Test 1
+#correction_factor = 0.4858
+#wind_u = 3.83
+#wind_v = 3.214
+
+#Test 2
+#correction_factor = 0.4858
+#wind_u = 26.812
+#wind_v = 22.498
+*/
 
 
 // [[Rcpp::export]]

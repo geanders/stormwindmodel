@@ -72,6 +72,22 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// add_forward_speed
+double add_forward_speed(double wind_sfc_sym, double tcspd_u, double tcspd_v, double swd, double cdist, double Rmax);
+RcppExport SEXP _stormwindmodel_add_forward_speed(SEXP wind_sfc_symSEXP, SEXP tcspd_uSEXP, SEXP tcspd_vSEXP, SEXP swdSEXP, SEXP cdistSEXP, SEXP RmaxSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type wind_sfc_sym(wind_sfc_symSEXP);
+    Rcpp::traits::input_parameter< double >::type tcspd_u(tcspd_uSEXP);
+    Rcpp::traits::input_parameter< double >::type tcspd_v(tcspd_vSEXP);
+    Rcpp::traits::input_parameter< double >::type swd(swdSEXP);
+    Rcpp::traits::input_parameter< double >::type cdist(cdistSEXP);
+    Rcpp::traits::input_parameter< double >::type Rmax(RmaxSEXP);
+    rcpp_result_gen = Rcpp::wrap(add_forward_speed(wind_sfc_sym, tcspd_u, tcspd_v, swd, cdist, Rmax));
+    return rcpp_result_gen;
+END_RCPP
+}
 // calc_grid_wind_cpp
 NumericVector calc_grid_wind_cpp(double glat, double glon, double max_dist, NumericVector tclat, NumericVector tclon, NumericVector Rmax, NumericVector R1, NumericVector R2, NumericVector vmax_gl, NumericVector n, NumericVector A, NumericVector X1, NumericVector tcspd_u, NumericVector tcspd_v);
 RcppExport SEXP _stormwindmodel_calc_grid_wind_cpp(SEXP glatSEXP, SEXP glonSEXP, SEXP max_distSEXP, SEXP tclatSEXP, SEXP tclonSEXP, SEXP RmaxSEXP, SEXP R1SEXP, SEXP R2SEXP, SEXP vmax_glSEXP, SEXP nSEXP, SEXP ASEXP, SEXP X1SEXP, SEXP tcspd_uSEXP, SEXP tcspd_vSEXP) {
@@ -405,6 +421,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_stormwindmodel_will1new", (DL_FUNC) &_stormwindmodel_will1new, 9},
     {"_stormwindmodel_calc_bearing_single", (DL_FUNC) &_stormwindmodel_calc_bearing_single, 4},
     {"_stormwindmodel_add_inflow", (DL_FUNC) &_stormwindmodel_add_inflow, 4},
+    {"_stormwindmodel_add_forward_speed", (DL_FUNC) &_stormwindmodel_add_forward_speed, 6},
     {"_stormwindmodel_calc_grid_wind_cpp", (DL_FUNC) &_stormwindmodel_calc_grid_wind_cpp, 14},
     {"_stormwindmodel_calc_grid_wind_cpp2", (DL_FUNC) &_stormwindmodel_calc_grid_wind_cpp2, 14},
     {"_stormwindmodel_calc_linear_coefs", (DL_FUNC) &_stormwindmodel_calc_linear_coefs, 2},
