@@ -323,22 +323,6 @@ get_grid_winds <- function(hurr_track = stormwindmodel::floyd_tracks,
 
   return(grid_winds_summary)
 }
-# get_grid_winds <- function(hurr_track = stormwindmodel::floyd_tracks,
-#                            grid_df = stormwindmodel::county_points,
-#                            tint = 0.25,
-#                            gust_duration_cut = 20,
-#                            sust_duration_cut = 20){
-#         full_track <- create_full_track(hurr_track = hurr_track, tint = tint)
-#         with_wind_radii <- add_wind_radii(full_track = full_track)
-#
-#         grid_winds <- plyr::adply(grid_df, 1, calc_and_summarize_grid_wind,
-#                                   with_wind_radii = with_wind_radii,
-#                                   tint = tint,
-#                                   gust_duration_cut = gust_duration_cut,
-#                                   sust_duration_cut = sust_duration_cut)
-#
-#         return(grid_winds)
-# }
 
 #' @export
 calc_grid_winds2 <- function(hurr_track = stormwindmodel::floyd_tracks,
