@@ -61,12 +61,30 @@ calc_bearing_single <- function(tclat, tclon, glat, glon) {
 #' @param gwd A numeric value with the gradient wind direction in degrees
 #' @param cdist A numeric value with the radius from the storm's center to the
 #' grid point in kilometers
-#' @param Rmax A numeric value with radius at which maximum winds occur in kilometers
+#' @param Rmax A numeric value with the radius at which maximum winds occur in kilometers
 #' @param tclat A numeric value with latitude in radians
 #' @return swd A numeric value with the surface wind direction in degrees
 #' @export
 add_inflow <- function(gwd, cdist, Rmax, tclat) {
     .Call(`_stormwindmodel_add_inflow`, gwd, cdist, Rmax, tclat)
+}
+
+#' Add in forward speed of the storm
+#' @param wind_sfc_sym A numeric value with the estimated symmetric surface
+#' wind speed at the grid point, in meters / second
+#' @param tcspd_u A numeric value with the u-component of the tropical cyclone
+#' speed in meters / second
+#' @param tcspd_v A numeric value with the v-component of the tropical cyclone
+#' speed in meters / second
+#' @param swd A numeric value with the surface wind direction in degrees
+#' @param cdist A numeric value with the radius from the storm's center to the
+#' grid point in kilometers
+#' @param Rmax A numeric value with the radius at which maximum winds occur in kilometers
+#' @return windspeed A numeric value with the asymmetric surface windspeed at the
+#' location, in meters/second
+#' @export
+add_forward_speed <- function(wind_sfc_sym, tcspd_u, tcspd_v, swd, cdist, Rmax) {
+    .Call(`_stormwindmodel_add_forward_speed`, wind_sfc_sym, tcspd_u, tcspd_v, swd, cdist, Rmax)
 }
 
 calc_grid_wind_cpp <- function(glat, glon, max_dist, tclat, tclon, Rmax, R1, R2, vmax_gl, n, A, X1, tcspd_u, tcspd_v) {
