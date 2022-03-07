@@ -11,7 +11,8 @@ using namespace Rcpp;
 //'   in radians
 //' @param glat A numeric value with the latitude of the grid point in radians
 //' @param glon A numeric value with the longitude of the grid point in radians
-//' @param Rearth A numeric value with the radius of the earth in kilometers
+//' @param Rearth A numeric value with the radius of the earth in kilometers. This
+//'   value defaults to 6,371 km, which is the median radius of the earth.
 //' @return A numeric value with the distance (in kilometers) from the tropical
 //'   cyclone center to the grid point.
 // [[Rcpp::export]]
