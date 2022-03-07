@@ -232,19 +232,92 @@ double calc_bearing_single(double tclat, double tclon,
   return theta;
 }
 
-/*** R
-tc_location <- c(39.099912, -94.581213) * pi / 180
-grid_location <- c(38.627089, -90.200203) * pi / 180
-expected_bearing <- c(353.49)
-calc_bearing_single(tc_location[1], tc_location[2],
-                    grid_location[1], grid_location[2])
+context("Check C++ calc_bearing function") {
+  test_that("Single bearing calculation correct for North Atlantic") {
+    double laura_lat_1 = 29.10 * M_PI / 180.0;
+    double laura_lon_1 = -93.15 * M_PI / 180.0;
+    double laura_lat_2 = 29.80 * M_PI / 180.0;
+    double laura_lon_2 = -93.30 * M_PI / 180.0;
 
-tc_location <- c(29.1, -93.15) * pi / 180
-grid_location <- c(29.8, -93.3) * pi / 180
-expected_bearing <- c(100.53)
-calc_bearing_single(tc_location[1], tc_location[2],
-                    grid_location[1], grid_location[2])
-*/
+    double bearing = calc_bearing_single(laura_lat_1, laura_lon_1,
+                                         laura_lat_2, laura_lon_2);
+
+    expect_true(round(bearing) == 101);
+  }
+
+  test_that("Single bearing calculation correct for Eastern Pacific") {
+    double douglas_lat_1 = 14.60 * M_PI / 180.0;
+    double douglas_lon_1 = -138.00 * M_PI / 180.0;
+    double douglas_lat_2 = 14.95 * M_PI / 180.0;
+    double douglas_lon_2 = -138.74 * M_PI / 180.0;
+
+    double bearing = calc_bearing_single(douglas_lat_1, douglas_lon_1,
+                                         douglas_lat_2, douglas_lon_2);
+
+    expect_true(round(bearing) == 154);
+  }
+
+  test_that("Single bearing calculation correct for Western Pacific"){
+    double haishen_lat_1 = 34.31 * M_PI / 180.0;
+    double haishen_lon_1 = 128.97 * M_PI / 180.0;
+    double haishen_lat_2 = 35.50 * M_PI / 180.0;
+    double haishen_lon_2 = 128.90 * M_PI / 180.0;
+
+    double bearing = calc_bearing_single(haishen_lat_1, haishen_lon_1,
+                                         haishen_lat_2, haishen_lon_2);
+
+    expect_true(round(bearing) == 93);
+  }
+
+  test_that("Single bearing calculation correct for Northern Indian basin storm"){
+    double amphan_lat_1 = 19.20 * M_PI / 180.0;
+    double amphan_lon_1 = 87.40 * M_PI / 180.0;
+    double amphan_lat_2 = 19.79 * M_PI / 180.0;
+    double amphan_lon_2 = 87.66 * M_PI / 180.0;
+
+    double bearing = calc_bearing_single(amphan_lat_1, amphan_lon_1,
+                                         amphan_lat_2, amphan_lon_2);
+
+    expect_true(round(bearing) == 67);
+  }
+
+  test_that("Single bearing calculation correct for Southern Indian basin storm") {
+    double belna_lat_1 = -12.40 * M_PI / 180.0;
+    double belna_lon_1 = 46.50 * M_PI / 180.0;
+    double belna_lat_2 = -12.63 * M_PI / 180.0;
+    double belna_lon_2 = 46.41 * M_PI / 180.0;
+
+    double bearing = calc_bearing_single(belna_lat_1, belna_lon_1,
+                                         belna_lat_2, belna_lon_2);
+
+    expect_true(round(bearing) == 249);
+  }
+
+  test_that("Single bearing calculation correct for Southern Pacific") {
+    double harold_lat_1 = -12.70 * M_PI / 180.0;
+    double harold_lon_1 = 163.00 * M_PI / 180.0;
+    double harold_lat_2 = -13.71 * M_PI / 180.0;
+    double harold_lon_2 = 163.41 * M_PI / 180.0;
+
+    double bearing = calc_bearing_single(harold_lat_1, harold_lon_1,
+                                         harold_lat_2, harold_lon_2);
+
+    expect_true(round(bearing) == 292);
+  }
+
+  test_that("Single bearing calculation correct for Southern Atlantic") {
+    double not_named_lat_1 = -29.00 * M_PI / 180.0;
+    double not_named_lon_1 = -49.60 * M_PI / 180.0;
+    double not_named_lat_2 = -28.77 * M_PI / 180.0;
+    double not_named_lon_2 = -49.93 * M_PI / 180.0;
+
+    double bearing = calc_bearing_single(not_named_lat_1, not_named_lon_1,
+                                         not_named_lat_2, not_named_lon_2);
+
+    expect_true(round(bearing) == 142);
+  }
+
+}
 
 // Calculate gradient wind direction at a point
 double calc_gwd(double tclat, double tclon, double glat, double glon) {
