@@ -17,7 +17,8 @@ in radians}
 
 \item{glon}{A numeric value with the longitude of the grid point in radians}
 
-\item{Rearth}{A numeric value with the radius of the earth in kilometers}
+\item{Rearth}{A numeric value with the radius of the earth in kilometers. This
+value defaults to 6,371 km, which is the median radius of the earth.}
 }
 \value{
 A numeric value with the distance (in kilometers) from the tropical

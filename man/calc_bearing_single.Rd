@@ -19,7 +19,7 @@ in radians}
 }
 \value{
 A numeric value with the bearing from the storm's center to the grid point
-  in polar coordinates
+  in polar coordinates (i.e., due East is 0 degrees, due North is 90 degrees, etc.)
 }
 \description{
 Calculate bearing from one lat/long to another for a single point
