@@ -545,7 +545,7 @@ stormwindmodel:::calc_grid_wind_cpp(glat = miami_dade_location$glat, glon = miam
 
 
 // [[Rcpp::export]]
-NumericMatrix calc_grid_wind_cpp2(NumericVector glat, NumericVector glon, double max_dist,
+List calc_grid_wind_cpp2(NumericVector glat, NumericVector glon, double max_dist,
                                  NumericVector tclat, NumericVector tclon,
                                  NumericVector Rmax, NumericVector R1, NumericVector R2, NumericVector vmax_gl,
                                  NumericVector n, NumericVector A, NumericVector X1,
@@ -555,6 +555,8 @@ NumericMatrix calc_grid_wind_cpp2(NumericVector glat, NumericVector glon, double
   int size_glat_glon = glat.size();
   double cdist, wind_gl_aa, gwd, wind_sfc_sym, swd;
   NumericMatrix windspeed(size_lat_lon, size_glat_glon);
+  NumericMatrix distance_from_storm(size_lat_lon, size_glat_glon);
+  NumericMatrix surface_wind_direction(size_lat_lon, size_glat_glon);
 
   // Convert everything from degrees to radians
   NumericVector glat_rad = glat * M_PI / 180.0;
@@ -566,9 +568,11 @@ NumericMatrix calc_grid_wind_cpp2(NumericVector glat, NumericVector glon, double
     for(int i = 0; i < size_lat_lon; i++){
       // Calculate the distance between the storm's center at each time and the grid point
       cdist = calc_distance(tclat_rad[i], tclon_rad[i], glat_rad[j], glon_rad[j]);
+      distance_from_storm(i, j) = cdist;
       // Assume all storm-associated wind beyond a certain distance is 0
       if(cdist > max_dist){
-        windspeed[i] = 0;
+        windspeed(i, j) = 0;
+        surface_wind_direction(i, j) = NA_REAL;
       } else {
         // Calculate gradient-level wind at the point
         wind_gl_aa = will1new(cdist, Rmax[i], R1[i], R2[i], vmax_gl[i], n[i], A[i], X1[i]);
@@ -578,13 +582,17 @@ NumericMatrix calc_grid_wind_cpp2(NumericVector glat, NumericVector glon, double
         wind_sfc_sym = gradient_to_surface_new(wind_gl_aa, cdist);
         // Add inflow
         swd = add_inflow(gwd, cdist, Rmax[i], tclat[i]);
+        surface_wind_direction(i, j) = swd;
         // Add forward speed of storm
         windspeed(i, j) = add_forward_speed(wind_sfc_sym, tcspd_u[i], tcspd_v[i], swd, cdist, Rmax[i]);
       }
     }
   }
 
-  return windspeed;
+  //return windspeed;
+  return List::create(Named("vmax_sust") = windspeed,
+                      Named("distance_from_storm") = distance_from_storm,
+                      Named("surface_wind_direction") = surface_wind_direction);
 }
 
 /*** R

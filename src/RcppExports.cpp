@@ -113,7 +113,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // calc_grid_wind_cpp2
-NumericMatrix calc_grid_wind_cpp2(NumericVector glat, NumericVector glon, double max_dist, NumericVector tclat, NumericVector tclon, NumericVector Rmax, NumericVector R1, NumericVector R2, NumericVector vmax_gl, NumericVector n, NumericVector A, NumericVector X1, NumericVector tcspd_u, NumericVector tcspd_v);
+List calc_grid_wind_cpp2(NumericVector glat, NumericVector glon, double max_dist, NumericVector tclat, NumericVector tclon, NumericVector Rmax, NumericVector R1, NumericVector R2, NumericVector vmax_gl, NumericVector n, NumericVector A, NumericVector X1, NumericVector tcspd_u, NumericVector tcspd_v);
 RcppExport SEXP _stormwindmodel_calc_grid_wind_cpp2(SEXP glatSEXP, SEXP glonSEXP, SEXP max_distSEXP, SEXP tclatSEXP, SEXP tclonSEXP, SEXP RmaxSEXP, SEXP R1SEXP, SEXP R2SEXP, SEXP vmax_glSEXP, SEXP nSEXP, SEXP ASEXP, SEXP X1SEXP, SEXP tcspd_uSEXP, SEXP tcspd_vSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
