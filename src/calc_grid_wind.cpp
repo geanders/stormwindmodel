@@ -473,7 +473,7 @@ add_forward_speed(wind, tcu_test, tcv_test, swd, cdist_test, Rmax)
 #wind_v = 22.498
 */
 
-
+//' @export
 // [[Rcpp::export]]
 NumericVector calc_grid_wind_cpp(double glat, double glon, double max_dist,
     NumericVector tclat, NumericVector tclon,

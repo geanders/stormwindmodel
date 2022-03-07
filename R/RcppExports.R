@@ -87,6 +87,7 @@ add_forward_speed <- function(wind_sfc_sym, tcspd_u, tcspd_v, swd, cdist, Rmax) 
     .Call(`_stormwindmodel_add_forward_speed`, wind_sfc_sym, tcspd_u, tcspd_v, swd, cdist, Rmax)
 }
 
+#' @export
 calc_grid_wind_cpp <- function(glat, glon, max_dist, tclat, tclon, Rmax, R1, R2, vmax_gl, n, A, X1, tcspd_u, tcspd_v) {
     .Call(`_stormwindmodel_calc_grid_wind_cpp`, glat, glon, max_dist, tclat, tclon, Rmax, R1, R2, vmax_gl, n, A, X1, tcspd_u, tcspd_v)
 }
