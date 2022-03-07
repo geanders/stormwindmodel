@@ -11,7 +11,8 @@ using namespace Rcpp;
 //'   in radians
 //' @param glat A numeric value with the latitude of the grid point in radians
 //' @param glon A numeric value with the longitude of the grid point in radians
-//' @param Rearth A numeric value with the radius of the earth in kilometers
+//' @param Rearth A numeric value with the radius of the earth in kilometers. This
+//'   value defaults to 6,371 km, which is the median radius of the earth.
 //' @return A numeric value with the distance (in kilometers) from the tropical
 //'   cyclone center to the grid point.
 // [[Rcpp::export]]
@@ -34,6 +35,7 @@ double calc_distance(double tclat, double tclon,
   return dist;
 }
 
+// C++ tests for calculating the distance between two latitudes and longitudes
 context("Check C++ calc_distance function") {
   test_that("Floyd to Dare Co distance is correct") {
     double floyd_lat = 33.7 * M_PI / 180.0;
@@ -208,8 +210,7 @@ test <- will1new(cdist = test_data, Rmax = with_wind[1,]$Rmax, R1 = with_wind[1,
 //' @param glat A numeric value with the latitude of the grid point in radians
 //' @param glon A numeric value with the longitude of the grid point in radians
 //' @return A numeric value with the bearing from the storm's center to the grid point
-//'   in polar coordinates
-//' @export
+//'   in polar coordinates (i.e., due East is 0 degrees, due North is 90 degrees, etc.)
 // [[Rcpp::export]]
 double calc_bearing_single(double tclat, double tclon,
                            double glat, double glon) {
@@ -315,6 +316,42 @@ context("Check C++ calc_bearing function") {
                                          not_named_lat_2, not_named_lon_2);
 
     expect_true(round(bearing) == 142);
+  }
+
+  test_that("Single bearing calculation correct for crossing prime meridian") {
+    double ophelia_lat_1 = 65.60 * M_PI / 180.0;
+    double ophelia_lon_1 = -1.0 * M_PI / 180.0;
+    double ophelia_lat_2 = 66.60 * M_PI / 180.0;
+    double ophelia_lon_2 = 1.90 * M_PI / 180.0;
+
+    double bearing = calc_bearing_single(ophelia_lat_1, ophelia_lon_1,
+                                         ophelia_lat_2, ophelia_lon_2);
+
+    expect_true(round(bearing) == 42);
+  }
+
+    test_that("Single bearing calculation correct for crossing international date line") {
+    double harold_lat_1 = -20.11 * M_PI / 180.0;
+    double harold_lon_1 = 179.70 * M_PI / 180.0;
+    double harold_lat_2 = -20.60 * M_PI / 180.0;
+    double harold_lon_2 = -178.10 * M_PI / 180.0;
+
+    double bearing = calc_bearing_single(harold_lat_1, harold_lon_1,
+                                         harold_lat_2, harold_lon_2);
+
+    expect_true(round(bearing) == 346);
+  }
+
+  test_that("Single bearing calculation correct for crossing international date line, IBTrACS convention") {
+    double harold_lat_1 = -20.11 * M_PI / 180.0;
+    double harold_lon_1 = 179.70 * M_PI / 180.0;
+    double harold_lat_2 = -20.60 * M_PI / 180.0;
+    double harold_lon_2 = 181.90 * M_PI / 180.0;
+
+    double bearing = calc_bearing_single(harold_lat_1, harold_lon_1,
+                                         harold_lat_2, harold_lon_2);
+
+    expect_true(round(bearing) == 346);
   }
 
 }
@@ -473,7 +510,7 @@ add_forward_speed(wind, tcu_test, tcv_test, swd, cdist_test, Rmax)
 #wind_v = 22.498
 */
 
-
+//' @export
 // [[Rcpp::export]]
 NumericVector calc_grid_wind_cpp(double glat, double glon, double max_dist,
     NumericVector tclat, NumericVector tclon,

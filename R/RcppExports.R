@@ -9,7 +9,8 @@
 #'   in radians
 #' @param glat A numeric value with the latitude of the grid point in radians
 #' @param glon A numeric value with the longitude of the grid point in radians
-#' @param Rearth A numeric value with the radius of the earth in kilometers
+#' @param Rearth A numeric value with the radius of the earth in kilometers. This
+#'   value defaults to 6,371 km, which is the median radius of the earth.
 #' @return A numeric value with the distance (in kilometers) from the tropical
 #'   cyclone center to the grid point.
 calc_distance <- function(tclat, tclon, glat, glon, Rearth = 6371) {
@@ -51,8 +52,7 @@ will1new <- function(cdist, Rmax, R1, R2, vmax_gl, n, A, X1, X2 = 25) {
 #' @param glat A numeric value with the latitude of the grid point in radians
 #' @param glon A numeric value with the longitude of the grid point in radians
 #' @return A numeric value with the bearing from the storm's center to the grid point
-#'   in polar coordinates
-#' @export
+#'   in polar coordinates (i.e., due East is 0 degrees, due North is 90 degrees, etc.)
 calc_bearing_single <- function(tclat, tclon, glat, glon) {
     .Call(`_stormwindmodel_calc_bearing_single`, tclat, tclon, glat, glon)
 }
@@ -87,6 +87,7 @@ add_forward_speed <- function(wind_sfc_sym, tcspd_u, tcspd_v, swd, cdist, Rmax) 
     .Call(`_stormwindmodel_add_forward_speed`, wind_sfc_sym, tcspd_u, tcspd_v, swd, cdist, Rmax)
 }
 
+#' @export
 calc_grid_wind_cpp <- function(glat, glon, max_dist, tclat, tclon, Rmax, R1, R2, vmax_gl, n, A, X1, tcspd_u, tcspd_v) {
     .Call(`_stormwindmodel_calc_grid_wind_cpp`, glat, glon, max_dist, tclat, tclon, Rmax, R1, R2, vmax_gl, n, A, X1, tcspd_u, tcspd_v)
 }
