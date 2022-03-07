@@ -58,6 +58,20 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// calc_gwd
+double calc_gwd(double tclat, double tclon, double glat, double glon);
+RcppExport SEXP _stormwindmodel_calc_gwd(SEXP tclatSEXP, SEXP tclonSEXP, SEXP glatSEXP, SEXP glonSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type tclat(tclatSEXP);
+    Rcpp::traits::input_parameter< double >::type tclon(tclonSEXP);
+    Rcpp::traits::input_parameter< double >::type glat(glatSEXP);
+    Rcpp::traits::input_parameter< double >::type glon(glonSEXP);
+    rcpp_result_gen = Rcpp::wrap(calc_gwd(tclat, tclon, glat, glon));
+    return rcpp_result_gen;
+END_RCPP
+}
 // add_inflow
 double add_inflow(double gwd, double cdist, double Rmax, double tclat);
 RcppExport SEXP _stormwindmodel_add_inflow(SEXP gwdSEXP, SEXP cdistSEXP, SEXP RmaxSEXP, SEXP tclatSEXP) {
@@ -422,6 +436,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_stormwindmodel_calc_distance", (DL_FUNC) &_stormwindmodel_calc_distance, 5},
     {"_stormwindmodel_will1new", (DL_FUNC) &_stormwindmodel_will1new, 9},
     {"_stormwindmodel_calc_bearing_single", (DL_FUNC) &_stormwindmodel_calc_bearing_single, 4},
+    {"_stormwindmodel_calc_gwd", (DL_FUNC) &_stormwindmodel_calc_gwd, 4},
     {"_stormwindmodel_add_inflow", (DL_FUNC) &_stormwindmodel_add_inflow, 4},
     {"_stormwindmodel_add_forward_speed", (DL_FUNC) &_stormwindmodel_add_forward_speed, 6},
     {"_stormwindmodel_calc_grid_wind_cpp", (DL_FUNC) &_stormwindmodel_calc_grid_wind_cpp, 14},

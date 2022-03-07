@@ -356,7 +356,17 @@ context("Check C++ calc_bearing function") {
 
 }
 
-// Calculate gradient wind direction at a point
+//' Calculate gradient wind direction at a point
+//'
+//' @param tclat A numeric value with the latitude of the tropical cyclone's center
+//'   in radians
+//' @param tclon A numeric value with the longitude of the tropical cyclone's center
+//'   in radians
+//' @param glat A numeric value with the latitude of the grid point in radians
+//' @param glon A numeric value with the longitude of the grid point in radians
+//' @return A numeric value with the the direction of gradient storm winds at a location,
+//'   in polar coordinates (i.e., due East is 0 degrees, due North is 90 degrees, etc.)
+// [[Rcpp::export]]
 double calc_gwd(double tclat, double tclon, double glat, double glon) {
 
   double gwd;
@@ -379,6 +389,33 @@ double calc_gwd(double tclat, double tclon, double glat, double glon) {
   gwd = fmod(gwd + 360.0, 360.0); // restrict to be between 0 and 360 degrees
 
   return gwd;
+}
+
+context("Check C++ calc_gwd function") {
+  test_that("Gradient wind calculation correct for Northern Hemisphere") {
+    double laura_lat_1 = 29.10 * M_PI / 180.0;
+    double laura_lon_1 = -93.15 * M_PI / 180.0;
+    double laura_lat_2 = 29.80 * M_PI / 180.0;
+    double laura_lon_2 = -93.30 * M_PI / 180.0;
+
+    double bearing = calc_gwd(laura_lat_1, laura_lon_1,
+                              laura_lat_2, laura_lon_2);
+
+    expect_true(round(bearing) == 191);
+  }
+
+  test_that("Gradient wind calculation correct for Southern Hemisphere") {
+    double belna_lat_1 = -12.40 * M_PI / 180.0;
+    double belna_lon_1 = 46.50 * M_PI / 180.0;
+    double belna_lat_2 = -12.63 * M_PI / 180.0;
+    double belna_lon_2 = 46.41 * M_PI / 180.0;
+
+    double bearing = calc_gwd(belna_lat_1, belna_lon_1,
+                              belna_lat_2, belna_lon_2);
+
+    expect_true(round(bearing) == 159);
+  }
+
 }
 
 // Calculate symmetrical surface wind from gradient wind

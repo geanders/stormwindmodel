@@ -57,6 +57,20 @@ calc_bearing_single <- function(tclat, tclon, glat, glon) {
     .Call(`_stormwindmodel_calc_bearing_single`, tclat, tclon, glat, glon)
 }
 
+#' Calculate gradient wind direction at a point
+#'
+#' @param tclat A numeric value with the latitude of the tropical cyclone's center
+#'   in radians
+#' @param tclon A numeric value with the longitude of the tropical cyclone's center
+#'   in radians
+#' @param glat A numeric value with the latitude of the grid point in radians
+#' @param glon A numeric value with the longitude of the grid point in radians
+#' @return A numeric value with the the direction of gradient storm winds at a location,
+#'   in polar coordinates (i.e., due East is 0 degrees, due North is 90 degrees, etc.)
+calc_gwd <- function(tclat, tclon, glat, glon) {
+    .Call(`_stormwindmodel_calc_gwd`, tclat, tclon, glat, glon)
+}
+
 #' Add inflow to direction of surface winds
 #' @param gwd A numeric value with the gradient wind direction in degrees
 #' @param cdist A numeric value with the radius from the storm's center to the
