@@ -98,7 +98,28 @@ context("Check C++ calc_distance function") {
   }
 }
 
-// Calculate equation 1a from Willoughby
+//' Calculate equation 1a from Willoughby
+//'
+//' This is the equation that is used for the wind profile inside the  eye (more
+//' specifically, from the center of the storm to R1, where the transition region
+//' for the model starts). It assumes that the wind increases from the center of
+//' the storm to the radius of maximum wind in proportion to a power of the radius
+//' from the center.
+//'
+//' @param vmax_gl A numeric value giving the maximum gradient-level 1-minute
+//'   sustained wind for the tropical cyclone, in meters per second. This is the
+//'   value given for the storm as a whole at the time point (for example, in
+//'   tracking data).
+//' @param r A numeric value giving the distance from the center of the storm to
+//'   the location where you would like to model the local wind, in kilometers
+//' @param Rmax A numeric value with the distance from the center of the storm to
+//'   the storm's radius of maximum wind, in kilometers
+//' @param n A numeric value giving the power by which the wind is assumed to
+//'   increase with radius within the center of the storm (i.e., from the center
+//'   to the radius of maximum wind)
+//'
+//' @return A numeric value with the modeled wind at distance r from the center of
+//'   the storm, in meters per second.
 double will1a(double vmax_gl, double r,
              double Rmax, double n) {
   double Vi = vmax_gl * pow((r / Rmax), n);
@@ -106,7 +127,58 @@ double will1a(double vmax_gl, double r,
   return Vi;
 }
 
-// Calculate equation 4 from Willoughby
+context("Check C++ will1a function") {
+  test_that("C++ will1a works with a power value (n) that isn't an integer") {
+    double storm_max_wind = 45.3;
+    double rad_to_model = 16.1;
+    double rad_max_wind = 30.2;
+    double power_for_eq = 0.8;
+
+    double wind_at_r = will1a(storm_max_wind, rad_to_model, rad_max_wind, power_for_eq);
+    expect_true(round(wind_at_r) == 27);
+  }
+
+  test_that("C++ will1a works at low maximum storm winds"){
+    double storm_max_wind = 10.0; // Lowest example wind given in Fig. 11 of Willoughby
+    double rad_to_model = 50.2;
+    double rad_max_wind = 79.8;
+    double power_for_eq = 0.4; // Approx. value of n for a wind of 10.0 in Fig. 11
+
+    double wind_at_r = will1a(storm_max_wind, rad_to_model, rad_max_wind, power_for_eq);
+    expect_true(round(wind_at_r) == 8);
+  }
+
+  test_that("C++ will1a works at high maximum storm winds"){
+    double storm_max_wind = 80.0; // Highest example wind given in Fig. 11 of Willoughby
+    double rad_to_model = 8.3;
+    double rad_max_wind = 25.1;
+    double power_for_eq = 1.4; // Approx. value of n for a wind of 80.0 in Fig. 11
+
+    double wind_at_r = will1a(storm_max_wind, rad_to_model, rad_max_wind, power_for_eq);
+    expect_true(round(wind_at_r) == 17);
+  }
+}
+
+//' Calculate equation 4 from Willoughby
+//'
+//' This is the equation that is used for the wind profile in outer regions of the
+//' storm (more specifically, outside of the second radius defining the transition
+//' region, R2). It assumes that ...
+//'
+//' @param vmax_gl A numeric value giving the maximum gradient-level 1-minute
+//'   sustained wind for the tropical cyclone, in meters per second. This is the
+//'   value given for the storm as a whole at the time point (for example, in
+//'   tracking data).
+//' @param A A numeric value ...
+//' @param r A numeric value giving the distance from the center of the storm to
+//'   the location where you would like to model the local wind, in kilometers
+//' @param Rmax A numeric value with the distance from the center of the storm to
+//'   the storm's radius of maximum wind, in kilometers
+//' @param X1 A numeric value ...
+//' @param X2 A numeric value ...
+//'
+//' @return A numeric value with the modeled wind at distance r from the center of
+//'   the storm, in meters per second.
 double will4(double vmax_gl, double A, double r, double Rmax, double X1,
             double X2 = 25.0){
 
@@ -114,6 +186,30 @@ double will4(double vmax_gl, double A, double r, double Rmax, double X1,
                         A * exp((Rmax - r) / X2));
 
   return Vo;
+}
+
+context("Check C++ will4 function") {
+  test_that("C++ will4 works further from the eye with low wind"){
+    double storm_max_wind = 10.0; // Lowest example wind given in Fig. 11 of Willoughby
+    double rad_to_model = 120.3;
+    double rad_max_wind = 79.8;
+    double A_for_test = 0.0; // A reasonable value for A at this wind based on Fig. 11
+    double X1_for_test = 325.0; // A reasonable value for X1 at this wind based on Fig. 11
+
+    double wind_at_r = will4(storm_max_wind, A_for_test, rad_to_model, rad_max_wind, X1_for_test);
+    expect_true(round(wind_at_r) == 9);
+  }
+
+  test_that("C++ will4 works further from the eye at high maximum storm winds"){
+    double storm_max_wind = 80.0; // Highest example wind given in Fig. 11 of Willoughby
+    double rad_to_model = 42.1;
+    double rad_max_wind = 25.1;
+    double A_for_test = 0.3; // A reasonable value for A at this wind based on Fig. 11
+    double X1_for_test = 200.0; // A reasonable value for X1 at this wind based on Fig. 11
+
+    double wind_at_r = will4(storm_max_wind, A_for_test, rad_to_model, rad_max_wind, X1_for_test);
+    expect_true(round(wind_at_r) == 64);
+  }
 }
 
 // Calculate equation 2 from Willoughby
@@ -160,7 +256,7 @@ double will2(double r, double R1, double R2) {
 // [[Rcpp::export]]
 double will1new(double cdist, double Rmax, double R1,
                 double R2, double vmax_gl, double n,
-                double A, double X1, double X2 = 25){
+                double A, double X1, double X2 = 25.0){
 
   double wind_gl_aa;
   double Vi, Vo, w;
@@ -186,19 +282,101 @@ double will1new(double cdist, double Rmax, double R1,
   return wind_gl_aa;
 }
 
+context("Check that C++ will1new function works") {
+  test_that("C++ will1new works very close to the eye with low wind"){
+    double storm_max_wind = 10.0; // Lowest example wind given in Fig. 11 of Willoughby
+    double rad_to_model = 50.2;
+    double rad_max_wind = 79.8;
+    double rad_start_transition = 70.0;
+    double rad_end_transition = 85.0;
+    double power_for_eq = 0.4; // Approx. value of n for a wind of 10.0 in Fig. 11
+    double A_for_test = 0.0; // A reasonable value for A at this wind based on Fig. 11
+    double X1_for_test = 325.0; // A reasonable value for X1 at this wind based on Fig. 11
+
+    double wind_at_r = will1new(rad_to_model, rad_max_wind, rad_start_transition,
+                                rad_end_transition, storm_max_wind, power_for_eq,
+                                A_for_test, X1_for_test);
+    expect_true(round(wind_at_r) == 8);
+  }
+
+  test_that("C++ will1new works very close to the eye at high maximum storm winds"){
+    double storm_max_wind = 80.0; // Highest example wind given in Fig. 11 of Willoughby
+    double rad_to_model = 8.3;
+    double rad_max_wind = 25.1;
+    double rad_start_transition = 20.0;
+    double rad_end_transition = 35.0;
+    double power_for_eq = 1.4; // Approx. value of n for a wind of 80.0 in Fig. 11
+    double A_for_test = 0.3; // A reasonable value for A at this wind based on Fig. 11
+    double X1_for_test = 200.0; // A reasonable value for X1 at this wind based on Fig. 11
+
+    double wind_at_r = will1new(rad_to_model, rad_max_wind, rad_start_transition,
+                                rad_end_transition, storm_max_wind, power_for_eq,
+                                A_for_test, X1_for_test);
+    expect_true(round(wind_at_r) == 17);
+  }
+
+  test_that("C++ will1new works further from the eye with low wind"){
+    double storm_max_wind = 10.0; // Lowest example wind given in Fig. 11 of Willoughby
+    double rad_to_model = 120.3;
+    double rad_max_wind = 79.8;
+    double rad_start_transition = 70.0;
+    double rad_end_transition = 85.0;
+    double power_for_eq = 0.4; // Approx. value of n for a wind of 10.0 in Fig. 11
+    double A_for_test = 0.0; // A reasonable value for A at this wind based on Fig. 11
+    double X1_for_test = 325.0; // A reasonable value for X1 at this wind based on Fig. 11
+
+    double wind_at_r = will1new(rad_to_model, rad_max_wind, rad_start_transition,
+                                rad_end_transition, storm_max_wind, power_for_eq,
+                                A_for_test, X1_for_test);
+    expect_true(round(wind_at_r) == 9);
+  }
+
+  test_that("C++ will1new works further from the eye at high maximum storm winds"){
+    double storm_max_wind = 80.0; // Highest example wind given in Fig. 11 of Willoughby
+    double rad_to_model = 42.1;
+    double rad_max_wind = 25.1;
+    double rad_start_transition = 20.0;
+    double rad_end_transition = 35.0;
+    double power_for_eq = 1.4; // Approx. value of n for a wind of 80.0 in Fig. 11
+    double A_for_test = 0.3; // A reasonable value for A at this wind based on Fig. 11
+    double X1_for_test = 200.0; // A reasonable value for X1 at this wind based on Fig. 11
+
+    double wind_at_r = will1new(rad_to_model, rad_max_wind, rad_start_transition,
+                                rad_end_transition, storm_max_wind, power_for_eq,
+                                A_for_test, X1_for_test);
+    expect_true(round(wind_at_r) == 64);
+  }
+}
+
 /*** R
-# Check function
+library(purrr)
+library(ggplot2)
 
-data("floyd_tracks")
-floyd_tracks <- create_full_track(floyd_tracks)
-with_wind <- add_wind_radii(floyd_tracks)
+# Replicate Figure 2 in Willoughby
+cdist <- 0:150
+fig_2_data <- cdist %>%
+  tibble(cdist = .,
+         v_at_dist = map_dbl(., .f = will1new,
+                             Rmax = 24, R1 = 10, R2 = 35,
+                             vmax_gl = 42, n = 0.9, A = 0.39,
+                             X1 = 305, X2 = 25))
+fig_2_data %>%
+  ggplot(aes(x = cdist, y = v_at_dist)) +
+  geom_line() +
+  geom_point()
 
-test <- will1new(cdist = test_data, Rmax = with_wind[1,]$Rmax, R1 = with_wind[1,]$R1, R2 = with_wind[1,]$R2,
-                    vmax_gl = with_wind[1,]$vmax_gl, n = with_wind[1,]$n, A = with_wind[1,]$A,
-                    X1 = with_wind[1,]$X1)
-
-
-
+# Replicate Figure 9a in Willoughby
+cdist <- 0:150
+fig_2_data <- cdist %>%
+  tibble(cdist = .,
+         v_at_dist = map_dbl(., .f = will1new,
+                             Rmax = 23, R1 = 15, R2 = 15 + 25,
+                             vmax_gl = 62, n = 1.2, A = 0.41,
+                             X1 = 301, X2 = 25))
+fig_2_data %>%
+  ggplot(aes(x = cdist, y = v_at_dist)) +
+  geom_line() +
+  geom_point()
 */
 
 //' Calculate bearing from one lat/long to another for a single point
