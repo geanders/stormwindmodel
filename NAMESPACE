@@ -2,7 +2,7 @@
 
 export()
 export(add_forward_speed)
-export(add_inflow)
+export(add_inflow_new)
 export(add_storm_track)
 export(add_wind_radii)
 export(calc_and_summarize_grid_wind)

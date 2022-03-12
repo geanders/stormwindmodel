@@ -125,8 +125,8 @@ calc_gwd <- function(tclat, tclon, glat, glon) {
 #' @param tclat A numeric value with latitude in radians
 #' @return swd A numeric value with the surface wind direction in degrees
 #' @export
-add_inflow <- function(gwd, cdist, Rmax, tclat) {
-    .Call(`_stormwindmodel_add_inflow`, gwd, cdist, Rmax, tclat)
+add_inflow_new <- function(gwd, cdist, Rmax, tclat, glandsea) {
+    .Call(`_stormwindmodel_add_inflow_new`, gwd, cdist, Rmax, tclat, glandsea)
 }
 
 #' Add in forward speed of the storm
@@ -148,12 +148,12 @@ add_forward_speed <- function(wind_sfc_sym, tcspd_u, tcspd_v, swd, cdist, Rmax) 
 }
 
 #' @export
-calc_grid_wind_cpp <- function(glat, glon, max_dist, tclat, tclon, Rmax, R1, R2, vmax_gl, n, A, X1, tcspd_u, tcspd_v) {
-    .Call(`_stormwindmodel_calc_grid_wind_cpp`, glat, glon, max_dist, tclat, tclon, Rmax, R1, R2, vmax_gl, n, A, X1, tcspd_u, tcspd_v)
+calc_grid_wind_cpp <- function(glat, glon, glandsea, max_dist, tclat, tclon, Rmax, R1, R2, vmax_gl, n, A, X1, tcspd_u, tcspd_v) {
+    .Call(`_stormwindmodel_calc_grid_wind_cpp`, glat, glon, glandsea, max_dist, tclat, tclon, Rmax, R1, R2, vmax_gl, n, A, X1, tcspd_u, tcspd_v)
 }
 
-calc_grid_wind_cpp2 <- function(glat, glon, max_dist, tclat, tclon, Rmax, R1, R2, vmax_gl, n, A, X1, tcspd_u, tcspd_v) {
-    .Call(`_stormwindmodel_calc_grid_wind_cpp2`, glat, glon, max_dist, tclat, tclon, Rmax, R1, R2, vmax_gl, n, A, X1, tcspd_u, tcspd_v)
+calc_grid_wind_cpp2 <- function(glat, glon, glandsea, max_dist, tclat, tclon, Rmax, R1, R2, vmax_gl, n, A, X1, tcspd_u, tcspd_v) {
+    .Call(`_stormwindmodel_calc_grid_wind_cpp2`, glat, glon, glandsea, max_dist, tclat, tclon, Rmax, R1, R2, vmax_gl, n, A, X1, tcspd_u, tcspd_v)
 }
 
 #' Calculate coefficients for linear interpolation
