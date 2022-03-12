@@ -29,19 +29,20 @@ NULL
 #'
 #' This is the equation that is used for the wind profile in outer regions of the
 #' storm (more specifically, outside of the second radius defining the transition
-#' region, R2). It assumes that ...
+#' region, R2).
 #'
 #' @param vmax_gl A numeric value giving the maximum gradient-level 1-minute
 #'   sustained wind for the tropical cyclone, in meters per second. This is the
 #'   value given for the storm as a whole at the time point (for example, in
 #'   tracking data).
-#' @param A A numeric value ...
+#' @param A A numeric value with the fitted contribution of the faster exponential
+#'   to the profile for Willoughby
 #' @param r A numeric value giving the distance from the center of the storm to
 #'   the location where you would like to model the local wind, in kilometers
 #' @param Rmax A numeric value with the distance from the center of the storm to
 #'   the storm's radius of maximum wind, in kilometers
-#' @param X1 A numeric value ...
-#' @param X2 A numeric value ...
+#' @param X1 A numeric value with the fitted slower decay length for Willoughby
+#' @param X2 A numeric value with the fixed rapid decay length for Willoughby
 #'
 #' @return A numeric value with the modeled wind at distance r from the center of
 #'   the storm, in meters per second.
@@ -61,6 +62,21 @@ NULL
 #'   cyclone center to the grid point.
 calc_distance <- function(tclat, tclon, glat, glon, Rearth = 6371) {
     .Call(`_stormwindmodel_calc_distance`, tclat, tclon, glat, glon, Rearth)
+}
+
+#' Calculate equation 2 from Willoughby
+#'
+#' @param r A numeric value giving the distance from the center of the storm to
+#'   the location where you would like to model the local wind, in kilometers
+#' @param R1 A numeric value with the lower boundary of the transition zone (in
+#'   km from the storm center)
+#' @param R2 A numeric value with the upper boundary of the transition zone (in
+#'   km from the storm center)
+#'
+#' @return A numeric value between 0 and 1 that gives the amount to weight Vi
+#'   versus Vo when estimating wind within the transition zone.
+will2_new <- function(r, R1, R2) {
+    .Call(`_stormwindmodel_will2_new`, r, R1, R2)
 }
 
 #' Calculate gradient wind speed using equation 1 from Willoughby

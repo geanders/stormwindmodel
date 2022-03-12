@@ -25,6 +25,19 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// will2_new
+double will2_new(double r, double R1, double R2);
+RcppExport SEXP _stormwindmodel_will2_new(SEXP rSEXP, SEXP R1SEXP, SEXP R2SEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type r(rSEXP);
+    Rcpp::traits::input_parameter< double >::type R1(R1SEXP);
+    Rcpp::traits::input_parameter< double >::type R2(R2SEXP);
+    rcpp_result_gen = Rcpp::wrap(will2_new(r, R1, R2));
+    return rcpp_result_gen;
+END_RCPP
+}
 // will1new
 double will1new(double cdist, double Rmax, double R1, double R2, double vmax_gl, double n, double A, double X1, double X2);
 RcppExport SEXP _stormwindmodel_will1new(SEXP cdistSEXP, SEXP RmaxSEXP, SEXP R1SEXP, SEXP R2SEXP, SEXP vmax_glSEXP, SEXP nSEXP, SEXP ASEXP, SEXP X1SEXP, SEXP X2SEXP) {
@@ -437,6 +450,7 @@ RcppExport SEXP run_testthat_tests(SEXP);
 
 static const R_CallMethodDef CallEntries[] = {
     {"_stormwindmodel_calc_distance", (DL_FUNC) &_stormwindmodel_calc_distance, 5},
+    {"_stormwindmodel_will2_new", (DL_FUNC) &_stormwindmodel_will2_new, 3},
     {"_stormwindmodel_will1new", (DL_FUNC) &_stormwindmodel_will1new, 9},
     {"_stormwindmodel_calc_bearing_single", (DL_FUNC) &_stormwindmodel_calc_bearing_single, 4},
     {"_stormwindmodel_calc_gwd", (DL_FUNC) &_stormwindmodel_calc_gwd, 4},

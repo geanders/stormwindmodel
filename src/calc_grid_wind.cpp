@@ -163,19 +163,20 @@ context("Check C++ will1a function") {
 //'
 //' This is the equation that is used for the wind profile in outer regions of the
 //' storm (more specifically, outside of the second radius defining the transition
-//' region, R2). It assumes that ...
+//' region, R2).
 //'
 //' @param vmax_gl A numeric value giving the maximum gradient-level 1-minute
 //'   sustained wind for the tropical cyclone, in meters per second. This is the
 //'   value given for the storm as a whole at the time point (for example, in
 //'   tracking data).
-//' @param A A numeric value ...
+//' @param A A numeric value with the fitted contribution of the faster exponential
+//'   to the profile for Willoughby
 //' @param r A numeric value giving the distance from the center of the storm to
 //'   the location where you would like to model the local wind, in kilometers
 //' @param Rmax A numeric value with the distance from the center of the storm to
 //'   the storm's radius of maximum wind, in kilometers
-//' @param X1 A numeric value ...
-//' @param X2 A numeric value ...
+//' @param X1 A numeric value with the fitted slower decay length for Willoughby
+//' @param X2 A numeric value with the fixed rapid decay length for Willoughby
 //'
 //' @return A numeric value with the modeled wind at distance r from the center of
 //'   the storm, in meters per second.
@@ -212,8 +213,19 @@ context("Check C++ will4 function") {
   }
 }
 
-// Calculate equation 2 from Willoughby
-double will2(double r, double R1, double R2) {
+//' Calculate equation 2 from Willoughby
+//'
+//' @param r A numeric value giving the distance from the center of the storm to
+//'   the location where you would like to model the local wind, in kilometers
+//' @param R1 A numeric value with the lower boundary of the transition zone (in
+//'   km from the storm center)
+//' @param R2 A numeric value with the upper boundary of the transition zone (in
+//'   km from the storm center)
+//'
+//' @return A numeric value between 0 and 1 that gives the amount to weight Vi
+//'   versus Vo when estimating wind within the transition zone.
+// [[Rcpp::export]]
+double will2_new(double r, double R1, double R2) {
 
   double w;
   double xi = (r - R1) / (R2 - R1);
@@ -230,6 +242,54 @@ double will2(double r, double R1, double R2) {
 
   return w;
 }
+
+context("Check C++ will2 function") {
+  test_that("C++ will2 function returns zero inside R1") {
+    double r = 5.0;
+    double R1 = 10.0;
+    double R2 = 40.0;
+
+    double w = will2_new(r, R1, R2);
+    expect_true(w == 0.0);
+  }
+
+  test_that("C++ will2 function returns one outside R2") {
+    double r = 50.0;
+    double R1 = 10.0;
+    double R2 = 40.0;
+
+    double w = will2_new(r, R1, R2);
+    expect_true(w == 1.0);
+  }
+
+  test_that("C++ will2 function works inside the transition region (R1 to R2)") {
+    double r = 25.0;
+    double R1 = 10.0;
+    double R2 = 40.0;
+
+    double w = will2_new(r, R1, R2);
+    expect_true(w == 0.5);
+  }
+}
+
+/*** R
+library(tidyverse)
+library(purrr)
+
+## Based on Willoughby, w should smoothly ramp up from 0 to 1 between R1 and
+## R2. Check this using R1 and R2 estimates from Fig 1 in Willoughby. The
+## result should look like the bottom plot in Fig 1 of Willoughby.
+R1 <- 10
+R2 <- 40
+
+df <- tibble(r = 0:100,
+             w = map_dbl(r, stormwindmodel:::will2_new, R1 = R1, R2 = R2))
+df %>%
+  ggplot(aes(x = r, y = w)) +
+  geom_point() +
+  geom_line()
+*/
+
 
 //' Calculate gradient wind speed using equation 1 from Willoughby
 //'
@@ -270,7 +330,7 @@ double will1new(double cdist, double Rmax, double R1,
   } else {
     Vi = will1a(vmax_gl, cdist, Rmax, n);
     Vo = will4(vmax_gl, A, cdist, Rmax, X1,  X2);
-    w = will2(cdist, R1, R2);
+    w = will2_new(cdist, R1, R2);
     // Willoughby equation 1b
     wind_gl_aa = Vi * (1 - w) + Vo * w;
   }
