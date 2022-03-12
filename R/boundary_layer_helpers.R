@@ -75,7 +75,6 @@ calc_gwd <- function(tclat, tclon, glat, glon){
 #'
 #' add_inflow(gwd = 160, cdist = 100, Rmax = 20, tclat = -32)
 #'
-#' @export
 add_inflow <- function(gwd, cdist, Rmax, tclat){
   if(is.na(gwd) | is.na(cdist) | is.na(Rmax)){
     return(NA)
