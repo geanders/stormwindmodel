@@ -77,6 +77,8 @@
 #'                    center of each county}
 #'    \item{glon}{A numeric vector giving the longitude of the population mean
 #'                     center of each county}
+#'    \item{glandsea}{A logical vector specifying whether each grid point is over
+#'                     land (TRUE) or over water (FALSE).}
 #' }
 #'
 #' @source
