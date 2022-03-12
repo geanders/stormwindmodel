@@ -138,7 +138,7 @@ calc_grid_wind <- function(grid_point = stormwindmodel::county_points[1, ],
 
   grid_wind <- tibble(date = with_wind_radii$date,
                       windspeed = calc_grid_wind_cpp(glat = grid_point$glat, glon = grid_point$glon,
-                                                     max_dist = max_dist,
+                                                     glandsea = grid_point$glandsea, max_dist = max_dist,
                                                      tclat = with_wind_radii$tclat, tclon = with_wind_radii$tclon,
                                                      Rmax = with_wind_radii$Rmax, R1 = with_wind_radii$R1,
                                                      R2 = with_wind_radii$R2, vmax_gl = with_wind_radii$vmax_gl,
@@ -334,7 +334,7 @@ calc_grid_winds2 <- function(hurr_track = stormwindmodel::floyd_tracks,
   with_wind_radii <- add_wind_radii(full_track = full_track)
 
   grid_winds <- stormwindmodel:::calc_grid_wind_cpp2(glat = grid_df$glat, glon = grid_df$glon,
-                                    max_dist =  max_dist,
+                                    glandsea = grid_df$glandsea, max_dist =  max_dist,
                                     tclat = with_wind_radii$tclat, tclon = with_wind_radii$tclon,
                                     Rmax = with_wind_radii$Rmax, R1 = with_wind_radii$R1,
                                     R2 = with_wind_radii$R2, vmax_gl = with_wind_radii$vmax_gl,
