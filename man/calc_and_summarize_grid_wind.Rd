@@ -13,8 +13,9 @@ calc_and_summarize_grid_wind(
 )
 }
 \arguments{
-\item{grid_point}{A one-row dataframe with the grid id, latitude, and
-longitude for a single location for which you want to model winds.}
+\item{grid_point}{A one-row dataframe with the grid id, latitude,
+longitude, and a logical value for whether the point is over land (TRUE) or
+water (FALSE) for a single location for which you want to model winds.}
 
 \item{with_wind_radii}{A dataframe of storm tracks, including inputs and
 parameters for the Willoughby wind model, as created by

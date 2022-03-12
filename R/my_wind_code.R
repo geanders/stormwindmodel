@@ -95,8 +95,9 @@ add_wind_radii <- function(full_track = create_full_track()){
 #' @param with_wind_radii A dataframe of storm tracks, including inputs and
 #'    parameters for the Willoughby wind model, as created by
 #'    \code{\link{add_wind_radii}}.
-#' @param grid_point A one-row dataframe with the grid id, latitude, and
-#'    longitude for a single location for which you want to model winds.
+#' @param grid_point A one-row dataframe with the grid id, latitude,
+#'    longitude, and a logical value for whether the point is over land (TRUE) or
+#'    water (FALSE) for a single location for which you want to model winds.
 #' @param max_dist A numeric value giving (in kilometers) the maximum distance
 #'    from the storm's center to model storm-associated winds. Any value beyond
 #'    this distance will be automatically set to 0 m / s for storm-associated winds.
