@@ -264,15 +264,9 @@ double will1new(double cdist, double Rmax, double R1,
   if(cdist < R1){
     Vi = will1a(vmax_gl, cdist, Rmax, n);
     wind_gl_aa = Vi;
-  } else if(cdist > R2){
+  } else {
     Vo = will4(vmax_gl, A, cdist, Rmax, X1,  X2);
     wind_gl_aa = Vo;
-  } else {
-    Vi = will1a(vmax_gl, cdist, Rmax, n);
-    Vo = will4(vmax_gl, A, cdist, Rmax, X1,  X2);
-    w = will2(cdist, R1, R2);
-    // Willoughby equation 1b
-    wind_gl_aa = Vi * (1 - w) + Vo * w;
   }
 
   if(wind_gl_aa < 0){
