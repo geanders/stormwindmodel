@@ -406,6 +406,70 @@ context("Check that C++ will1new function works") {
                                 A_for_test, X1_for_test);
     expect_true(round(wind_at_r) == 64);
   }
+
+  test_that("C++ will1new works within the transition region with low wind"){
+    double storm_max_wind = 10.0; // Lowest example wind given in Fig. 11 of Willoughby
+    double rad_to_model = 72;
+    double rad_max_wind = 79.8;
+    double rad_start_transition = 70.0;
+    double rad_end_transition = 85.0;
+    double power_for_eq = 0.4; // Approx. value of n for a wind of 10.0 in Fig. 11
+    double A_for_test = 0.0; // A reasonable value for A at this wind based on Fig. 11
+    double X1_for_test = 325.0; // A reasonable value for X1 at this wind based on Fig. 11
+
+    double wind_at_r = will1new(rad_to_model, rad_max_wind, rad_start_transition,
+                                rad_end_transition, storm_max_wind, power_for_eq,
+                                A_for_test, X1_for_test);
+    expect_true(round(wind_at_r) == 10);
+  }
+
+  test_that("C++ will1new works within the transition region at high maximum storm winds"){
+    double storm_max_wind = 80.0; // Highest example wind given in Fig. 11 of Willoughby
+    double rad_to_model = 22.0;
+    double rad_max_wind = 25.1;
+    double rad_start_transition = 20.0;
+    double rad_end_transition = 35.0;
+    double power_for_eq = 1.4; // Approx. value of n for a wind of 80.0 in Fig. 11
+    double A_for_test = 0.3; // A reasonable value for A at this wind based on Fig. 11
+    double X1_for_test = 200.0; // A reasonable value for X1 at this wind based on Fig. 11
+
+    double wind_at_r = will1new(rad_to_model, rad_max_wind, rad_start_transition,
+                                rad_end_transition, storm_max_wind, power_for_eq,
+                                A_for_test, X1_for_test);
+    expect_true(round(wind_at_r) == 67);
+  }
+
+  test_that("C++ will1new works at Rmax with low wind"){
+    double storm_max_wind = 10.0; // Lowest example wind given in Fig. 11 of Willoughby
+    double rad_to_model = 79.8;
+    double rad_max_wind = 79.8;
+    double rad_start_transition = 70.0;
+    double rad_end_transition = 85.0;
+    double power_for_eq = 0.4; // Approx. value of n for a wind of 10.0 in Fig. 11
+    double A_for_test = 0.0; // A reasonable value for A at this wind based on Fig. 11
+    double X1_for_test = 325.0; // A reasonable value for X1 at this wind based on Fig. 11
+
+    double wind_at_r = will1new(rad_to_model, rad_max_wind, rad_start_transition,
+                                rad_end_transition, storm_max_wind, power_for_eq,
+                                A_for_test, X1_for_test);
+    expect_true(round(wind_at_r) == 10);
+  }
+
+  test_that("C++ will1new works at Rmax at high maximum storm winds"){
+    double storm_max_wind = 80.0; // Highest example wind given in Fig. 11 of Willoughby
+    double rad_to_model = 25.1;
+    double rad_max_wind = 25.1;
+    double rad_start_transition = 20.0;
+    double rad_end_transition = 35.0;
+    double power_for_eq = 1.4; // Approx. value of n for a wind of 80.0 in Fig. 11
+    double A_for_test = 0.3; // A reasonable value for A at this wind based on Fig. 11
+    double X1_for_test = 200.0; // A reasonable value for X1 at this wind based on Fig. 11
+
+    double wind_at_r = will1new(rad_to_model, rad_max_wind, rad_start_transition,
+                                rad_end_transition, storm_max_wind, power_for_eq,
+                                A_for_test, X1_for_test);
+    expect_true(round(wind_at_r) == 80);
+  }
 }
 
 /*** R
