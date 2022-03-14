@@ -1,0 +1,53 @@
+---
+title: "Visualization Tests"
+author: "Jordan Robinson"
+date: "3/7/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Purpose
+
+Showing visualization examples that can be pulled from data.
+
+```{r}
+library(stormwindmodel)
+library(tidyverse)
+library(ggplot2)
+
+storm_data <- floyd_tracks
+grid_data <- county_points
+```
+
+
+Use functions to pull storm data. In this case, winds
+```{r}
+wind_map_data <- calc_grid_winds2()
+head(wind_map_data)
+```
+
+Basic Plot -  max wind speed at each location based on get_grid_winds, which pulls max from cal_grid_winds2 matrix
+```{r}
+base_plot <- get_grid_winds(storm_data, grid_data)
+map_wind(base_plot)
+```
+
+New Plot - take all points at a specific time and plot
+```{r}
+
+county_data <- tigris:::counties(state = c("NC", "FL","GA","VA", "DE", "MD", "NJ", "PA", "NY","CT","RI", "MA", "NH", "VT", "ME"), cb = T, class = "sf")
+
+practice <- right_join(base_plot, grid_data)
+sf_plot <- sf:::st_as_sf(practice, coords = c("glon", "glat")) %>% 
+   sf:::st_set_crs(4269)
+
+#merge counties w/ fibs
+
+ggplot() + 
+  geom_sf(data = county_data) +
+  geom_sf(data = sf_plot, aes(color = vmax_sust))
+
+```
