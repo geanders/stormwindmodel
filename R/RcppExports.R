@@ -149,14 +149,25 @@ calc_bearing_single <- function(tclat, tclon, glat, glon) {
 
 #' Calculate gradient wind direction at a point
 #'
+#' This function determines the bearing from the storm's center to a
+#' grid point location and then calculates the direction of gradient
+#' winds at that grid point. Gradient winds will be perpendicular to
+#' the direction from the storm's center to the grid point. In the
+#' Northern hemisphere, cyclonic winds are counterclockwise, so you
+#' add 90 degrees to the bearing from the storm center to the grid point
+#' when using polar coordinates. In the Southern hemisphere, cyclonic
+#' winds are clockwise, so you subtract 90 degrees.
+#'
 #' @param tclat A numeric value with the latitude of the tropical cyclone's center
 #'   in radians
 #' @param tclon A numeric value with the longitude of the tropical cyclone's center
 #'   in radians
 #' @param glat A numeric value with the latitude of the grid point in radians
 #' @param glon A numeric value with the longitude of the grid point in radians
+#'
 #' @return A numeric value with the the direction of gradient storm winds at a location,
 #'   in polar coordinates (i.e., due East is 0 degrees, due North is 90 degrees, etc.)
+#'
 calc_gwd <- function(tclat, tclon, glat, glon) {
     .Call(`_stormwindmodel_calc_gwd`, tclat, tclon, glat, glon)
 }
@@ -211,8 +222,8 @@ gradient_to_surface_new <- function(wind_gl_aa, cdist, glandsea) {
 #'    tropical cyclone winds and waves for emergency management. Ocean
 #'    Engineering 30(4):553-578.
 #'
-add_inflow_new <- function(gwd, cdist, Rmax, tclat, glandsea) {
-    .Call(`_stormwindmodel_add_inflow_new`, gwd, cdist, Rmax, tclat, glandsea)
+add_inflow <- function(gwd, cdist, Rmax, tclat, glandsea) {
+    .Call(`_stormwindmodel_add_inflow`, gwd, cdist, Rmax, tclat, glandsea)
 }
 
 #' Add in forward speed of the storm
