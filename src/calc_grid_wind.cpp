@@ -311,28 +311,92 @@ df %>%
 */
 
 
-//' Calculate gradient wind speed using equation 1 from Willoughby
+//' Model wind speed at a grid point for a storm track observation
+//'
+//' Models the gradient wind speed at a certain radius from
+//' a storm's center. To do this, it uses different equations and subfunctions
+//' depending on how large the radius is (see details). This function requires,
+//' as inputs, Willoughby wind model parameters calculated using the
+//' \code{\link{add_wind_radii}} function.
 //'
 //' @param cdist A numeric value with the distance between the grid point and the
 //'   center of the storm (in km)
-//' @param Rmax A numeric value with the radius at which max winds occur
-//'   (in km from the center of the storm)
 //' @param R1 A numeric value with the lower boundary of the transition zone (in
 //'   km from the storm center)
 //' @param R2 A numeric value with the upper boundary of the transition zone (in
 //'   km from the storm center)
 //' @param vmax_gl A numeric value with the maximum gradient level 1-minute
 //'   sustained wind, in (m/s)
-//' @param A A numeric value as a parameter for the Willoughby model
-//' @param r A numeric value with the radius from the storm center to the grid
-//'   point (in km)
+//' @param A A numeric value that is a parameter between 0 and 1 for the Willoughby
+//'   model
 //' @param Rmax A numeric value with the radius at which the maximum wind occurs
 //'   (in km)
-//' @param X1 A numeric value as a parameter for the Willoughby model
+//' @param X1 A numeric value that is a parameter for the Willoughby model
 //' @param X2 A numeric value as a parameter for the Willoughby model, set to 25
 //'   (Willoughby, Darling, and Rahn 2006)
-//' @return wind_gl_aa A numeric value ...
-//' @export
+//'
+//' @return Returns a numeric vector with gradient wind speed at a radius of
+//'    \eqn{r} from the storm's center, in meters per second.
+//'
+//' @details If \eqn{r \le R_1}{r \le R1}, this function is calculating the equation:
+//'
+//'    \deqn{V(r) = V_i = V_{max} \left( \frac{r}{R_{max}} \right)^n}{
+//'    V(r) = Vi = vmax_gl (r / Rmax)^n}
+//'
+//'    where:
+//'    \itemize{
+//'      \item{\eqn{V(r)}: Maximum sustained gradient wind speed at a radius of
+//'        \eqn{r} from the storm's center}
+//'      \item{\eqn{r}: Radius from the storm center, in kilometers}
+//'      \item{\eqn{V_{max,G}}{vmax_gl}: Maximum sustained gradient wind speed of the
+//'        storm, in meters per second}
+//'      \item{\eqn{R_1}{R1}: A parameter for the Willoughby wind model (radius to
+//'        start of transition region)}
+//'      \item{\eqn{R_{max}}{Rmax}: Radius (in kilometers) to highest winds}
+//'      \item{\eqn{n}: A parameter for the Willoughby wind model}
+//'    }
+//'
+//'    If \eqn{R_2 < r}{R2 \le r}, this function is calculating
+//'      the equation:
+//'
+//'      \deqn{V(r) = V_o = V_{max}\left[(1 - A) e^\frac{R_{max} - r}{X_1} + A e^\frac{R_{max} - r}{X_2}\right]}{
+//'      V(r) = Vo = vmax_gl[(1 - A) e^((Rmax - r) / X1) + A e^((Rmax - r) / X_2)]}
+//'
+//'    where:
+//'    \itemize{
+//'      \item{\eqn{V(r)}: Maximum sustained gradient wind speed at a radius of
+//'        \eqn{r} kilometers from the storm's center}
+//'      \item{\eqn{r}: Radius from the storm center, in kilometers}
+//'      \item{\eqn{V_{max,G}}{vmax_gl}: Maximum sustained gradient wind speed of the
+//'        storm, in meters per second}
+//'      \item{\eqn{R_{max}}{Rmax}: Radius (in kilometers) to highest winds}
+//'      \item{\eqn{A}, \eqn{X_1}{X1}, \eqn{X_2}{X2}: Parameters for the
+//'         Willoughby wind model}
+//'    }
+//'
+//'    If \eqn{R_1 < r \le R_2}{R1 < r \le R2}, this function uses
+//'      the equations:
+//'
+//'      \deqn{\xi = \frac{r - R_1}{R_2 - R_1}}{
+//'      \xi = (r - R1) / (R2 - R1)}
+//'
+//'      and, if \eqn{0 \le \xi < \le 1} (otherwise, \eqn{w = 0}):
+//'
+//'      \deqn{w = 126 \xi^5 - 420 \xi^6 + 540 \xi^7- 315 \xi^8 + 70 \xi^9}
+//'
+//'      and then:
+//'
+//'      \deqn{V(r) = V_i (1 - w) + V_o w, (R_1 \le r \le R_2)}{
+//'      V(r) = Vi (1 - w) + Vo w}
+//'
+//'    where, for this series of equations:
+//'    \itemize{
+//'      \item{\eqn{V(r)}: Maximum sustained gradient wind speed at a radius of
+//'        \eqn{r} kilometers from the storm's center}
+//'      \item{\eqn{r}: Radius from the storm center, in kilometers}
+//'      \item{\eqn{w}: Weighting variable}
+//'      \item{\eqn{R_1}{R1}, \eqn{R_2}{R2}: Parameters for the Willoughby wind model}
+//'    }
 //'
 //' @references
 //'
@@ -341,7 +405,7 @@ df %>%
 //' continuous profiles. Monthly Weather Review 134(4):1102-1120.
 //'
 // [[Rcpp::export]]
-double will1new(double cdist, double Rmax, double R1,
+double will1(double cdist, double Rmax, double R1,
                 double R2, double vmax_gl, double n,
                 double A, double X1, double X2 = 25.0){
 
@@ -369,8 +433,8 @@ double will1new(double cdist, double Rmax, double R1,
   return wind_gl_aa;
 }
 
-context("Check that C++ will1new function works") {
-  test_that("C++ will1new works very close to the eye with low wind"){
+context("Check that C++ will1 function works") {
+  test_that("C++ will1 works very close to the eye with low wind"){
     double storm_max_wind = 10.0; // Lowest example wind given in Fig. 11 of Willoughby
     double rad_to_model = 50.2;
     double rad_max_wind = 79.8;
@@ -380,13 +444,13 @@ context("Check that C++ will1new function works") {
     double A_for_test = 0.0; // A reasonable value for A at this wind based on Fig. 11
     double X1_for_test = 325.0; // A reasonable value for X1 at this wind based on Fig. 11
 
-    double wind_at_r = will1new(rad_to_model, rad_max_wind, rad_start_transition,
+    double wind_at_r = will1(rad_to_model, rad_max_wind, rad_start_transition,
                                 rad_end_transition, storm_max_wind, power_for_eq,
                                 A_for_test, X1_for_test);
     expect_true(round(wind_at_r) == 8);
   }
 
-  test_that("C++ will1new works very close to the eye at high maximum storm winds"){
+  test_that("C++ will1 works very close to the eye at high maximum storm winds"){
     double storm_max_wind = 80.0; // Highest example wind given in Fig. 11 of Willoughby
     double rad_to_model = 8.3;
     double rad_max_wind = 25.1;
@@ -396,13 +460,13 @@ context("Check that C++ will1new function works") {
     double A_for_test = 0.3; // A reasonable value for A at this wind based on Fig. 11
     double X1_for_test = 200.0; // A reasonable value for X1 at this wind based on Fig. 11
 
-    double wind_at_r = will1new(rad_to_model, rad_max_wind, rad_start_transition,
+    double wind_at_r = will1(rad_to_model, rad_max_wind, rad_start_transition,
                                 rad_end_transition, storm_max_wind, power_for_eq,
                                 A_for_test, X1_for_test);
     expect_true(round(wind_at_r) == 17);
   }
 
-  test_that("C++ will1new works further from the eye with low wind"){
+  test_that("C++ will1 works further from the eye with low wind"){
     double storm_max_wind = 10.0; // Lowest example wind given in Fig. 11 of Willoughby
     double rad_to_model = 120.3;
     double rad_max_wind = 79.8;
@@ -412,13 +476,13 @@ context("Check that C++ will1new function works") {
     double A_for_test = 0.0; // A reasonable value for A at this wind based on Fig. 11
     double X1_for_test = 325.0; // A reasonable value for X1 at this wind based on Fig. 11
 
-    double wind_at_r = will1new(rad_to_model, rad_max_wind, rad_start_transition,
+    double wind_at_r = will1(rad_to_model, rad_max_wind, rad_start_transition,
                                 rad_end_transition, storm_max_wind, power_for_eq,
                                 A_for_test, X1_for_test);
     expect_true(round(wind_at_r) == 9);
   }
 
-  test_that("C++ will1new works further from the eye at high maximum storm winds"){
+  test_that("C++ will1 works further from the eye at high maximum storm winds"){
     double storm_max_wind = 80.0; // Highest example wind given in Fig. 11 of Willoughby
     double rad_to_model = 42.1;
     double rad_max_wind = 25.1;
@@ -428,13 +492,13 @@ context("Check that C++ will1new function works") {
     double A_for_test = 0.3; // A reasonable value for A at this wind based on Fig. 11
     double X1_for_test = 200.0; // A reasonable value for X1 at this wind based on Fig. 11
 
-    double wind_at_r = will1new(rad_to_model, rad_max_wind, rad_start_transition,
+    double wind_at_r = will1(rad_to_model, rad_max_wind, rad_start_transition,
                                 rad_end_transition, storm_max_wind, power_for_eq,
                                 A_for_test, X1_for_test);
     expect_true(round(wind_at_r) == 64);
   }
 
-  test_that("C++ will1new works within the transition region with low wind"){
+  test_that("C++ will1 works within the transition region with low wind"){
     double storm_max_wind = 10.0; // Lowest example wind given in Fig. 11 of Willoughby
     double rad_to_model = 72;
     double rad_max_wind = 79.8;
@@ -444,13 +508,13 @@ context("Check that C++ will1new function works") {
     double A_for_test = 0.0; // A reasonable value for A at this wind based on Fig. 11
     double X1_for_test = 325.0; // A reasonable value for X1 at this wind based on Fig. 11
 
-    double wind_at_r = will1new(rad_to_model, rad_max_wind, rad_start_transition,
+    double wind_at_r = will1(rad_to_model, rad_max_wind, rad_start_transition,
                                 rad_end_transition, storm_max_wind, power_for_eq,
                                 A_for_test, X1_for_test);
     expect_true(round(wind_at_r) == 10);
   }
 
-  test_that("C++ will1new works within the transition region at high maximum storm winds"){
+  test_that("C++ will1 works within the transition region at high maximum storm winds"){
     double storm_max_wind = 80.0; // Highest example wind given in Fig. 11 of Willoughby
     double rad_to_model = 22.0;
     double rad_max_wind = 25.1;
@@ -460,13 +524,13 @@ context("Check that C++ will1new function works") {
     double A_for_test = 0.3; // A reasonable value for A at this wind based on Fig. 11
     double X1_for_test = 200.0; // A reasonable value for X1 at this wind based on Fig. 11
 
-    double wind_at_r = will1new(rad_to_model, rad_max_wind, rad_start_transition,
+    double wind_at_r = will1(rad_to_model, rad_max_wind, rad_start_transition,
                                 rad_end_transition, storm_max_wind, power_for_eq,
                                 A_for_test, X1_for_test);
     expect_true(round(wind_at_r) == 67);
   }
 
-  test_that("C++ will1new works at Rmax with low wind"){
+  test_that("C++ will1 works at Rmax with low wind"){
     double storm_max_wind = 10.0; // Lowest example wind given in Fig. 11 of Willoughby
     double rad_to_model = 79.8;
     double rad_max_wind = 79.8;
@@ -476,13 +540,13 @@ context("Check that C++ will1new function works") {
     double A_for_test = 0.0; // A reasonable value for A at this wind based on Fig. 11
     double X1_for_test = 325.0; // A reasonable value for X1 at this wind based on Fig. 11
 
-    double wind_at_r = will1new(rad_to_model, rad_max_wind, rad_start_transition,
+    double wind_at_r = will1(rad_to_model, rad_max_wind, rad_start_transition,
                                 rad_end_transition, storm_max_wind, power_for_eq,
                                 A_for_test, X1_for_test);
     expect_true(round(wind_at_r) == 10);
   }
 
-  test_that("C++ will1new works at Rmax at high maximum storm winds"){
+  test_that("C++ will1 works at Rmax at high maximum storm winds"){
     double storm_max_wind = 80.0; // Highest example wind given in Fig. 11 of Willoughby
     double rad_to_model = 25.1;
     double rad_max_wind = 25.1;
@@ -492,7 +556,7 @@ context("Check that C++ will1new function works") {
     double A_for_test = 0.3; // A reasonable value for A at this wind based on Fig. 11
     double X1_for_test = 200.0; // A reasonable value for X1 at this wind based on Fig. 11
 
-    double wind_at_r = will1new(rad_to_model, rad_max_wind, rad_start_transition,
+    double wind_at_r = will1(rad_to_model, rad_max_wind, rad_start_transition,
                                 rad_end_transition, storm_max_wind, power_for_eq,
                                 A_for_test, X1_for_test);
     expect_true(round(wind_at_r) == 80);
@@ -508,7 +572,7 @@ library(ggplot2)
 cdist <- 0:150
 fig_2_data <- cdist %>%
   tibble(cdist = .,
-         v_at_dist = map_dbl(., .f = will1new,
+         v_at_dist = map_dbl(., .f = will1,
                              Rmax = 24, R1 = 10, R2 = 35,
                              vmax_gl = 42, n = 0.9, A = 0.39,
                              X1 = 305, X2 = 25))
@@ -521,7 +585,7 @@ fig_2_data %>%
 cdist <- 0:150
 fig_2_data <- cdist %>%
   tibble(cdist = .,
-         v_at_dist = map_dbl(., .f = will1new,
+         v_at_dist = map_dbl(., .f = will1,
                              Rmax = 23, R1 = 15, R2 = 15 + 25,
                              vmax_gl = 62, n = 1.2, A = 0.41,
                              X1 = 301, X2 = 25))
@@ -761,6 +825,10 @@ context("Check C++ calc_gwd function") {
 
 //' Calculate symmetrical surface wind from gradient wind
 //'
+//' Calculates the surface wind speed based on an estimated gradient
+//' wind speed at a point and the radius from the storm center to
+//' the grid point.
+//'
 //' @param wind_gl_aa The gradient-level wind at the location at which the wind
 //'   is being modeled (in m/s)
 //' @param cdist The distance from the center of the storm to the location at
@@ -771,12 +839,21 @@ context("Check C++ calc_gwd function") {
 //' @return A numeric value giving the surface-level wind at that location (before
 //'   incorporating the role of forward motion of the storm) (in m/s)
 //'
+//' @details The reduction factor is based on Figure 3 of Knaff et al., 2003.
+//' Over water, it is estimated to be 0.9 up to a radius of 100 km,
+//' 0.75 for a radius of 700 km or more, and decrease linearly between
+//' a radius of 100 km and 700 km. Points over land use a reduction
+//' factor that is 20\% lower.
+//'
 //' @references
 //'
-//'
+//' Knaff JA, DeMaria M, Molenar DA, Sampson CR, and Seybold MG. 2011. An
+//' automated, objective, multiple-satellite-platform tropical cyclone surface
+//' wind speed analysis. Journal of Applied Meteorology and Climatology
+//' 50(10):2149-2166
 //'
 // [[Rcpp::export]]
-double gradient_to_surface_new(double wind_gl_aa, double cdist, bool glandsea) {
+double gradient_to_surface(double wind_gl_aa, double cdist, bool glandsea) {
   double wind_sfc_sym, reduction_factor;
 
   if(cdist <= 100){
@@ -798,13 +875,13 @@ double gradient_to_surface_new(double wind_gl_aa, double cdist, bool glandsea) {
   return wind_sfc_sym;
 }
 
-context("Check C++ gradient_to_surface_new function") {
+context("Check C++ gradient_to_surface function") {
   test_that("Gradient-to-surface C++ function works close to the storm center over land"){
     double gradient_wind = 20.0;
     double r_to_model = 50.0;
     bool over_land = true;
 
-    double calculated_surface_wind = gradient_to_surface_new(gradient_wind,
+    double calculated_surface_wind = gradient_to_surface(gradient_wind,
                                                              r_to_model,
                                                              over_land);
     expect_true(round(calculated_surface_wind) == 14);
@@ -815,7 +892,7 @@ context("Check C++ gradient_to_surface_new function") {
     double r_to_model = 50.0;
     bool over_land = false;
 
-    double calculated_surface_wind = gradient_to_surface_new(gradient_wind,
+    double calculated_surface_wind = gradient_to_surface(gradient_wind,
                                                              r_to_model,
                                                              over_land);
     expect_true(round(calculated_surface_wind) == 18);
@@ -826,7 +903,7 @@ context("Check C++ gradient_to_surface_new function") {
     double r_to_model = 900.0;
     bool over_land = true;
 
-    double calculated_surface_wind = gradient_to_surface_new(gradient_wind,
+    double calculated_surface_wind = gradient_to_surface(gradient_wind,
                                                              r_to_model,
                                                              over_land);
     expect_true(round(calculated_surface_wind) == 12);
@@ -837,7 +914,7 @@ context("Check C++ gradient_to_surface_new function") {
     double r_to_model = 900.0;
     bool over_land = false;
 
-    double calculated_surface_wind = gradient_to_surface_new(gradient_wind,
+    double calculated_surface_wind = gradient_to_surface(gradient_wind,
                                                              r_to_model,
                                                              over_land);
     expect_true(round(calculated_surface_wind) == 15);
@@ -848,7 +925,7 @@ context("Check C++ gradient_to_surface_new function") {
     double r_to_model = 200.0;
     bool over_land = true;
 
-    double calculated_surface_wind = gradient_to_surface_new(gradient_wind,
+    double calculated_surface_wind = gradient_to_surface(gradient_wind,
                                                              r_to_model,
                                                              over_land);
     expect_true(round(calculated_surface_wind) == 14);
@@ -859,7 +936,7 @@ context("Check C++ gradient_to_surface_new function") {
     double r_to_model = 200.0;
     bool over_land = false;
 
-    double calculated_surface_wind = gradient_to_surface_new(gradient_wind,
+    double calculated_surface_wind = gradient_to_surface(gradient_wind,
                                                              r_to_model,
                                                              over_land);
     expect_true(round(calculated_surface_wind) == 18);
@@ -875,7 +952,7 @@ library(ggplot2)
 tibble(cdist = rep(0:900, 2),
        over_land = rep(c(TRUE, FALSE), each = 901),
        reduction_factor = map2_dbl(.x = cdist, .y = over_land,
-                                   .f = ~ stormwindmodel:::gradient_to_surface_new(1.0, .x, .y))) %>%
+                                   .f = ~ stormwindmodel:::gradient_to_surface(1.0, .x, .y))) %>%
   ggplot(aes(x = cdist, y = reduction_factor, color = over_land, group = over_land)) +
   geom_line() +
   ylim(c(0.5, 1.0))
@@ -1471,11 +1548,11 @@ NumericVector calc_grid_wind_cpp(double glat, double glon, bool glandsea,
       windspeed[i] = 0;
     } else {
       // Calculate gradient-level wind at the point
-      wind_gl_aa = will1new(cdist, Rmax[i], R1[i], R2[i], vmax_gl[i], n[i], A[i], X1[i]);
+      wind_gl_aa = will1(cdist, Rmax[i], R1[i], R2[i], vmax_gl[i], n[i], A[i], X1[i]);
       // Calculate the gradient wind direction at the point
       gwd = calc_gwd(tclat_rad[i], tclon_rad[i], glat_rad, glon_rad);
       // Calculate symmetrical surface wind at the point
-      wind_sfc_sym = gradient_to_surface_new(wind_gl_aa, cdist, glandsea);
+      wind_sfc_sym = gradient_to_surface(wind_gl_aa, cdist, glandsea);
       // Add inflow
       swd = add_inflow(gwd, cdist, Rmax[i], tclat[i], glandsea);
       // Add forward speed of storm
@@ -1551,11 +1628,11 @@ List calc_grid_wind_cpp2(NumericVector glat, NumericVector glon, LogicalVector g
         surface_wind_direction(i, j) = NA_REAL;
       } else {
         // Calculate gradient-level wind at the point
-        wind_gl_aa = will1new(cdist, Rmax[i], R1[i], R2[i], vmax_gl[i], n[i], A[i], X1[i]);
+        wind_gl_aa = will1(cdist, Rmax[i], R1[i], R2[i], vmax_gl[i], n[i], A[i], X1[i]);
         // Calculate the gradient wind direction at the point
         gwd = calc_gwd(tclat_rad[i], tclon_rad[i], glat_rad[j], glon_rad[j]);
         // Calculate symmetrical surface wind at the point
-        wind_sfc_sym = gradient_to_surface_new(wind_gl_aa, cdist, glandsea[j]);
+        wind_sfc_sym = gradient_to_surface(wind_gl_aa, cdist, glandsea[j]);
         // Add inflow
         swd = add_inflow(gwd, cdist, Rmax[i], tclat[i], glandsea[j]);
         surface_wind_direction(i, j) = swd;
