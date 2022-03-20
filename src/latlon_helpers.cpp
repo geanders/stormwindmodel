@@ -126,7 +126,6 @@ stormwindmodel:::latlon_to_km(c(45, 43), c(-80, -81), c(48, 49), c(-82, -80))
 //'    the two observations, in meters per second.
 //'
 //' @export
-
 // [[Rcpp::export]]
 NumericVector calc_forward_speed(NumericVector tclat_1, NumericVector tclon_1,
                                  Rcpp::DatetimeVector time_1,
