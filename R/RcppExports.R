@@ -100,28 +100,92 @@ will2_new <- function(r, R1, R2) {
     .Call(`_stormwindmodel_will2_new`, r, R1, R2)
 }
 
-#' Calculate gradient wind speed using equation 1 from Willoughby
+#' Model wind speed at a grid point for a storm track observation
+#'
+#' Models the gradient wind speed at a certain radius from
+#' a storm's center. To do this, it uses different equations and subfunctions
+#' depending on how large the radius is (see details). This function requires,
+#' as inputs, Willoughby wind model parameters calculated using the
+#' \code{\link{add_wind_radii}} function.
 #'
 #' @param cdist A numeric value with the distance between the grid point and the
 #'   center of the storm (in km)
-#' @param Rmax A numeric value with the radius at which max winds occur
-#'   (in km from the center of the storm)
 #' @param R1 A numeric value with the lower boundary of the transition zone (in
 #'   km from the storm center)
 #' @param R2 A numeric value with the upper boundary of the transition zone (in
 #'   km from the storm center)
 #' @param vmax_gl A numeric value with the maximum gradient level 1-minute
 #'   sustained wind, in (m/s)
-#' @param A A numeric value as a parameter for the Willoughby model
-#' @param r A numeric value with the radius from the storm center to the grid
-#'   point (in km)
+#' @param A A numeric value that is a parameter between 0 and 1 for the Willoughby
+#'   model
 #' @param Rmax A numeric value with the radius at which the maximum wind occurs
 #'   (in km)
-#' @param X1 A numeric value as a parameter for the Willoughby model
+#' @param X1 A numeric value that is a parameter for the Willoughby model
 #' @param X2 A numeric value as a parameter for the Willoughby model, set to 25
 #'   (Willoughby, Darling, and Rahn 2006)
-#' @return wind_gl_aa A numeric value ...
-#' @export
+#'
+#' @return Returns a numeric vector with gradient wind speed at a radius of
+#'    \eqn{r} from the storm's center, in meters per second.
+#'
+#' @details If \eqn{r \le R_1}{r \le R1}, this function is calculating the equation:
+#'
+#'    \deqn{V(r) = V_i = V_{max} \left( \frac{r}{R_{max}} \right)^n}{
+#'    V(r) = Vi = vmax_gl (r / Rmax)^n}
+#'
+#'    where:
+#'    \itemize{
+#'      \item{\eqn{V(r)}: Maximum sustained gradient wind speed at a radius of
+#'        \eqn{r} from the storm's center}
+#'      \item{\eqn{r}: Radius from the storm center, in kilometers}
+#'      \item{\eqn{V_{max,G}}{vmax_gl}: Maximum sustained gradient wind speed of the
+#'        storm, in meters per second}
+#'      \item{\eqn{R_1}{R1}: A parameter for the Willoughby wind model (radius to
+#'        start of transition region)}
+#'      \item{\eqn{R_{max}}{Rmax}: Radius (in kilometers) to highest winds}
+#'      \item{\eqn{n}: A parameter for the Willoughby wind model}
+#'    }
+#'
+#'    If \eqn{R_2 < r}{R2 \le r}, this function is calculating
+#'      the equation:
+#'
+#'      \deqn{V(r) = V_o = V_{max}\left[(1 - A) e^\frac{R_{max} - r}{X_1} + A e^\frac{R_{max} - r}{X_2}\right]}{
+#'      V(r) = Vo = vmax_gl[(1 - A) e^((Rmax - r) / X1) + A e^((Rmax - r) / X_2)]}
+#'
+#'    where:
+#'    \itemize{
+#'      \item{\eqn{V(r)}: Maximum sustained gradient wind speed at a radius of
+#'        \eqn{r} kilometers from the storm's center}
+#'      \item{\eqn{r}: Radius from the storm center, in kilometers}
+#'      \item{\eqn{V_{max,G}}{vmax_gl}: Maximum sustained gradient wind speed of the
+#'        storm, in meters per second}
+#'      \item{\eqn{R_{max}}{Rmax}: Radius (in kilometers) to highest winds}
+#'      \item{\eqn{A}, \eqn{X_1}{X1}, \eqn{X_2}{X2}: Parameters for the
+#'         Willoughby wind model}
+#'    }
+#'
+#'    If \eqn{R_1 < r \le R_2}{R1 < r \le R2}, this function uses
+#'      the equations:
+#'
+#'      \deqn{\xi = \frac{r - R_1}{R_2 - R_1}}{
+#'      \xi = (r - R1) / (R2 - R1)}
+#'
+#'      and, if \eqn{0 \le \xi < \le 1} (otherwise, \eqn{w = 0}):
+#'
+#'      \deqn{w = 126 \xi^5 - 420 \xi^6 + 540 \xi^7- 315 \xi^8 + 70 \xi^9}
+#'
+#'      and then:
+#'
+#'      \deqn{V(r) = V_i (1 - w) + V_o w, (R_1 \le r \le R_2)}{
+#'      V(r) = Vi (1 - w) + Vo w}
+#'
+#'    where, for this series of equations:
+#'    \itemize{
+#'      \item{\eqn{V(r)}: Maximum sustained gradient wind speed at a radius of
+#'        \eqn{r} kilometers from the storm's center}
+#'      \item{\eqn{r}: Radius from the storm center, in kilometers}
+#'      \item{\eqn{w}: Weighting variable}
+#'      \item{\eqn{R_1}{R1}, \eqn{R_2}{R2}: Parameters for the Willoughby wind model}
+#'    }
 #'
 #' @references
 #'
@@ -129,8 +193,8 @@ will2_new <- function(r, R1, R2) {
 #' of the primary hurricane vortex. Part II: A new family of sectionally
 #' continuous profiles. Monthly Weather Review 134(4):1102-1120.
 #'
-will1new <- function(cdist, Rmax, R1, R2, vmax_gl, n, A, X1, X2 = 25.0) {
-    .Call(`_stormwindmodel_will1new`, cdist, Rmax, R1, R2, vmax_gl, n, A, X1, X2)
+will1 <- function(cdist, Rmax, R1, R2, vmax_gl, n, A, X1, X2 = 25.0) {
+    .Call(`_stormwindmodel_will1`, cdist, Rmax, R1, R2, vmax_gl, n, A, X1, X2)
 }
 
 #' Calculate bearing from one lat/long to another for a single point
@@ -174,6 +238,10 @@ calc_gwd <- function(tclat, tclon, glat, glon) {
 
 #' Calculate symmetrical surface wind from gradient wind
 #'
+#' Calculates the surface wind speed based on an estimated gradient
+#' wind speed at a point and the radius from the storm center to
+#' the grid point.
+#'
 #' @param wind_gl_aa The gradient-level wind at the location at which the wind
 #'   is being modeled (in m/s)
 #' @param cdist The distance from the center of the storm to the location at
@@ -184,12 +252,21 @@ calc_gwd <- function(tclat, tclon, glat, glon) {
 #' @return A numeric value giving the surface-level wind at that location (before
 #'   incorporating the role of forward motion of the storm) (in m/s)
 #'
+#' @details The reduction factor is based on Figure 3 of Knaff et al., 2003.
+#' Over water, it is estimated to be 0.9 up to a radius of 100 km,
+#' 0.75 for a radius of 700 km or more, and decrease linearly between
+#' a radius of 100 km and 700 km. Points over land use a reduction
+#' factor that is 20\% lower.
+#'
 #' @references
 #'
+#' Knaff JA, DeMaria M, Molenar DA, Sampson CR, and Seybold MG. 2011. An
+#' automated, objective, multiple-satellite-platform tropical cyclone surface
+#' wind speed analysis. Journal of Applied Meteorology and Climatology
+#' 50(10):2149-2166
 #'
-#'
-gradient_to_surface_new <- function(wind_gl_aa, cdist, glandsea) {
-    .Call(`_stormwindmodel_gradient_to_surface_new`, wind_gl_aa, cdist, glandsea)
+gradient_to_surface <- function(wind_gl_aa, cdist, glandsea) {
+    .Call(`_stormwindmodel_gradient_to_surface`, wind_gl_aa, cdist, glandsea)
 }
 
 #' Add inflow to direction of surface winds
@@ -458,55 +535,6 @@ calc_bearing <- function(tclat_1, tclon_1, tclat_2, tclon_2) {
     .Call(`_stormwindmodel_calc_bearing`, tclat_1, tclon_1, tclat_2, tclon_2)
 }
 
-#' Calculate wind within R1
-#'
-#' This function calculates windspeed inside R1, the radius that defines
-#' the end of the the transition region in Willoughby's double-exponential
-#' model.
-#'
-#' @param r Numeric vector of radius from the storm center to the point you are
-#'    measuring, in kilometers
-#' @param vmax_gl Numeric vector of the tangential wind component of the maximum
-#'    gradient wind speed, in meters per second
-#' @param Rmax Numeric vector of the radius at which the maximum wind occurs,
-#'    in kilometers
-#' @inheritParams will3_right
-#'
-#' @return A numeric value with the estimated wind inside the radius R1.
-#'
-#' @export
-NULL
-
-#' Calculate wind outside R2
-#'
-#' This function calculates windspeed outside R2, the radius that defines
-#' the end of the the transition region in Willoughby's double-exponential
-#' model.
-#'
-#' @inheritParams will1a
-#' @inheritParams will1
-#' @inheritParams will3_right
-#'
-#' @return A numeric value with the estimated wind outside the radius R2.
-NULL
-
-#' @export
-NULL
-
-#' Willoughby et al. (2006), Equation 2
-#'
-#' Calculates equation 2 from Willoughby et al. (2006).
-#'
-#' @param R1 Numeric vector of radius at start of transition zone, in
-#'    kilometers
-#' @inheritParams will1a
-#'
-#' @return A numeric vector of the weighting parameter for Willoughby's wind
-#'    profile equations (\eqn{w}).
-#'
-#' @export
-NULL
-
 #' Calculate right-hand side of Willoughby Eqn. 3
 #'
 #' Calculates the right hand side of the version of Eqn. 3 in Willoughby et al.
@@ -667,105 +695,6 @@ NULL
 #' @export
 NULL
 
-#' Model wind speed at a grid point for a storm track observation
-#'
-#' Models the gradient wind speed at a certain radius from
-#' a storm's center. To do this, it uses different equations and subfunctions
-#' depending on how large the radius is (see details). This function requires,
-#' as inputs, Willoughby wind model parameters calculated using the
-#' \code{\link{add_wind_radii}} function.
-#'
-#' @param cdist Distance (in km) from center of tropical cyclone to grid point.
-#' @param R1 A numeric vector of one of the parameters of the Willoughby model.
-#' @param R2 A numeric vector of one of the parameters of the Willoughby model.
-#' @param X2 A numeric vector of one of the parameters of the Willoughby model.
-#' @inheritParams will1a
-#' @inheritParams will3_right
-#'
-#' @return Returns a numeric vector with gradient wind speed at a radius of
-#'    \eqn{r} from the storm's center, in meters per second.
-#'
-#' @details If \eqn{r \le R_1}{r \le R1}, this function is calculating the equation:
-#'
-#'    \deqn{V(r) = V_i = V_{max} \left( \frac{r}{R_{max}} \right)^n}{
-#'    V(r) = Vi = vmax_gl (r / Rmax)^n}
-#'
-#'    where:
-#'    \itemize{
-#'      \item{\eqn{V(r)}: Maximum sustained gradient wind speed at a radius of
-#'        \eqn{r} from the storm's center}
-#'      \item{\eqn{r}: Radius from the storm center, in kilometers}
-#'      \item{\eqn{V_{max,G}}{vmax_gl}: Maximum sustained gradient wind speed of the
-#'        storm, in meters per second}
-#'      \item{\eqn{R_1}{R1}: A parameter for the Willoughby wind model (radius to
-#'        start of transition region)}
-#'      \item{\eqn{R_{max}}{Rmax}: Radius (in kilometers) to highest winds}
-#'      \item{\eqn{n}: A parameter for the Willoughby wind model}
-#'    }
-#'
-#'    If \eqn{R_2 < r}{R2 \le r}, this function is calculating
-#'      the equation:
-#'
-#'      \deqn{V(r) = V_o = V_{max}\left[(1 - A) e^\frac{R_{max} - r}{X_1} + A e^\frac{R_{max} - r}{X_2}\right]}{
-#'      V(r) = Vo = vmax_gl[(1 - A) e^((Rmax - r) / X1) + A e^((Rmax - r) / X_2)]}
-#'
-#'    where:
-#'    \itemize{
-#'      \item{\eqn{V(r)}: Maximum sustained gradient wind speed at a radius of
-#'        \eqn{r} kilometers from the storm's center}
-#'      \item{\eqn{r}: Radius from the storm center, in kilometers}
-#'      \item{\eqn{V_{max,G}}{vmax_gl}: Maximum sustained gradient wind speed of the
-#'        storm, in meters per second}
-#'      \item{\eqn{R_{max}}{Rmax}: Radius (in kilometers) to highest winds}
-#'      \item{\eqn{A}, \eqn{X_1}{X1}, \eqn{X_2}{X2}: Parameters for the
-#'         Willoughby wind model}
-#'    }
-#'
-#'    If \eqn{R_1 < r \le R_2}{R1 < r \le R2}, this function uses
-#'      the equations:
-#'
-#'      \deqn{\xi = \frac{r - R_1}{R_2 - R_1}}{
-#'      \xi = (r - R1) / (R2 - R1)}
-#'
-#'      and, if \eqn{0 \le \xi < \le 1} (otherwise, \eqn{w = 0}):
-#'
-#'      \deqn{w = 126 \xi^5 - 420 \xi^6 + 540 \xi^7- 315 \xi^8 + 70 \xi^9}
-#'
-#'      and then:
-#'
-#'      \deqn{V(r) = V_i (1 - w) + V_o w, (R_1 \le r \le R_2)}{
-#'      V(r) = Vi (1 - w) + Vo w}
-#'
-#'    where, for this series of equations:
-#'    \itemize{
-#'      \item{\eqn{V(r)}: Maximum sustained gradient wind speed at a radius of
-#'        \eqn{r} kilometers from the storm's center}
-#'      \item{\eqn{r}: Radius from the storm center, in kilometers}
-#'      \item{\eqn{w}: Weighting variable}
-#'      \item{\eqn{R_1}{R1}, \eqn{R_2}{R2}: Parameters for the Willoughby wind model}
-#'    }
-#'
-#' @references
-#'
-#' Willoughby HE, Darling RWR, and Rahn ME. 2006. Parametric representation
-#' of the primary hurricane vortex. Part II: A new family of sectionally
-#' continuous profiles. Monthly Weather Review 134(4):1102-1120.
-#'
-#' @export
-NULL
-
-will1a <- function(vmax_gl, r, Rmax, n) {
-    .Call(`_stormwindmodel_will1a`, vmax_gl, r, Rmax, n)
-}
-
-will4 <- function(vmax_gl, A, r, Rmax, X1, X2 = 25.0) {
-    .Call(`_stormwindmodel_will4`, vmax_gl, A, r, Rmax, X1, X2)
-}
-
-will2 <- function(r, R1, R2) {
-    .Call(`_stormwindmodel_will2`, r, R1, R2)
-}
-
 will3_right <- function(n, A, X1, Rmax) {
     .Call(`_stormwindmodel_will3_right`, n, A, X1, Rmax)
 }
@@ -818,9 +747,5 @@ will10b <- function(vmax_gl, tclat) {
 
 will10c <- function(vmax_gl, tclat) {
     .Call(`_stormwindmodel_will10c`, vmax_gl, tclat)
-}
-
-will1 <- function(cdist, Rmax, R1, R2, vmax_gl, n, A, X1, X2 = 25L) {
-    .Call(`_stormwindmodel_will1`, cdist, Rmax, R1, R2, vmax_gl, n, A, X1, X2)
 }
 

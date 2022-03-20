@@ -38,9 +38,9 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// will1new
-double will1new(double cdist, double Rmax, double R1, double R2, double vmax_gl, double n, double A, double X1, double X2);
-RcppExport SEXP _stormwindmodel_will1new(SEXP cdistSEXP, SEXP RmaxSEXP, SEXP R1SEXP, SEXP R2SEXP, SEXP vmax_glSEXP, SEXP nSEXP, SEXP ASEXP, SEXP X1SEXP, SEXP X2SEXP) {
+// will1
+double will1(double cdist, double Rmax, double R1, double R2, double vmax_gl, double n, double A, double X1, double X2);
+RcppExport SEXP _stormwindmodel_will1(SEXP cdistSEXP, SEXP RmaxSEXP, SEXP R1SEXP, SEXP R2SEXP, SEXP vmax_glSEXP, SEXP nSEXP, SEXP ASEXP, SEXP X1SEXP, SEXP X2SEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -53,7 +53,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type A(ASEXP);
     Rcpp::traits::input_parameter< double >::type X1(X1SEXP);
     Rcpp::traits::input_parameter< double >::type X2(X2SEXP);
-    rcpp_result_gen = Rcpp::wrap(will1new(cdist, Rmax, R1, R2, vmax_gl, n, A, X1, X2));
+    rcpp_result_gen = Rcpp::wrap(will1(cdist, Rmax, R1, R2, vmax_gl, n, A, X1, X2));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -85,16 +85,16 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// gradient_to_surface_new
-double gradient_to_surface_new(double wind_gl_aa, double cdist, bool glandsea);
-RcppExport SEXP _stormwindmodel_gradient_to_surface_new(SEXP wind_gl_aaSEXP, SEXP cdistSEXP, SEXP glandseaSEXP) {
+// gradient_to_surface
+double gradient_to_surface(double wind_gl_aa, double cdist, bool glandsea);
+RcppExport SEXP _stormwindmodel_gradient_to_surface(SEXP wind_gl_aaSEXP, SEXP cdistSEXP, SEXP glandseaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< double >::type wind_gl_aa(wind_gl_aaSEXP);
     Rcpp::traits::input_parameter< double >::type cdist(cdistSEXP);
     Rcpp::traits::input_parameter< bool >::type glandsea(glandseaSEXP);
-    rcpp_result_gen = Rcpp::wrap(gradient_to_surface_new(wind_gl_aa, cdist, glandsea));
+    rcpp_result_gen = Rcpp::wrap(gradient_to_surface(wind_gl_aa, cdist, glandsea));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -322,49 +322,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// will1a
-float will1a(float vmax_gl, float r, float Rmax, float n);
-RcppExport SEXP _stormwindmodel_will1a(SEXP vmax_glSEXP, SEXP rSEXP, SEXP RmaxSEXP, SEXP nSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< float >::type vmax_gl(vmax_glSEXP);
-    Rcpp::traits::input_parameter< float >::type r(rSEXP);
-    Rcpp::traits::input_parameter< float >::type Rmax(RmaxSEXP);
-    Rcpp::traits::input_parameter< float >::type n(nSEXP);
-    rcpp_result_gen = Rcpp::wrap(will1a(vmax_gl, r, Rmax, n));
-    return rcpp_result_gen;
-END_RCPP
-}
-// will4
-float will4(float vmax_gl, float A, float r, float Rmax, float X1, float X2);
-RcppExport SEXP _stormwindmodel_will4(SEXP vmax_glSEXP, SEXP ASEXP, SEXP rSEXP, SEXP RmaxSEXP, SEXP X1SEXP, SEXP X2SEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< float >::type vmax_gl(vmax_glSEXP);
-    Rcpp::traits::input_parameter< float >::type A(ASEXP);
-    Rcpp::traits::input_parameter< float >::type r(rSEXP);
-    Rcpp::traits::input_parameter< float >::type Rmax(RmaxSEXP);
-    Rcpp::traits::input_parameter< float >::type X1(X1SEXP);
-    Rcpp::traits::input_parameter< float >::type X2(X2SEXP);
-    rcpp_result_gen = Rcpp::wrap(will4(vmax_gl, A, r, Rmax, X1, X2));
-    return rcpp_result_gen;
-END_RCPP
-}
-// will2
-float will2(float r, float R1, float R2);
-RcppExport SEXP _stormwindmodel_will2(SEXP rSEXP, SEXP R1SEXP, SEXP R2SEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< float >::type r(rSEXP);
-    Rcpp::traits::input_parameter< float >::type R1(R1SEXP);
-    Rcpp::traits::input_parameter< float >::type R2(R2SEXP);
-    rcpp_result_gen = Rcpp::wrap(will2(r, R1, R2));
-    return rcpp_result_gen;
-END_RCPP
-}
 // will3_right
 NumericVector will3_right(NumericVector n, NumericVector A, NumericVector X1, NumericVector Rmax);
 RcppExport SEXP _stormwindmodel_will3_right(SEXP nSEXP, SEXP ASEXP, SEXP X1SEXP, SEXP RmaxSEXP) {
@@ -439,35 +396,16 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// will1
-NumericVector will1(NumericVector cdist, NumericVector Rmax, NumericVector R1, NumericVector R2, NumericVector vmax_gl, NumericVector n, NumericVector A, NumericVector X1, NumericVector X2);
-RcppExport SEXP _stormwindmodel_will1(SEXP cdistSEXP, SEXP RmaxSEXP, SEXP R1SEXP, SEXP R2SEXP, SEXP vmax_glSEXP, SEXP nSEXP, SEXP ASEXP, SEXP X1SEXP, SEXP X2SEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericVector >::type cdist(cdistSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type Rmax(RmaxSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type R1(R1SEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type R2(R2SEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type vmax_gl(vmax_glSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type n(nSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type A(ASEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type X1(X1SEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type X2(X2SEXP);
-    rcpp_result_gen = Rcpp::wrap(will1(cdist, Rmax, R1, R2, vmax_gl, n, A, X1, X2));
-    return rcpp_result_gen;
-END_RCPP
-}
 
 RcppExport SEXP run_testthat_tests(SEXP);
 
 static const R_CallMethodDef CallEntries[] = {
     {"_stormwindmodel_calc_distance", (DL_FUNC) &_stormwindmodel_calc_distance, 5},
     {"_stormwindmodel_will2_new", (DL_FUNC) &_stormwindmodel_will2_new, 3},
-    {"_stormwindmodel_will1new", (DL_FUNC) &_stormwindmodel_will1new, 9},
+    {"_stormwindmodel_will1", (DL_FUNC) &_stormwindmodel_will1, 9},
     {"_stormwindmodel_calc_bearing_single", (DL_FUNC) &_stormwindmodel_calc_bearing_single, 4},
     {"_stormwindmodel_calc_gwd", (DL_FUNC) &_stormwindmodel_calc_gwd, 4},
-    {"_stormwindmodel_gradient_to_surface_new", (DL_FUNC) &_stormwindmodel_gradient_to_surface_new, 3},
+    {"_stormwindmodel_gradient_to_surface", (DL_FUNC) &_stormwindmodel_gradient_to_surface, 3},
     {"_stormwindmodel_add_inflow", (DL_FUNC) &_stormwindmodel_add_inflow, 5},
     {"_stormwindmodel_add_forward_speed", (DL_FUNC) &_stormwindmodel_add_forward_speed, 6},
     {"_stormwindmodel_calc_grid_wind_cpp", (DL_FUNC) &_stormwindmodel_calc_grid_wind_cpp, 15},
@@ -483,16 +421,12 @@ static const R_CallMethodDef CallEntries[] = {
     {"_stormwindmodel_latlon_to_km", (DL_FUNC) &_stormwindmodel_latlon_to_km, 5},
     {"_stormwindmodel_calc_forward_speed", (DL_FUNC) &_stormwindmodel_calc_forward_speed, 6},
     {"_stormwindmodel_calc_bearing", (DL_FUNC) &_stormwindmodel_calc_bearing, 4},
-    {"_stormwindmodel_will1a", (DL_FUNC) &_stormwindmodel_will1a, 4},
-    {"_stormwindmodel_will4", (DL_FUNC) &_stormwindmodel_will4, 6},
-    {"_stormwindmodel_will2", (DL_FUNC) &_stormwindmodel_will2, 3},
     {"_stormwindmodel_will3_right", (DL_FUNC) &_stormwindmodel_will3_right, 4},
     {"_stormwindmodel_calc_R1", (DL_FUNC) &_stormwindmodel_calc_R1, 2},
     {"_stormwindmodel_will7a", (DL_FUNC) &_stormwindmodel_will7a, 2},
     {"_stormwindmodel_will10a", (DL_FUNC) &_stormwindmodel_will10a, 2},
     {"_stormwindmodel_will10b", (DL_FUNC) &_stormwindmodel_will10b, 2},
     {"_stormwindmodel_will10c", (DL_FUNC) &_stormwindmodel_will10c, 2},
-    {"_stormwindmodel_will1", (DL_FUNC) &_stormwindmodel_will1, 9},
     {"run_testthat_tests", (DL_FUNC) &run_testthat_tests, 1},
     {NULL, NULL, 0}
 };
