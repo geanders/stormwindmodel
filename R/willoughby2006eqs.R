@@ -1,5 +1,3 @@
-
-
 #' Calculate the function value and derivative for Willoughby Eqn. 3
 #'
 #' Calculates values of both the function and the derivative of
