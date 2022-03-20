@@ -200,7 +200,7 @@ NumericVector calc_R1(NumericVector Rmax, NumericVector xi) {
 //' wind (\eqn{V_{max,G}}{vmax_gl}) and latitude (\eqn{\phi}). This function
 //' implements Willoughby et al. (2006), Equation 7a.
 //'
-//' @param tclat Numeric vector of the absolute value of latitude, in degrees.
+//' @param tclat Numeric vector of the value of latitude, in degrees.
 //' @inheritParams will1a
 //'
 //' @details This function fits the following equation:
@@ -223,7 +223,6 @@ NumericVector calc_R1(NumericVector Rmax, NumericVector xi) {
 //' continuous profiles. Monthly Weather Review 134(4):1102-1120.
 //'
 //' @export
-
 // [[Rcpp::export]]
 NumericVector will7a(NumericVector vmax_gl, NumericVector tclat) {
 
