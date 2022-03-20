@@ -35,7 +35,6 @@ double calc_distance(double tclat, double tclon,
   return dist;
 }
 
-// C++ tests for calculating the distance between two latitudes and longitudes
 context("Check C++ calc_distance function") {
   test_that("Floyd to Dare Co distance is correct") {
     double floyd_lat = 33.7 * M_PI / 180.0;
@@ -98,7 +97,7 @@ context("Check C++ calc_distance function") {
   }
 }
 
-//' Calculate equation 1a from Willoughby
+//' Willoughby et al. (2006), Equation 1(a)
 //'
 //' This is the equation that is used for the wind profile inside the  eye (more
 //' specifically, from the center of the storm to R1, where the transition region
@@ -110,8 +109,8 @@ context("Check C++ calc_distance function") {
 //'   sustained wind for the tropical cyclone, in meters per second. This is the
 //'   value given for the storm as a whole at the time point (for example, in
 //'   tracking data).
-//' @param r A numeric value giving the distance from the center of the storm to
-//'   the location where you would like to model the local wind, in kilometers
+//' @param r A numeric value of radius from the storm center to the point you are
+//'   measuring, in kilometers
 //' @param Rmax A numeric value with the distance from the center of the storm to
 //'   the storm's radius of maximum wind, in kilometers
 //' @param n A numeric value giving the power by which the wind is assumed to
@@ -120,6 +119,13 @@ context("Check C++ calc_distance function") {
 //'
 //' @return A numeric value with the modeled wind at distance r from the center of
 //'   the storm, in meters per second.
+//'
+//' @references
+//'
+//' Willoughby HE, Darling RWR, and Rahn ME. 2006. Parametric representation
+//' of the primary hurricane vortex. Part II: A new family of sectionally
+//' continuous profiles. Monthly Weather Review 134(4):1102-1120.
+//'
 double will1a(double vmax_gl, double r,
              double Rmax, double n) {
   double Vi = vmax_gl * pow((r / Rmax), n);
@@ -180,6 +186,13 @@ context("Check C++ will1a function") {
 //'
 //' @return A numeric value with the modeled wind at distance r from the center of
 //'   the storm, in meters per second.
+//'
+//' @references
+//'
+//' Willoughby HE, Darling RWR, and Rahn ME. 2006. Parametric representation
+//' of the primary hurricane vortex. Part II: A new family of sectionally
+//' continuous profiles. Monthly Weather Review 134(4):1102-1120.
+//'
 double will4(double vmax_gl, double A, double r, double Rmax, double X1,
             double X2 = 25.0){
 
@@ -224,6 +237,13 @@ context("Check C++ will4 function") {
 //'
 //' @return A numeric value between 0 and 1 that gives the amount to weight Vi
 //'   versus Vo when estimating wind within the transition zone.
+//'
+//' @references
+//'
+//' Willoughby HE, Darling RWR, and Rahn ME. 2006. Parametric representation
+//' of the primary hurricane vortex. Part II: A new family of sectionally
+//' continuous profiles. Monthly Weather Review 134(4):1102-1120.
+//'
 // [[Rcpp::export]]
 double will2_new(double r, double R1, double R2) {
 
@@ -313,6 +333,13 @@ df %>%
 //'   (Willoughby, Darling, and Rahn 2006)
 //' @return wind_gl_aa A numeric value ...
 //' @export
+//'
+//' @references
+//'
+//' Willoughby HE, Darling RWR, and Rahn ME. 2006. Parametric representation
+//' of the primary hurricane vortex. Part II: A new family of sectionally
+//' continuous profiles. Monthly Weather Review 134(4):1102-1120.
+//'
 // [[Rcpp::export]]
 double will1new(double cdist, double Rmax, double R1,
                 double R2, double vmax_gl, double n,
@@ -721,7 +748,23 @@ context("Check C++ calc_gwd function") {
 
 }
 
-// Calculate symmetrical surface wind from gradient wind
+//' Calculate symmetrical surface wind from gradient wind
+//'
+//' @param wind_gl_aa The gradient-level wind at the location at which the wind
+//'   is being modeled (in m/s)
+//' @param cdist The distance from the center of the storm to the location at
+//'   which the wind is being modeled (in kilometers)
+//' @param glandsea A logical value that specifies whether the location at which
+//'   the wind is being modeled is over land (TRUE) or over water (FALSE)
+//'
+//' @return A numeric value giving the surface-level wind at that location (before
+//'   incorporating the role of forward motion of the storm) (in m/s)
+//'
+//' @references
+//'
+//'
+//'
+// [[Rcpp::export]]
 double gradient_to_surface_new(double wind_gl_aa, double cdist, bool glandsea) {
   double wind_sfc_sym, reduction_factor;
 
@@ -744,14 +787,119 @@ double gradient_to_surface_new(double wind_gl_aa, double cdist, bool glandsea) {
   return wind_sfc_sym;
 }
 
+context("Check C++ gradient_to_surface_new function") {
+  test_that("Gradient-to-surface C++ function works close to the storm center over land"){
+    double gradient_wind = 20.0;
+    double r_to_model = 50.0;
+    bool over_land = true;
+
+    double calculated_surface_wind = gradient_to_surface_new(gradient_wind,
+                                                             r_to_model,
+                                                             over_land);
+    expect_true(round(calculated_surface_wind) == 14);
+  }
+
+  test_that("Gradient-to-surface C++ function works close to the storm center over water"){
+    double gradient_wind = 20.0;
+    double r_to_model = 50.0;
+    bool over_land = false;
+
+    double calculated_surface_wind = gradient_to_surface_new(gradient_wind,
+                                                             r_to_model,
+                                                             over_land);
+    expect_true(round(calculated_surface_wind) == 18);
+  }
+
+  test_that("Gradient-to-surface C++ function works far from the storm center over land"){
+    double gradient_wind = 20.0;
+    double r_to_model = 900.0;
+    bool over_land = true;
+
+    double calculated_surface_wind = gradient_to_surface_new(gradient_wind,
+                                                             r_to_model,
+                                                             over_land);
+    expect_true(round(calculated_surface_wind) == 12);
+  }
+
+  test_that("Gradient-to-surface C++ function works far from the storm center over water"){
+    double gradient_wind = 20.0;
+    double r_to_model = 900.0;
+    bool over_land = false;
+
+    double calculated_surface_wind = gradient_to_surface_new(gradient_wind,
+                                                             r_to_model,
+                                                             over_land);
+    expect_true(round(calculated_surface_wind) == 15);
+  }
+
+  test_that("Gradient-to-surface C++ function works at mid distances from the storm center over land"){
+    double gradient_wind = 20.0;
+    double r_to_model = 200.0;
+    bool over_land = true;
+
+    double calculated_surface_wind = gradient_to_surface_new(gradient_wind,
+                                                             r_to_model,
+                                                             over_land);
+    expect_true(round(calculated_surface_wind) == 14);
+  }
+
+  test_that("Gradient-to-surface C++ function works at mid distances from the storm center over water"){
+    double gradient_wind = 20.0;
+    double r_to_model = 200.0;
+    bool over_land = false;
+
+    double calculated_surface_wind = gradient_to_surface_new(gradient_wind,
+                                                             r_to_model,
+                                                             over_land);
+    expect_true(round(calculated_surface_wind) == 18);
+  }
+}
+
+/*** R
+library(purrr)
+library(tidyverse)
+library(ggplot2)
+
+# Recreate Fig 3 from Knaff et al., 2011
+tibble(cdist = rep(0:900, 2),
+       over_land = rep(c(TRUE, FALSE), each = 901),
+       reduction_factor = map2_dbl(.x = cdist, .y = over_land,
+                                   .f = ~ stormwindmodel:::gradient_to_surface_new(1.0, .x, .y))) %>%
+  ggplot(aes(x = cdist, y = reduction_factor, color = over_land, group = over_land)) +
+  geom_line() +
+  ylim(c(0.5, 1.0))
+*/
+
 //' Add inflow to direction of surface winds
-//' @param gwd A numeric value with the gradient wind direction in degrees
-//' @param cdist A numeric value with the radius from the storm's center to the
-//' grid point in kilometers
+//'
+//' This function adds an inflow angle to the angle of the wind direction.
+//' It calculates an inflow angle as a function of the distance from the
+//' storm center to a location (Phadke et al. 2003). If the locations is over
+//' land, it then adds 20 degrees to this inflow angle to account for the location
+//' being over land rather than over water.
+//'
+//' @param gwd A numeric value with the gradient wind direction in polar degrees
+//'   (e.g., due east is 0 degrees, due north is 90 degrees)
+//' @param cdist The distance from the center of the storm to the location at
+//'   which the wind is being modeled (in kilometers)
 //' @param Rmax A numeric value with the radius at which maximum winds occur in kilometers
 //' @param tclat A numeric value with latitude in radians
-//' @return swd A numeric value with the surface wind direction in degrees
-//' @export
+//' @param glandsea A logical value that specifies whether the location at which
+//'   the wind is being modeled is over land (TRUE) or over water (FALSE)
+//'
+//' @return swd A numeric value with the surface wind direction in polar degrees
+//'   (e.g., due east is 0, due north is 90)
+//'
+//' @details
+//'
+//' This function uses equations 11a-c from Phadke et al. (2003).
+//'
+//' @references
+//'
+//' Phadke AC, Martino CD, Cheung KF, and Houston SH. 2003. Modeling of
+//'    tropical cyclone winds and waves for emergency management. Ocean
+//'    Engineering 30(4):553-578.
+//'
 // [[Rcpp::export]]
 double add_inflow_new(double gwd, double cdist, double Rmax, double tclat, bool glandsea) {
   double inflow_angle, swd;
@@ -785,19 +933,269 @@ double add_inflow_new(double gwd, double cdist, double Rmax, double tclat, bool 
   return swd;
 }
 
+context("Check C++ add_inflow function") {
+  test_that("C++ add_inflow function works at the storm center over water in the Northern Hemisphere") {
+    double gradient_wind_direction = 0.0;
+    double rad_to_model = 0.0;
+    double rad_to_max_wind = 20.0;
+    double latitude_to_model = 0.45;
+    bool land_sea = false;
+
+    double surface_wind_direction = add_inflow_new(gradient_wind_direction,
+                                                   rad_to_model, rad_to_max_wind,
+                                                   latitude_to_model, land_sea);
+
+    expect_true(round(surface_wind_direction) == 11);
+  }
+
+  test_that("C++ add_inflow function works within the eye over water in the Northern Hemisphere") {
+    double gradient_wind_direction = 0.0;
+    double rad_to_model = 10.0;
+    double rad_to_max_wind = 20.0;
+    double latitude_to_model = 0.45;
+    bool land_sea = false;
+
+    double surface_wind_direction = add_inflow_new(gradient_wind_direction,
+                                                   rad_to_model, rad_to_max_wind,
+                                                   latitude_to_model, land_sea);
+
+    expect_true(round(surface_wind_direction) == 12);
+  }
+
+  test_that("C++ add_inflow function works at Rmax over water in the Northern Hemisphere") {
+    double gradient_wind_direction = 0.0;
+    double rad_to_model = 20.0;
+    double rad_to_max_wind = 20.0;
+    double latitude_to_model = 0.45;
+    bool land_sea = false;
+
+    double surface_wind_direction = add_inflow_new(gradient_wind_direction,
+                                                   rad_to_model, rad_to_max_wind,
+                                                   latitude_to_model, land_sea);
+
+    expect_true(round(surface_wind_direction) == 20);
+  }
+
+  test_that("C++ add_inflow function works at 1.2 * Rmax over water in the Northern Hemisphere") {
+    double gradient_wind_direction = 0.0;
+    double rad_to_model = 24.0;
+    double rad_to_max_wind = 20.0;
+    double latitude_to_model = 0.45;
+    bool land_sea = false;
+
+    double surface_wind_direction = add_inflow_new(gradient_wind_direction,
+                                                   rad_to_model, rad_to_max_wind,
+                                                   latitude_to_model, land_sea);
+
+    expect_true(round(surface_wind_direction) == 25);
+  }
+
+  test_that("C++ add_inflow function works at the storm center over land in the Northern Hemisphere") {
+    double gradient_wind_direction = 0.0;
+    double rad_to_model = 0.0;
+    double rad_to_max_wind = 20.0;
+    double latitude_to_model = 0.45;
+    bool land_sea = true;
+
+    double surface_wind_direction = add_inflow_new(gradient_wind_direction,
+                                                   rad_to_model, rad_to_max_wind,
+                                                   latitude_to_model, land_sea);
+
+    expect_true(round(surface_wind_direction) == 31);
+  }
+
+  test_that("C++ add_inflow function works within the eye over land in the Northern Hemisphere") {
+    double gradient_wind_direction = 0.0;
+    double rad_to_model = 10.0;
+    double rad_to_max_wind = 20.0;
+    double latitude_to_model = 0.45;
+    bool land_sea = true;
+
+    double surface_wind_direction = add_inflow_new(gradient_wind_direction,
+                                                   rad_to_model, rad_to_max_wind,
+                                                   latitude_to_model, land_sea);
+
+    expect_true(round(surface_wind_direction) == 32);
+  }
+
+  test_that("C++ add_inflow function works at Rmax over land in the Northern Hemisphere") {
+    double gradient_wind_direction = 0.0;
+    double rad_to_model = 20.0;
+    double rad_to_max_wind = 20.0;
+    double latitude_to_model = 0.45;
+    bool land_sea = true;
+
+    double surface_wind_direction = add_inflow_new(gradient_wind_direction,
+                                                   rad_to_model, rad_to_max_wind,
+                                                   latitude_to_model, land_sea);
+
+    expect_true(round(surface_wind_direction) == 40);
+  }
+
+  test_that("C++ add_inflow function works at 1.2 * Rmax over land in the Northern Hemisphere") {
+    double gradient_wind_direction = 0.0;
+    double rad_to_model = 24.0;
+    double rad_to_max_wind = 20.0;
+    double latitude_to_model = 0.45;
+    bool land_sea = true;
+
+    double surface_wind_direction = add_inflow_new(gradient_wind_direction,
+                                                   rad_to_model, rad_to_max_wind,
+                                                   latitude_to_model, land_sea);
+
+    expect_true(round(surface_wind_direction) == 45);
+  }
+
+  test_that("C++ add_inflow function works at the storm center over water in the Southern Hemisphere") {
+    double gradient_wind_direction = 0.0;
+    double rad_to_model = 0.0;
+    double rad_to_max_wind = 20.0;
+    double latitude_to_model = -0.45;
+    bool land_sea = false;
+
+    double surface_wind_direction = add_inflow_new(gradient_wind_direction,
+                                                   rad_to_model, rad_to_max_wind,
+                                                   latitude_to_model, land_sea);
+
+    expect_true(round(surface_wind_direction) == 349);
+  }
+
+  test_that("C++ add_inflow function works within the eye over water in the Southern Hemisphere") {
+    double gradient_wind_direction = 0.0;
+    double rad_to_model = 10.0;
+    double rad_to_max_wind = 20.0;
+    double latitude_to_model = -0.45;
+    bool land_sea = false;
+
+    double surface_wind_direction = add_inflow_new(gradient_wind_direction,
+                                                   rad_to_model, rad_to_max_wind,
+                                                   latitude_to_model, land_sea);
+
+    expect_true(round(surface_wind_direction) == 349);
+  }
+
+  test_that("C++ add_inflow function works at Rmax over water in the Southern Hemisphere") {
+    double gradient_wind_direction = 0.0;
+    double rad_to_model = 20.0;
+    double rad_to_max_wind = 20.0;
+    double latitude_to_model = -0.45;
+    bool land_sea = false;
+
+    double surface_wind_direction = add_inflow_new(gradient_wind_direction,
+                                                   rad_to_model, rad_to_max_wind,
+                                                   latitude_to_model, land_sea);
+
+    expect_true(round(surface_wind_direction) == 340);
+  }
+
+  test_that("C++ add_inflow function works at 1.2 * Rmax over water in the Southern Hemisphere") {
+    double gradient_wind_direction = 0.0;
+    double rad_to_model = 24.0;
+    double rad_to_max_wind = 20.0;
+    double latitude_to_model = -0.45;
+    bool land_sea = false;
+
+    double surface_wind_direction = add_inflow_new(gradient_wind_direction,
+                                                   rad_to_model, rad_to_max_wind,
+                                                   latitude_to_model, land_sea);
+
+    expect_true(round(surface_wind_direction) == 335);
+  }
+
+  test_that("C++ add_inflow function works at the storm center over land in the Southern Hemisphere") {
+    double gradient_wind_direction = 0.0;
+    double rad_to_model = 0.0;
+    double rad_to_max_wind = 20.0;
+    double latitude_to_model = -0.45;
+    bool land_sea = true;
+
+    double surface_wind_direction = add_inflow_new(gradient_wind_direction,
+                                                   rad_to_model, rad_to_max_wind,
+                                                   latitude_to_model, land_sea);
+
+    expect_true(round(surface_wind_direction) == 329);
+  }
+
+  test_that("C++ add_inflow function works within the eye over land in the Southern Hemisphere") {
+    double gradient_wind_direction = 0.0;
+    double rad_to_model = 10.0;
+    double rad_to_max_wind = 20.0;
+    double latitude_to_model = -0.45;
+    bool land_sea = true;
+
+    double surface_wind_direction = add_inflow_new(gradient_wind_direction,
+                                                   rad_to_model, rad_to_max_wind,
+                                                   latitude_to_model, land_sea);
+
+    expect_true(round(surface_wind_direction) == 329);
+  }
+
+  test_that("C++ add_inflow function works at Rmax over land in the Southern Hemisphere") {
+    double gradient_wind_direction = 0.0;
+    double rad_to_model = 20.0;
+    double rad_to_max_wind = 20.0;
+    double latitude_to_model = -0.45;
+    bool land_sea = true;
+
+    double surface_wind_direction = add_inflow_new(gradient_wind_direction,
+                                                   rad_to_model, rad_to_max_wind,
+                                                   latitude_to_model, land_sea);
+
+    expect_true(round(surface_wind_direction) == 320);
+  }
+
+  test_that("C++ add_inflow function works at 1.2 * Rmax over land in the Southern Hemisphere") {
+    double gradient_wind_direction = 0.0;
+    double rad_to_model = 24.0;
+    double rad_to_max_wind = 20.0;
+    double latitude_to_model = -0.45;
+    bool land_sea = true;
+
+    double surface_wind_direction = add_inflow_new(gradient_wind_direction,
+                                                   rad_to_model, rad_to_max_wind,
+                                                   latitude_to_model, land_sea);
+
+    expect_true(round(surface_wind_direction) == 315);
+  }
+}
+
 /*** R
-#check function
-gwd_test <- 20
-cdist_test <- 135
-Rmax_test <- 100
-tc_location <- c(-29.1, -93.15) * pi / 180
+library(tidyverse)
+library(purrr)
 
-add_inflow_new(gwd_test,cdist_test, Rmax_test, tc_location[1], TRUE)
+## Create a plot of the added inflow angle versus distance from storm center and
+## radius to maximum wind for the Northern Hemisphere
+Rmax <- 20
+tibble(cdist = rep(0:50, 2),
+       over_land = rep(c(TRUE, FALSE), each = 51),
+       inflow_angle = map2_dbl(.x = cdist, .y = over_land,
+                              .f = ~ stormwindmodel:::add_inflow_new(gwd = 0, cdist = .x,
+                                                                     Rmax = Rmax, tclat = .45,
+                                                                     glandsea = .y))) %>%
+  ggplot(aes(x = cdist, y = inflow_angle, color = over_land, group = over_land)) +
+  geom_point() +
+  geom_vline(xintercept = Rmax, linetype = 2)
 
+## Create a plot of the added inflow angle versus distance from storm center and
+## radius to maximum wind for the Southern Hemisphere
+Rmax <- 20
+tibble(cdist = rep(0:50, 2),
+       over_land = rep(c(TRUE, FALSE), each = 51),
+       inflow_angle = map2_dbl(.x = cdist, .y = over_land,
+                               .f = ~ stormwindmodel:::add_inflow_new(gwd = 0, cdist = .x,
+                                                                      Rmax = Rmax, tclat = -0.45,
+                                                                      glandsea = .y)) - 360) %>%
+  ggplot(aes(x = cdist, y = inflow_angle, color = over_land, group = over_land)) +
+  geom_point() +
+  geom_vline(xintercept = Rmax, linetype = 2)
 */
 
-
 //' Add in forward speed of the storm
+//'
+//' Adds the storm's forward speed component (i.e., motion asymmetry) back
+//' into the estimated surface wind speed at a grid point location after
+//' rotational winds have been modeled for the location.
+//'
 //' @param wind_sfc_sym A numeric value with the estimated symmetric surface
 //' wind speed at the grid point, in meters / second
 //' @param tcspd_u A numeric value with the u-component of the tropical cyclone
@@ -808,9 +1206,20 @@ add_inflow_new(gwd_test,cdist_test, Rmax_test, tc_location[1], TRUE)
 //' @param cdist A numeric value with the radius from the storm's center to the
 //' grid point in kilometers
 //' @param Rmax A numeric value with the radius at which maximum winds occur in kilometers
+//'
 //' @return windspeed A numeric value with the asymmetric surface windspeed at the
 //' location, in meters/second
-//' @export
+//'
+//' @details
+//'
+//' This function uses equation 12 from Phadke et al. (2003).
+//'
+//' @references
+//'
+//' Phadke AC, Martino CD, Cheung KF, and Houston SH. 2003. Modeling of
+//'    tropical cyclone winds and waves for emergency management. Ocean
+//'    Engineering 30(4):553-578.
+//'
 // [[Rcpp::export]]
 double add_forward_speed(double wind_sfc_sym, double tcspd_u, double tcspd_v, double swd,
                          double cdist, double Rmax) {
@@ -827,32 +1236,202 @@ double add_forward_speed(double wind_sfc_sym, double tcspd_u, double tcspd_v, do
   double wind_sfc_v = wind_sfc_sym_v + correction_factor * tcspd_v;
   double windspeed = sqrt(pow(wind_sfc_u, 2.0) + pow(wind_sfc_v, 2.0));
 
-  // Reset any negative values to 0
-  if (windspeed < 0) {
-    windspeed = 0;
-  }
-
   return windspeed;
 }
-/*** R
-wind <- 35
-tcu_test <- 16
-tcv_test <- -2
-swd <- 40
-cdist_test <- 55
-Rmax <- 70
-add_forward_speed(wind, tcu_test, tcv_test, swd, cdist_test, Rmax)
 
-#Test 1
-#correction_factor = 0.4858
-#wind_u = 3.83
-#wind_v = 3.214
+context("Check that C++ add_forward_speed function works correctly") {
+  test_that("C++ add_forward_speed works in the Northern Hemisphere near the eye on right of storm") {
+    double symmetrical_surface_wind = 40.0;
+    double forward_speed_u = 2.37;
+    double forward_speed_v = 7.67;
+    double surface_wind_direction = 100.0;
+    double r_to_model = 10.0;
+    double r_to_max_wind = 25.0;
 
-#Test 2
-#correction_factor = 0.4858
-#wind_u = 26.812
-#wind_v = 22.498
-*/
+    double estimated_windspeed = add_forward_speed(symmetrical_surface_wind,
+                                                   forward_speed_u, forward_speed_v,
+                                                   surface_wind_direction,
+                                                   r_to_model, r_to_max_wind);
+
+    expect_true(round(estimated_windspeed) == 42);
+  }
+
+  test_that("C++ add_forward_speed works in the Northern Hemisphere near the eye on left of storm") {
+    double symmetrical_surface_wind = 40.0;
+    double forward_speed_u = 2.37;
+    double forward_speed_v = 7.67;
+    double surface_wind_direction = 300.0;
+    double r_to_model = 10.0;
+    double r_to_max_wind = 25.0;
+
+    double estimated_windspeed = add_forward_speed(symmetrical_surface_wind,
+                                                   forward_speed_u, forward_speed_v,
+                                                   surface_wind_direction,
+                                                   r_to_model, r_to_max_wind);
+
+    expect_true(round(estimated_windspeed) == 38);
+  }
+
+  test_that("C++ add_forward_speed works in the Northern Hemisphere near the radius of maximum wind on right of storm") {
+    double symmetrical_surface_wind = 55.0;
+    double forward_speed_u = 2.37;
+    double forward_speed_v = 7.67;
+    double surface_wind_direction = 100.0;
+    double r_to_model = 25.0;
+    double r_to_max_wind = 25.0;
+
+    double estimated_windspeed = add_forward_speed(symmetrical_surface_wind,
+                                                   forward_speed_u, forward_speed_v,
+                                                   surface_wind_direction,
+                                                   r_to_model, r_to_max_wind);
+
+    expect_true(round(estimated_windspeed) == 59);
+  }
+
+  test_that("C++ add_forward_speed works in the Northern Hemisphere near the radius of maximum wind on left of storm") {
+    double symmetrical_surface_wind = 55.0;
+    double forward_speed_u = 2.37;
+    double forward_speed_v = 7.67;
+    double surface_wind_direction = 300.0;
+    double r_to_model = 25.0;
+    double r_to_max_wind = 25.0;
+
+    double estimated_windspeed = add_forward_speed(symmetrical_surface_wind,
+                                                   forward_speed_u, forward_speed_v,
+                                                   surface_wind_direction,
+                                                   r_to_model, r_to_max_wind);
+
+    expect_true(round(estimated_windspeed) == 52);
+  }
+
+  test_that("C++ add_forward_speed works in the Northern Hemisphere far from the eye on right of storm") {
+    double symmetrical_surface_wind = 8.0;
+    double forward_speed_u = 2.37;
+    double forward_speed_v = 7.67;
+    double surface_wind_direction = 100.0;
+    double r_to_model = 80.0;
+    double r_to_max_wind = 25.0;
+
+    double estimated_windspeed = add_forward_speed(symmetrical_surface_wind,
+                                                   forward_speed_u, forward_speed_v,
+                                                   surface_wind_direction,
+                                                   r_to_model, r_to_max_wind);
+
+    expect_true(round(estimated_windspeed) == 10);
+  }
+
+  test_that("C++ add_forward_speed works in the Northern Hemisphere far from the eye on left of storm") {
+    double symmetrical_surface_wind = 8.0;
+    double forward_speed_u = 2.37;
+    double forward_speed_v = 7.67;
+    double surface_wind_direction = 300.0;
+    double r_to_model = 80.0;
+    double r_to_max_wind = 25.0;
+
+    double estimated_windspeed = add_forward_speed(symmetrical_surface_wind,
+                                                   forward_speed_u, forward_speed_v,
+                                                   surface_wind_direction,
+                                                   r_to_model, r_to_max_wind);
+
+    expect_true(round(estimated_windspeed) == 7);
+  }
+
+  test_that("C++ add_forward_speed works in the Southern Hemisphere near the eye on right of storm") {
+    double symmetrical_surface_wind = 40.0;
+    double forward_speed_u = -2.37;
+    double forward_speed_v = -7.67;
+    double surface_wind_direction = 45.0;
+    double r_to_model = 10.0;
+    double r_to_max_wind = 25.0;
+
+    double estimated_windspeed = add_forward_speed(symmetrical_surface_wind,
+                                                   forward_speed_u, forward_speed_v,
+                                                   surface_wind_direction,
+                                                   r_to_model, r_to_max_wind);
+
+    expect_true(round(estimated_windspeed) == 38);
+  }
+
+  test_that("C++ add_forward_speed works in the Southern Hemisphere near the eye on left of storm") {
+    double symmetrical_surface_wind = 40.0;
+    double forward_speed_u = -2.37;
+    double forward_speed_v = -7.67;
+    double surface_wind_direction = 225.0;
+    double r_to_model = 10.0;
+    double r_to_max_wind = 25.0;
+
+    double estimated_windspeed = add_forward_speed(symmetrical_surface_wind,
+                                                   forward_speed_u, forward_speed_v,
+                                                   surface_wind_direction,
+                                                   r_to_model, r_to_max_wind);
+
+    expect_true(round(estimated_windspeed) == 42);
+  }
+
+  test_that("C++ add_forward_speed works in the Southern Hemisphere near the radius of maximum wind on right of storm") {
+    double symmetrical_surface_wind = 55.0;
+    double forward_speed_u = -2.37;
+    double forward_speed_v = -7.67;
+    double surface_wind_direction = 45.0;
+    double r_to_model = 25.0;
+    double r_to_max_wind = 25.0;
+
+    double estimated_windspeed = add_forward_speed(symmetrical_surface_wind,
+                                                   forward_speed_u, forward_speed_v,
+                                                   surface_wind_direction,
+                                                   r_to_model, r_to_max_wind);
+
+    expect_true(round(estimated_windspeed) == 51);
+  }
+
+  test_that("C++ add_forward_speed works in the Southern Hemisphere near the radius of maximum wind on left of storm") {
+    double symmetrical_surface_wind = 55.0;
+    double forward_speed_u = -2.37;
+    double forward_speed_v = -7.67;
+    double surface_wind_direction = 225.0;
+    double r_to_model = 25.0;
+    double r_to_max_wind = 25.0;
+
+    double estimated_windspeed = add_forward_speed(symmetrical_surface_wind,
+                                                   forward_speed_u, forward_speed_v,
+                                                   surface_wind_direction,
+                                                   r_to_model, r_to_max_wind);
+
+    expect_true(round(estimated_windspeed) == 59);
+  }
+
+  test_that("C++ add_forward_speed works in the Southern Hemisphere far from the eye on right of storm") {
+    double symmetrical_surface_wind = 8.0;
+    double forward_speed_u = -2.37;
+    double forward_speed_v = -7.67;
+    double surface_wind_direction = 45.0;
+    double r_to_model = 80.0;
+    double r_to_max_wind = 25.0;
+
+    double estimated_windspeed = add_forward_speed(symmetrical_surface_wind,
+                                                   forward_speed_u, forward_speed_v,
+                                                   surface_wind_direction,
+                                                   r_to_model, r_to_max_wind);
+
+    expect_true(round(estimated_windspeed) == 6);
+  }
+
+  test_that("C++ add_forward_speed works in the Southern Hemisphere far from the eye on left of storm") {
+    double symmetrical_surface_wind = 8.0;
+    double forward_speed_u = -2.37;
+    double forward_speed_v = -7.67;
+    double surface_wind_direction = 225.0;
+    double r_to_model = 80.0;
+    double r_to_max_wind = 25.0;
+
+    double estimated_windspeed = add_forward_speed(symmetrical_surface_wind,
+                                                   forward_speed_u, forward_speed_v,
+                                                   surface_wind_direction,
+                                                   r_to_model, r_to_max_wind);
+
+    expect_true(round(estimated_windspeed) == 10);
+  }
+}
 
 //' @export
 // [[Rcpp::export]]
