@@ -23,3 +23,8 @@ A numeric value between 0 and 1 that gives the amount to weight Vi
 \description{
 Calculate equation 2 from Willoughby
 }
+\references{
+Willoughby HE, Darling RWR, and Rahn ME. 2006. Parametric representation
+of the primary hurricane vortex. Part II: A new family of sectionally
+continuous profiles. Monthly Weather Review 134(4):1102-1120.
+}

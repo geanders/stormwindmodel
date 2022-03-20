@@ -85,6 +85,19 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// gradient_to_surface_new
+double gradient_to_surface_new(double wind_gl_aa, double cdist, bool glandsea);
+RcppExport SEXP _stormwindmodel_gradient_to_surface_new(SEXP wind_gl_aaSEXP, SEXP cdistSEXP, SEXP glandseaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type wind_gl_aa(wind_gl_aaSEXP);
+    Rcpp::traits::input_parameter< double >::type cdist(cdistSEXP);
+    Rcpp::traits::input_parameter< bool >::type glandsea(glandseaSEXP);
+    rcpp_result_gen = Rcpp::wrap(gradient_to_surface_new(wind_gl_aa, cdist, glandsea));
+    return rcpp_result_gen;
+END_RCPP
+}
 // add_inflow_new
 double add_inflow_new(double gwd, double cdist, double Rmax, double tclat, bool glandsea);
 RcppExport SEXP _stormwindmodel_add_inflow_new(SEXP gwdSEXP, SEXP cdistSEXP, SEXP RmaxSEXP, SEXP tclatSEXP, SEXP glandseaSEXP) {
@@ -454,6 +467,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_stormwindmodel_will1new", (DL_FUNC) &_stormwindmodel_will1new, 9},
     {"_stormwindmodel_calc_bearing_single", (DL_FUNC) &_stormwindmodel_calc_bearing_single, 4},
     {"_stormwindmodel_calc_gwd", (DL_FUNC) &_stormwindmodel_calc_gwd, 4},
+    {"_stormwindmodel_gradient_to_surface_new", (DL_FUNC) &_stormwindmodel_gradient_to_surface_new, 3},
     {"_stormwindmodel_add_inflow_new", (DL_FUNC) &_stormwindmodel_add_inflow_new, 5},
     {"_stormwindmodel_add_forward_speed", (DL_FUNC) &_stormwindmodel_add_forward_speed, 6},
     {"_stormwindmodel_calc_grid_wind_cpp", (DL_FUNC) &_stormwindmodel_calc_grid_wind_cpp, 15},

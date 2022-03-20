@@ -36,11 +36,21 @@ A numeric vector giving asymmetric surface windspeed (m / s) at the
 Adds the storm's forward speed component (i.e., motion asymmetry) back
 into the estimated surface wind speed at a grid point location after
 rotational winds have been modeled for the location.
+
+Adds the storm's forward speed component (i.e., motion asymmetry) back
+into the estimated surface wind speed at a grid point location after
+rotational winds have been modeled for the location.
 }
 \details{
 This function uses equation 12 from Phadke et al. (2003).
+
+This function uses equation 12 from Phadke et al. (2003).
 }
 \references{
+Phadke AC, Martino CD, Cheung KF, and Houston SH. 2003. Modeling of
+   tropical cyclone winds and waves for emergency management. Ocean
+   Engineering 30(4):553-578.
+
 Phadke AC, Martino CD, Cheung KF, and Houston SH. 2003. Modeling of
    tropical cyclone winds and waves for emergency management. Ocean
    Engineering 30(4):553-578.

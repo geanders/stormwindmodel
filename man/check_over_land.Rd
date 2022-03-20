@@ -7,6 +7,8 @@
 check_over_land(tclat, tclon)
 }
 \arguments{
+\item{tclat}{Numeric vector of the value of latitude, in degrees.}
+
 \item{tclon}{Numeric vector of the absolute value of latitude, in degrees.}
 }
 \value{

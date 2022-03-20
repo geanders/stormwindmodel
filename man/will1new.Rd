@@ -38,3 +38,8 @@ wind_gl_aa A numeric value ...
 \description{
 Calculate gradient wind speed using equation 1 from Willoughby
 }
+\references{
+Willoughby HE, Darling RWR, and Rahn ME. 2006. Parametric representation
+of the primary hurricane vortex. Part II: A new family of sectionally
+continuous profiles. Monthly Weather Review 134(4):1102-1120.
+}
