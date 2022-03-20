@@ -688,14 +688,25 @@ context("Check C++ calc_bearing function") {
 
 //' Calculate gradient wind direction at a point
 //'
+//' This function determines the bearing from the storm's center to a
+//' grid point location and then calculates the direction of gradient
+//' winds at that grid point. Gradient winds will be perpendicular to
+//' the direction from the storm's center to the grid point. In the
+//' Northern hemisphere, cyclonic winds are counterclockwise, so you
+//' add 90 degrees to the bearing from the storm center to the grid point
+//' when using polar coordinates. In the Southern hemisphere, cyclonic
+//' winds are clockwise, so you subtract 90 degrees.
+//'
 //' @param tclat A numeric value with the latitude of the tropical cyclone's center
 //'   in radians
 //' @param tclon A numeric value with the longitude of the tropical cyclone's center
 //'   in radians
 //' @param glat A numeric value with the latitude of the grid point in radians
 //' @param glon A numeric value with the longitude of the grid point in radians
+//'
 //' @return A numeric value with the the direction of gradient storm winds at a location,
 //'   in polar coordinates (i.e., due East is 0 degrees, due North is 90 degrees, etc.)
+//'
 // [[Rcpp::export]]
 double calc_gwd(double tclat, double tclon, double glat, double glon) {
 
@@ -901,7 +912,7 @@ tibble(cdist = rep(0:900, 2),
 //'    Engineering 30(4):553-578.
 //'
 // [[Rcpp::export]]
-double add_inflow_new(double gwd, double cdist, double Rmax, double tclat, bool glandsea) {
+double add_inflow(double gwd, double cdist, double Rmax, double tclat, bool glandsea) {
   double inflow_angle, swd;
 
   // Calculate inflow angle over water based on radius of location from storm
@@ -941,7 +952,7 @@ context("Check C++ add_inflow function") {
     double latitude_to_model = 0.45;
     bool land_sea = false;
 
-    double surface_wind_direction = add_inflow_new(gradient_wind_direction,
+    double surface_wind_direction = add_inflow(gradient_wind_direction,
                                                    rad_to_model, rad_to_max_wind,
                                                    latitude_to_model, land_sea);
 
@@ -955,7 +966,7 @@ context("Check C++ add_inflow function") {
     double latitude_to_model = 0.45;
     bool land_sea = false;
 
-    double surface_wind_direction = add_inflow_new(gradient_wind_direction,
+    double surface_wind_direction = add_inflow(gradient_wind_direction,
                                                    rad_to_model, rad_to_max_wind,
                                                    latitude_to_model, land_sea);
 
@@ -969,7 +980,7 @@ context("Check C++ add_inflow function") {
     double latitude_to_model = 0.45;
     bool land_sea = false;
 
-    double surface_wind_direction = add_inflow_new(gradient_wind_direction,
+    double surface_wind_direction = add_inflow(gradient_wind_direction,
                                                    rad_to_model, rad_to_max_wind,
                                                    latitude_to_model, land_sea);
 
@@ -983,7 +994,7 @@ context("Check C++ add_inflow function") {
     double latitude_to_model = 0.45;
     bool land_sea = false;
 
-    double surface_wind_direction = add_inflow_new(gradient_wind_direction,
+    double surface_wind_direction = add_inflow(gradient_wind_direction,
                                                    rad_to_model, rad_to_max_wind,
                                                    latitude_to_model, land_sea);
 
@@ -997,7 +1008,7 @@ context("Check C++ add_inflow function") {
     double latitude_to_model = 0.45;
     bool land_sea = true;
 
-    double surface_wind_direction = add_inflow_new(gradient_wind_direction,
+    double surface_wind_direction = add_inflow(gradient_wind_direction,
                                                    rad_to_model, rad_to_max_wind,
                                                    latitude_to_model, land_sea);
 
@@ -1011,7 +1022,7 @@ context("Check C++ add_inflow function") {
     double latitude_to_model = 0.45;
     bool land_sea = true;
 
-    double surface_wind_direction = add_inflow_new(gradient_wind_direction,
+    double surface_wind_direction = add_inflow(gradient_wind_direction,
                                                    rad_to_model, rad_to_max_wind,
                                                    latitude_to_model, land_sea);
 
@@ -1025,7 +1036,7 @@ context("Check C++ add_inflow function") {
     double latitude_to_model = 0.45;
     bool land_sea = true;
 
-    double surface_wind_direction = add_inflow_new(gradient_wind_direction,
+    double surface_wind_direction = add_inflow(gradient_wind_direction,
                                                    rad_to_model, rad_to_max_wind,
                                                    latitude_to_model, land_sea);
 
@@ -1039,7 +1050,7 @@ context("Check C++ add_inflow function") {
     double latitude_to_model = 0.45;
     bool land_sea = true;
 
-    double surface_wind_direction = add_inflow_new(gradient_wind_direction,
+    double surface_wind_direction = add_inflow(gradient_wind_direction,
                                                    rad_to_model, rad_to_max_wind,
                                                    latitude_to_model, land_sea);
 
@@ -1053,7 +1064,7 @@ context("Check C++ add_inflow function") {
     double latitude_to_model = -0.45;
     bool land_sea = false;
 
-    double surface_wind_direction = add_inflow_new(gradient_wind_direction,
+    double surface_wind_direction = add_inflow(gradient_wind_direction,
                                                    rad_to_model, rad_to_max_wind,
                                                    latitude_to_model, land_sea);
 
@@ -1067,7 +1078,7 @@ context("Check C++ add_inflow function") {
     double latitude_to_model = -0.45;
     bool land_sea = false;
 
-    double surface_wind_direction = add_inflow_new(gradient_wind_direction,
+    double surface_wind_direction = add_inflow(gradient_wind_direction,
                                                    rad_to_model, rad_to_max_wind,
                                                    latitude_to_model, land_sea);
 
@@ -1081,7 +1092,7 @@ context("Check C++ add_inflow function") {
     double latitude_to_model = -0.45;
     bool land_sea = false;
 
-    double surface_wind_direction = add_inflow_new(gradient_wind_direction,
+    double surface_wind_direction = add_inflow(gradient_wind_direction,
                                                    rad_to_model, rad_to_max_wind,
                                                    latitude_to_model, land_sea);
 
@@ -1095,7 +1106,7 @@ context("Check C++ add_inflow function") {
     double latitude_to_model = -0.45;
     bool land_sea = false;
 
-    double surface_wind_direction = add_inflow_new(gradient_wind_direction,
+    double surface_wind_direction = add_inflow(gradient_wind_direction,
                                                    rad_to_model, rad_to_max_wind,
                                                    latitude_to_model, land_sea);
 
@@ -1109,7 +1120,7 @@ context("Check C++ add_inflow function") {
     double latitude_to_model = -0.45;
     bool land_sea = true;
 
-    double surface_wind_direction = add_inflow_new(gradient_wind_direction,
+    double surface_wind_direction = add_inflow(gradient_wind_direction,
                                                    rad_to_model, rad_to_max_wind,
                                                    latitude_to_model, land_sea);
 
@@ -1123,7 +1134,7 @@ context("Check C++ add_inflow function") {
     double latitude_to_model = -0.45;
     bool land_sea = true;
 
-    double surface_wind_direction = add_inflow_new(gradient_wind_direction,
+    double surface_wind_direction = add_inflow(gradient_wind_direction,
                                                    rad_to_model, rad_to_max_wind,
                                                    latitude_to_model, land_sea);
 
@@ -1137,7 +1148,7 @@ context("Check C++ add_inflow function") {
     double latitude_to_model = -0.45;
     bool land_sea = true;
 
-    double surface_wind_direction = add_inflow_new(gradient_wind_direction,
+    double surface_wind_direction = add_inflow(gradient_wind_direction,
                                                    rad_to_model, rad_to_max_wind,
                                                    latitude_to_model, land_sea);
 
@@ -1151,7 +1162,7 @@ context("Check C++ add_inflow function") {
     double latitude_to_model = -0.45;
     bool land_sea = true;
 
-    double surface_wind_direction = add_inflow_new(gradient_wind_direction,
+    double surface_wind_direction = add_inflow(gradient_wind_direction,
                                                    rad_to_model, rad_to_max_wind,
                                                    latitude_to_model, land_sea);
 
@@ -1169,7 +1180,7 @@ Rmax <- 20
 tibble(cdist = rep(0:50, 2),
        over_land = rep(c(TRUE, FALSE), each = 51),
        inflow_angle = map2_dbl(.x = cdist, .y = over_land,
-                              .f = ~ stormwindmodel:::add_inflow_new(gwd = 0, cdist = .x,
+                              .f = ~ stormwindmodel:::add_inflow(gwd = 0, cdist = .x,
                                                                      Rmax = Rmax, tclat = .45,
                                                                      glandsea = .y))) %>%
   ggplot(aes(x = cdist, y = inflow_angle, color = over_land, group = over_land)) +
@@ -1182,7 +1193,7 @@ Rmax <- 20
 tibble(cdist = rep(0:50, 2),
        over_land = rep(c(TRUE, FALSE), each = 51),
        inflow_angle = map2_dbl(.x = cdist, .y = over_land,
-                               .f = ~ stormwindmodel:::add_inflow_new(gwd = 0, cdist = .x,
+                               .f = ~ stormwindmodel:::add_inflow(gwd = 0, cdist = .x,
                                                                       Rmax = Rmax, tclat = -0.45,
                                                                       glandsea = .y)) - 360) %>%
   ggplot(aes(x = cdist, y = inflow_angle, color = over_land, group = over_land)) +
@@ -1466,7 +1477,7 @@ NumericVector calc_grid_wind_cpp(double glat, double glon, bool glandsea,
       // Calculate symmetrical surface wind at the point
       wind_sfc_sym = gradient_to_surface_new(wind_gl_aa, cdist, glandsea);
       // Add inflow
-      swd = add_inflow_new(gwd, cdist, Rmax[i], tclat[i], glandsea);
+      swd = add_inflow(gwd, cdist, Rmax[i], tclat[i], glandsea);
       // Add forward speed of storm
       windspeed[i] = add_forward_speed(wind_sfc_sym, tcspd_u[i], tcspd_v[i], swd, cdist, Rmax[i]);
     }
@@ -1546,7 +1557,7 @@ List calc_grid_wind_cpp2(NumericVector glat, NumericVector glon, LogicalVector g
         // Calculate symmetrical surface wind at the point
         wind_sfc_sym = gradient_to_surface_new(wind_gl_aa, cdist, glandsea[j]);
         // Add inflow
-        swd = add_inflow_new(gwd, cdist, Rmax[i], tclat[i], glandsea[j]);
+        swd = add_inflow(gwd, cdist, Rmax[i], tclat[i], glandsea[j]);
         surface_wind_direction(i, j) = swd;
         // Add forward speed of storm
         windspeed(i, j) = add_forward_speed(wind_sfc_sym, tcspd_u[i], tcspd_v[i], swd, cdist, Rmax[i]);
