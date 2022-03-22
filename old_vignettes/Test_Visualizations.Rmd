@@ -24,9 +24,9 @@ grid_data <- county_points
 
 
 Use functions to pull storm data. In this case, winds
-```{r}
+```{r, echo = FALSE}
 wind_map_data <- calc_grid_winds2()
-head(wind_map_data)
+
 ```
 
 Basic Plot -  max wind speed at each location based on get_grid_winds, which pulls max from cal_grid_winds2 matrix
@@ -41,13 +41,33 @@ New Plot - take all points at a specific time and plot
 county_data <- tigris:::counties(state = c("NC", "FL","GA","VA", "DE", "MD", "NJ", "PA", "NY","CT","RI", "MA", "NH", "VT", "ME"), cb = T, class = "sf")
 
 practice <- right_join(base_plot, grid_data)
+practice <- practice[practice$gridid %in% county_data$GEOID,]
 sf_plot <- sf:::st_as_sf(practice, coords = c("glon", "glat")) %>% 
    sf:::st_set_crs(4269)
 
 #merge counties w/ fibs
-
+#Code 1
 ggplot() + 
   geom_sf(data = county_data) +
-  geom_sf(data = sf_plot, aes(color = vmax_sust))
+  geom_sf(data = sf_plot, aes(color = vmax_sust))+
+  metR::geom_arrow(data  = practice, aes(x = vmax_sust, y = sust_dur,
+                       dx = glon, 
+                       dy =glat),
+                       arrow.type = "closed",
+                       #arrow.length = practice$vmax_gust,
+                       show.legend = TRUE)
+#Code 2
+ggplot() + 
+  geom_sf(data = county_data) +
+  geom_sf(data = sf_plot)+
+  geom_spoke(data = practice, aes(x = glon, y = glat,
+                                     angle = sust_dur,
+                                     color = vmax_gust,
+                                     radius = vmax_gust/10
+                                     ), 
+               arrow = arrow(length = unit(.05, 'inches')),
+               show.legend = TRUE)+
+  scale_color_gradient(low='darkblue', high='darkred')
+  
 
 ```
