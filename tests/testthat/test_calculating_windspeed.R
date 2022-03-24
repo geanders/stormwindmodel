@@ -102,3 +102,34 @@ test_that("Wind speed estimates are reasonable for Hurricane Michael", {
 
 })
 
+test_that("Wind estimates agree with hand calculations", {
+  ex_counties <- county_points %>%
+    filter(gridid %in% c("22071", "22075", "22087", "22051", # Several counties in LA and MS
+                         "28045", "28047", "28059"))
+
+  ex_winds <- calc_grid_winds2(hurr_track = stormwindmodel::katrina_tracks,
+                               grid_df = ex_counties)
+  ex_winds <- ex_winds[["vmax_sust"]]
+  ex_max_winds <- ex_winds %>%
+    as.data.frame() %>%
+    rownames_to_column(var = "date") %>%
+    filter(as.character(date) == "2005-08-29 11:15:00") %>%
+    select(-date) %>%
+    pivot_longer(everything(), names_to = "county_fips", values_to = "vmax_sust")
+
+  expect_equal(ex_max_winds %>% filter(county_fips == 22071) %>% pull(vmax_sust) %>% round(),
+               30)
+  expect_equal(ex_max_winds %>% filter(county_fips == 22075) %>% pull(vmax_sust) %>% round(),
+               37)
+  expect_equal(ex_max_winds %>% filter(county_fips == 22087) %>% pull(vmax_sust) %>% round(),
+               32)
+  expect_equal(ex_max_winds %>% filter(county_fips == 22051) %>% pull(vmax_sust) %>% round(),
+               29)
+  expect_equal(ex_max_winds %>% filter(county_fips == 28045) %>% pull(vmax_sust) %>% round(),
+               26)
+  expect_equal(ex_max_winds %>% filter(county_fips == 28047) %>% pull(vmax_sust) %>% round(),
+               24)
+  expect_equal(ex_max_winds %>% filter(county_fips == 28059) %>% pull(vmax_sust) %>% round(),
+               22)
+})
+
