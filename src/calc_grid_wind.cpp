@@ -245,7 +245,7 @@ context("Check C++ will4 function") {
 //' continuous profiles. Monthly Weather Review 134(4):1102-1120.
 //'
 // [[Rcpp::export]]
-double will2_new(double r, double R1, double R2) {
+double will2(double r, double R1, double R2) {
 
   double w;
   double xi = (r - R1) / (R2 - R1);
@@ -269,7 +269,7 @@ context("Check C++ will2 function") {
     double R1 = 10.0;
     double R2 = 40.0;
 
-    double w = will2_new(r, R1, R2);
+    double w = will2(r, R1, R2);
     expect_true(w == 0.0);
   }
 
@@ -278,7 +278,7 @@ context("Check C++ will2 function") {
     double R1 = 10.0;
     double R2 = 40.0;
 
-    double w = will2_new(r, R1, R2);
+    double w = will2(r, R1, R2);
     expect_true(w == 1.0);
   }
 
@@ -287,7 +287,7 @@ context("Check C++ will2 function") {
     double R1 = 10.0;
     double R2 = 40.0;
 
-    double w = will2_new(r, R1, R2);
+    double w = will2(r, R1, R2);
     expect_true(w == 0.5);
   }
 }
@@ -303,7 +303,7 @@ R1 <- 10
 R2 <- 40
 
 df <- tibble(r = 0:100,
-             w = map_dbl(r, stormwindmodel:::will2_new, R1 = R1, R2 = R2))
+             w = map_dbl(r, stormwindmodel:::will2, R1 = R1, R2 = R2))
 df %>%
   ggplot(aes(x = r, y = w)) +
   geom_point() +
@@ -421,7 +421,7 @@ double will1(double cdist, double Rmax, double R1,
   } else {
     Vi = will1a(vmax_gl, cdist, Rmax, n);
     Vo = will4(vmax_gl, A, cdist, Rmax, X1,  X2);
-    w = will2_new(cdist, R1, R2);
+    w = will2(cdist, R1, R2);
     // Willoughby equation 1b
     wind_gl_aa = Vi * (1 - w) + Vo * w;
   }
@@ -1521,82 +1521,9 @@ context("Check that C++ add_forward_speed function works correctly") {
   }
 }
 
-//' @export
-// [[Rcpp::export]]
-NumericVector calc_grid_wind_cpp(double glat, double glon, bool glandsea,
-                                 double max_dist,
-    NumericVector tclat, NumericVector tclon,
-    NumericVector Rmax, NumericVector R1, NumericVector R2, NumericVector vmax_gl,
-    NumericVector n, NumericVector A, NumericVector X1,
-    NumericVector tcspd_u, NumericVector tcspd_v) {
-
-  int size_data = tclat.size();
-  double cdist, wind_gl_aa, gwd, wind_sfc_sym, swd;
-  NumericVector windspeed(size_data);
-
-  // Convert everything from degrees to radians
-  double glat_rad = glat * M_PI / 180.0;
-  double glon_rad = glon * M_PI / 180.0;
-  NumericVector tclat_rad = tclat * M_PI / 180.0;
-  NumericVector tclon_rad = tclon * M_PI / 180.0;
-
-  for(int i = 0; i < size_data; i++){
-    // Calculate the distance between the storm's center at each time and the grid point
-    cdist = calc_distance(tclat_rad[i], tclon_rad[i], glat_rad, glon_rad);
-    // Assume all storm-associated wind beyond a certain distance is 0
-    if(cdist > max_dist){
-      windspeed[i] = 0;
-    } else {
-      // Calculate gradient-level wind at the point
-      wind_gl_aa = will1(cdist, Rmax[i], R1[i], R2[i], vmax_gl[i], n[i], A[i], X1[i]);
-      // Calculate the gradient wind direction at the point
-      gwd = calc_gwd(tclat_rad[i], tclon_rad[i], glat_rad, glon_rad);
-      // Calculate symmetrical surface wind at the point
-      wind_sfc_sym = gradient_to_surface(wind_gl_aa, cdist, glandsea);
-      // Add inflow
-      swd = add_inflow(gwd, cdist, Rmax[i], tclat[i], glandsea);
-      // Add forward speed of storm
-      windspeed[i] = add_forward_speed(wind_sfc_sym, tcspd_u[i], tcspd_v[i], swd, cdist, Rmax[i]);
-    }
-  }
-
-  return windspeed;
-}
-
-/*** R
-old_version <- calc_grid_wind(grid_point = tibble(glat = 29.97270, glon = -90.05284),
-                   with_wind_radii = tibble(date = lubridate::ymd_hms(c("1999-09-13 06:00:00", "1999-09-13 06:15:00")),
-                                            tclat = c(29.6, 29.0), tclon = c(-90.0, -90.1),
-                                            Rmax = c(22.1, 22.1), R1 = c(4.42, 4.43), R2 = c(29.4, 29.4), vmax_gl = c(73.6, 73.6),
-                                            n = c(1.38, 1.38), A = c(0.279, 0.279), X1 = c(213.0, 213.0),
-                                            tcspd_u = c(-6.23, -6.25), tcspd_v = c(73.6, 73.6)))
-
-stormwindmodel:::calc_grid_wind_cpp(glat = 29.97270, glon = -90.05284,
-                                    glandsea = TRUE, max_dist =  2222.4,
-                   tclat = c(29.6, 29.0, NA), tclon = c(-90.0, -90.1, NA),
-                   Rmax = c(22.1, 22.1, NA), R1 = c(4.42, 4.43, NA), R2 = c(29.4, 29.4, NA), vmax_gl = c(73.6, 73.6, NA),
-                   n = c(1.38, 1.38, NA), A = c(0.279, 0.279, NA), X1 = c(213.0, 213.0, NA),
-                   tcspd_u = c(-6.23, -6.25, NA), tcspd_v = c(73.6, 73.6, NA))
-
-
-katrina_full_track <- create_full_track(hurr_track = stormwindmodel::katrina_tracks, tint = 0.25)
-katrina_wind_radii <- add_wind_radii(full_track = katrina_full_track) %>%
-  slice(210:220)
-miami_dade_location <- county_points %>%
-  filter(gridid == "12086")
-
-stormwindmodel:::calc_grid_wind_cpp(glat = miami_dade_location$glat, glon = miami_dade_location$glon,
-                                    glandsea = TRUE, max_dist =  2222.4,
-                                    tclat = katrina_wind_radii$tclat, tclon = katrina_wind_radii$tclon,
-                                    Rmax = katrina_wind_radii$Rmax, R1 = katrina_wind_radii$R1,
-                                    R2 = katrina_wind_radii$R2, vmax_gl = katrina_wind_radii$vmax_gl,
-                                    n = katrina_wind_radii$n, A = katrina_wind_radii$A, X1 = katrina_wind_radii$X1,
-                                    tcspd_u = katrina_wind_radii$tcspd_u, tcspd_v = katrina_wind_radii$tcspd_v)
-*/
-
 
 // [[Rcpp::export]]
-List calc_grid_wind_cpp2(NumericVector glat, NumericVector glon, LogicalVector glandsea,
+List calc_grid_winds_cpp(NumericVector glat, NumericVector glon, LogicalVector glandsea,
                          double max_dist,
                          NumericVector tclat, NumericVector tclon,
                          NumericVector Rmax, NumericVector R1, NumericVector R2,
@@ -1649,21 +1576,14 @@ List calc_grid_wind_cpp2(NumericVector glat, NumericVector glon, LogicalVector g
 }
 
 /*** R
-old_version <- calc_grid_wind(grid_point = tibble(glat = 29.97270, glon = -90.05284),
-                              with_wind_radii = tibble(date = lubridate::ymd_hms(c("1999-09-13 06:00:00", "1999-09-13 06:15:00")),
-                                                       tclat = c(29.6, 29.0), tclon = c(-90.0, -90.1),
-                                                       Rmax = c(22.1, 22.1), R1 = c(4.42, 4.43), R2 = c(29.4, 29.4), vmax_gl = c(73.6, 73.6),
-                                                       n = c(1.38, 1.38), A = c(0.279, 0.279), X1 = c(213.0, 213.0),
-                                                       tcspd_u = c(-6.23, -6.25), tcspd_v = c(73.6, 73.6)))
-
-stormwindmodel:::calc_grid_wind_cpp2(glat = 29.97270, glon = -90.05284,
+stormwindmodel:::calc_grid_winds_cpp(glat = 29.97270, glon = -90.05284,
                                      glandsea = TRUE, max_dist =  2222.4,
                                     tclat = c(29.6, 29.0, NA), tclon = c(-90.0, -90.1, NA),
                                     Rmax = c(22.1, 22.1, NA), R1 = c(4.42, 4.43, NA), R2 = c(29.4, 29.4, NA), vmax_gl = c(73.6, 73.6, NA),
                                     n = c(1.38, 1.38, NA), A = c(0.279, 0.279, NA), X1 = c(213.0, 213.0, NA),
                                     tcspd_u = c(-6.23, -6.25, NA), tcspd_v = c(73.6, 73.6, NA))
 
-stormwindmodel:::calc_grid_wind_cpp2(glat = c(29.97270, 30, 29), glon = c(-90.05284, -90, -89),
+stormwindmodel:::calc_grid_winds_cpp(glat = c(29.97270, 30, 29), glon = c(-90.05284, -90, -89),
                                      glandsea = c(TRUE, TRUE, TRUE), max_dist =  2222.4,
                                      tclat = c(29.6, 29.0, NA), tclon = c(-90.0, -90.1, NA),
                                      Rmax = c(22.1, 22.1, NA), R1 = c(4.42, 4.43, NA), R2 = c(29.4, 29.4, NA), vmax_gl = c(73.6, 73.6, NA),
@@ -1677,7 +1597,7 @@ katrina_wind_radii <- add_wind_radii(full_track = katrina_full_track)
 florida_location <- county_points %>%
   filter(stringr::str_sub(gridid, 1, 2) == "12")
 
-a <- stormwindmodel:::calc_grid_wind_cpp2(glat = florida_location$glat, glon = florida_location$glon,
+a <- stormwindmodel:::calc_grid_winds_cpp(glat = florida_location$glat, glon = florida_location$glon,
                                      glandsea = rep(TRUE, nrow(florida_location)), max_dist =  2222.4,
                                     tclat = katrina_wind_radii$tclat, tclon = katrina_wind_radii$tclon,
                                     Rmax = katrina_wind_radii$Rmax, R1 = katrina_wind_radii$R1,

@@ -4,7 +4,7 @@ test_that("Wind speed estimates are reasonable for Hurricane Katrina", {
   orleans_and_miami <- county_points %>%
     filter(gridid %in% c("22071", "12086"))
 
-  katrina_wind <- calc_grid_winds2(grid_df = orleans_and_miami,
+  katrina_wind <- calc_grid_winds(grid_df = orleans_and_miami,
                                    hurr_track = stormwindmodel::katrina_tracks)
 
   orleans_max <- max(katrina_wind[["vmax_sust"]][, "22071"], na.rm = TRUE)
@@ -37,7 +37,7 @@ test_that("Wind speed estimates are reasonable for Hurricane Michael", {
   bay_county_location <- county_points %>%
     filter(gridid == "12005")
 
-  bay_michael_wind <- calc_grid_winds2(grid_df = bay_county_location,
+  bay_michael_wind <- calc_grid_winds(grid_df = bay_county_location,
                                        hurr_track = michael_track)
   bay_county_max <- max(bay_michael_wind[["vmax_sust"]][, "12005"], na.rm = TRUE)
 
@@ -51,7 +51,7 @@ test_that("Wind speed estimates are reasonable for Hurricane Michael", {
     filter(storm_id == "Michael-2018" & vmax_sust == 32.9216) %>%
     pull(fips)
 
-  michael_high_winds <- calc_grid_winds2(hurr_track = michael_track,
+  michael_high_winds <- calc_grid_winds(hurr_track = michael_track,
                                          grid_df = county_points %>%
                                            filter(gridid %in% highest_wind_locs))
   michael_high_winds_vmax <- apply(michael_high_winds[["vmax_sust"]],
@@ -68,7 +68,7 @@ test_that("Wind speed estimates are reasonable for Hurricane Michael", {
     filter(storm_id == "Michael-2018" & vmax_sust == 25.7200) %>%
     pull(fips)
 
-  michael_mid_winds <- calc_grid_winds2(hurr_track = michael_track,
+  michael_mid_winds <- calc_grid_winds(hurr_track = michael_track,
                                          grid_df = county_points %>%
                                            filter(gridid %in% mid_wind_locs))
   michael_mid_winds_vmax <- apply(michael_mid_winds[["vmax_sust"]],
@@ -88,7 +88,7 @@ test_that("Wind speed estimates are reasonable for Hurricane Michael", {
     filter(storm_id == "Michael-2018" & vmax_sust == 17.4896) %>%
     pull(fips)
 
-  michael_low_winds <- calc_grid_winds2(hurr_track = michael_track,
+  michael_low_winds <- calc_grid_winds(hurr_track = michael_track,
                                         grid_df = county_points %>%
                                           filter(gridid %in% low_wind_locs))
   michael_low_winds_vmax <- apply(michael_low_winds[["vmax_sust"]],
@@ -107,7 +107,7 @@ test_that("Wind estimates agree with hand calculations", {
     filter(gridid %in% c("22071", "22075", "22087", "22051", # Several counties in LA and MS
                          "28045", "28047", "28059"))
 
-  ex_winds <- calc_grid_winds2(hurr_track = stormwindmodel::katrina_tracks,
+  ex_winds <- calc_grid_winds(hurr_track = stormwindmodel::katrina_tracks,
                                grid_df = ex_counties)
   ex_winds <- ex_winds[["vmax_sust"]]
   ex_max_winds <- ex_winds %>%
