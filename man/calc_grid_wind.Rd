@@ -27,7 +27,12 @@ The default value is 2222.4 km (1200 nautical miles).}
 \value{
 A dataframe with date (\code{date}) and modeled wind speed
    (\code{windspeed}, in m / s) at the grid point location for all storm
-   observations.
+   observations. There are also columns for the distance (how far the stomr
+   was from the location at that timepoint) and surface wind direction (in polar
+   conventions, so 0 degrees is due East, 90 is due North, etc.). If the storm
+   was further than the specified \code{max_dist} from the location, then surface
+   wind direction will not be calculated and instead will have a missing (\code{NA})
+   value.
 }
 \description{
 Uses the Willoughby wind model (Willoughby et al. 2006) to calculate wind
@@ -40,7 +45,7 @@ data("floyd_tracks")
 data("county_points")
 full_track <- create_full_track(hurr_track = floyd_tracks)
 with_wind_radii <- add_wind_radii(full_track = full_track)
-wind_grid <- calc_grid_wind(grid_point = county_points[1, ],
+wind_grid <- calc_grid_wind(grid_point = county_points[county_points$gridid == "37055", ],
                             with_wind_radii = with_wind_radii)
 head(wind_grid)
 }

@@ -25,16 +25,16 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// will2_new
-double will2_new(double r, double R1, double R2);
-RcppExport SEXP _stormwindmodel_will2_new(SEXP rSEXP, SEXP R1SEXP, SEXP R2SEXP) {
+// will2
+double will2(double r, double R1, double R2);
+RcppExport SEXP _stormwindmodel_will2(SEXP rSEXP, SEXP R1SEXP, SEXP R2SEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< double >::type r(rSEXP);
     Rcpp::traits::input_parameter< double >::type R1(R1SEXP);
     Rcpp::traits::input_parameter< double >::type R2(R2SEXP);
-    rcpp_result_gen = Rcpp::wrap(will2_new(r, R1, R2));
+    rcpp_result_gen = Rcpp::wrap(will2(r, R1, R2));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -129,34 +129,9 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// calc_grid_wind_cpp
-NumericVector calc_grid_wind_cpp(double glat, double glon, bool glandsea, double max_dist, NumericVector tclat, NumericVector tclon, NumericVector Rmax, NumericVector R1, NumericVector R2, NumericVector vmax_gl, NumericVector n, NumericVector A, NumericVector X1, NumericVector tcspd_u, NumericVector tcspd_v);
-RcppExport SEXP _stormwindmodel_calc_grid_wind_cpp(SEXP glatSEXP, SEXP glonSEXP, SEXP glandseaSEXP, SEXP max_distSEXP, SEXP tclatSEXP, SEXP tclonSEXP, SEXP RmaxSEXP, SEXP R1SEXP, SEXP R2SEXP, SEXP vmax_glSEXP, SEXP nSEXP, SEXP ASEXP, SEXP X1SEXP, SEXP tcspd_uSEXP, SEXP tcspd_vSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< double >::type glat(glatSEXP);
-    Rcpp::traits::input_parameter< double >::type glon(glonSEXP);
-    Rcpp::traits::input_parameter< bool >::type glandsea(glandseaSEXP);
-    Rcpp::traits::input_parameter< double >::type max_dist(max_distSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type tclat(tclatSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type tclon(tclonSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type Rmax(RmaxSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type R1(R1SEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type R2(R2SEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type vmax_gl(vmax_glSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type n(nSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type A(ASEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type X1(X1SEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type tcspd_u(tcspd_uSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type tcspd_v(tcspd_vSEXP);
-    rcpp_result_gen = Rcpp::wrap(calc_grid_wind_cpp(glat, glon, glandsea, max_dist, tclat, tclon, Rmax, R1, R2, vmax_gl, n, A, X1, tcspd_u, tcspd_v));
-    return rcpp_result_gen;
-END_RCPP
-}
-// calc_grid_wind_cpp2
-List calc_grid_wind_cpp2(NumericVector glat, NumericVector glon, LogicalVector glandsea, double max_dist, NumericVector tclat, NumericVector tclon, NumericVector Rmax, NumericVector R1, NumericVector R2, NumericVector vmax_gl, NumericVector n, NumericVector A, NumericVector X1, NumericVector tcspd_u, NumericVector tcspd_v);
-RcppExport SEXP _stormwindmodel_calc_grid_wind_cpp2(SEXP glatSEXP, SEXP glonSEXP, SEXP glandseaSEXP, SEXP max_distSEXP, SEXP tclatSEXP, SEXP tclonSEXP, SEXP RmaxSEXP, SEXP R1SEXP, SEXP R2SEXP, SEXP vmax_glSEXP, SEXP nSEXP, SEXP ASEXP, SEXP X1SEXP, SEXP tcspd_uSEXP, SEXP tcspd_vSEXP) {
+// calc_grid_winds_cpp
+List calc_grid_winds_cpp(NumericVector glat, NumericVector glon, LogicalVector glandsea, double max_dist, NumericVector tclat, NumericVector tclon, NumericVector Rmax, NumericVector R1, NumericVector R2, NumericVector vmax_gl, NumericVector n, NumericVector A, NumericVector X1, NumericVector tcspd_u, NumericVector tcspd_v);
+RcppExport SEXP _stormwindmodel_calc_grid_winds_cpp(SEXP glatSEXP, SEXP glonSEXP, SEXP glandseaSEXP, SEXP max_distSEXP, SEXP tclatSEXP, SEXP tclonSEXP, SEXP RmaxSEXP, SEXP R1SEXP, SEXP R2SEXP, SEXP vmax_glSEXP, SEXP nSEXP, SEXP ASEXP, SEXP X1SEXP, SEXP tcspd_uSEXP, SEXP tcspd_vSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -175,7 +150,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< NumericVector >::type X1(X1SEXP);
     Rcpp::traits::input_parameter< NumericVector >::type tcspd_u(tcspd_uSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type tcspd_v(tcspd_vSEXP);
-    rcpp_result_gen = Rcpp::wrap(calc_grid_wind_cpp2(glat, glon, glandsea, max_dist, tclat, tclon, Rmax, R1, R2, vmax_gl, n, A, X1, tcspd_u, tcspd_v));
+    rcpp_result_gen = Rcpp::wrap(calc_grid_winds_cpp(glat, glon, glandsea, max_dist, tclat, tclon, Rmax, R1, R2, vmax_gl, n, A, X1, tcspd_u, tcspd_v));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -401,15 +376,14 @@ RcppExport SEXP run_testthat_tests(SEXP);
 
 static const R_CallMethodDef CallEntries[] = {
     {"_stormwindmodel_calc_distance", (DL_FUNC) &_stormwindmodel_calc_distance, 5},
-    {"_stormwindmodel_will2_new", (DL_FUNC) &_stormwindmodel_will2_new, 3},
+    {"_stormwindmodel_will2", (DL_FUNC) &_stormwindmodel_will2, 3},
     {"_stormwindmodel_will1", (DL_FUNC) &_stormwindmodel_will1, 9},
     {"_stormwindmodel_calc_bearing_single", (DL_FUNC) &_stormwindmodel_calc_bearing_single, 4},
     {"_stormwindmodel_calc_gwd", (DL_FUNC) &_stormwindmodel_calc_gwd, 4},
     {"_stormwindmodel_gradient_to_surface", (DL_FUNC) &_stormwindmodel_gradient_to_surface, 3},
     {"_stormwindmodel_add_inflow", (DL_FUNC) &_stormwindmodel_add_inflow, 5},
     {"_stormwindmodel_add_forward_speed", (DL_FUNC) &_stormwindmodel_add_forward_speed, 6},
-    {"_stormwindmodel_calc_grid_wind_cpp", (DL_FUNC) &_stormwindmodel_calc_grid_wind_cpp, 15},
-    {"_stormwindmodel_calc_grid_wind_cpp2", (DL_FUNC) &_stormwindmodel_calc_grid_wind_cpp2, 15},
+    {"_stormwindmodel_calc_grid_winds_cpp", (DL_FUNC) &_stormwindmodel_calc_grid_winds_cpp, 15},
     {"_stormwindmodel_calc_linear_coefs", (DL_FUNC) &_stormwindmodel_calc_linear_coefs, 2},
     {"_stormwindmodel_find_x_section", (DL_FUNC) &_stormwindmodel_find_x_section, 2},
     {"_stormwindmodel_interpolate_line", (DL_FUNC) &_stormwindmodel_interpolate_line, 3},

@@ -96,8 +96,8 @@ calc_distance <- function(tclat, tclon, glat, glon, Rearth = 6371) {
 #' of the primary hurricane vortex. Part II: A new family of sectionally
 #' continuous profiles. Monthly Weather Review 134(4):1102-1120.
 #'
-will2_new <- function(r, R1, R2) {
-    .Call(`_stormwindmodel_will2_new`, r, R1, R2)
+will2 <- function(r, R1, R2) {
+    .Call(`_stormwindmodel_will2`, r, R1, R2)
 }
 
 #' Model wind speed at a grid point for a storm track observation
@@ -337,13 +337,8 @@ add_forward_speed <- function(wind_sfc_sym, tcspd_u, tcspd_v, swd, cdist, Rmax) 
     .Call(`_stormwindmodel_add_forward_speed`, wind_sfc_sym, tcspd_u, tcspd_v, swd, cdist, Rmax)
 }
 
-#' @export
-calc_grid_wind_cpp <- function(glat, glon, glandsea, max_dist, tclat, tclon, Rmax, R1, R2, vmax_gl, n, A, X1, tcspd_u, tcspd_v) {
-    .Call(`_stormwindmodel_calc_grid_wind_cpp`, glat, glon, glandsea, max_dist, tclat, tclon, Rmax, R1, R2, vmax_gl, n, A, X1, tcspd_u, tcspd_v)
-}
-
-calc_grid_wind_cpp2 <- function(glat, glon, glandsea, max_dist, tclat, tclon, Rmax, R1, R2, vmax_gl, n, A, X1, tcspd_u, tcspd_v) {
-    .Call(`_stormwindmodel_calc_grid_wind_cpp2`, glat, glon, glandsea, max_dist, tclat, tclon, Rmax, R1, R2, vmax_gl, n, A, X1, tcspd_u, tcspd_v)
+calc_grid_winds_cpp <- function(glat, glon, glandsea, max_dist, tclat, tclon, Rmax, R1, R2, vmax_gl, n, A, X1, tcspd_u, tcspd_v) {
+    .Call(`_stormwindmodel_calc_grid_winds_cpp`, glat, glon, glandsea, max_dist, tclat, tclon, Rmax, R1, R2, vmax_gl, n, A, X1, tcspd_u, tcspd_v)
 }
 
 #' Calculate coefficients for linear interpolation
