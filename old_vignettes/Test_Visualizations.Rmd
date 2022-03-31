@@ -17,6 +17,7 @@ Showing visualization examples that can be pulled from data.
 library(stormwindmodel)
 library(tidyverse)
 library(ggplot2)
+library(sf)
 
 storm_data <- floyd_tracks
 grid_data <- county_points
@@ -25,7 +26,7 @@ grid_data <- county_points
 
 Use functions to pull storm data. In this case, winds
 ```{r, echo = FALSE, include = FALSE}
-wind_map_data <- calc_grid_winds2()
+wind_map_data <- calc_grid_winds(storm_data)
 wind_max_sust <- wind_map_data[["vmax_sust"]]
 wind_surface_dir <- wind_map_data[["surface_wind_direction"]]
 wind_surface_dir_specific <- wind_surface_dir["1999-09-15 17:00:00",]
@@ -39,6 +40,7 @@ map_wind(base_plot)
 ```
 
 New Plot - take all points at a specific time and plot
+#grid from data, then set grid
 ```{r}
 
 county_data <- tigris:::counties(state = c("NC"), cb = T, class = "sf")
@@ -59,16 +61,6 @@ sf_plot <- sf:::st_as_sf(practice, coords = c("glon", "glat")) %>%
    sf:::st_set_crs(4269)
 
 #merge counties w/ fibs
-#Code 1
-# ggplot() + 
-#   geom_sf(data = county_data) +
-#    geom_sf(data = sf_plot)#+
-  # metR::geom_arrow(data  = practice, aes(x = wind_max, y = sust_dur,
-  #                      dx = glon, 
-  #                      dy =glat),
-  #                      arrow.type = "closed",
-  #                      #arrow.length = practice$vmax_gust,
-  #                      show.legend = TRUE)
 
 #Code 2
 ggplot() + 
@@ -88,7 +80,18 @@ ggplot() +
 
 #using st_make_object to set grid first
 ```{r}
-grid_spacing <- 8000
+arrow_radius <- 20
+
+example_state <- c("NC")
+
+example_counties <- c("Columbus", "Brunswick", "New Hanover", "Pender", "Bladen",
+                      "Robeson", "Carteret", "Onslow", "Scotland")
+
+example_time <- "1999-09-15 17:00:00"
+
+county_data <- tigris:::tracts(state = example_state, county = example_counties,
+                               cb = T, class = "sf")
+
 test <- sf::st_make_grid(county_data, square = TRUE, what = "centers")%>% 
   st_sf() %>% 
   mutate(gridid = as.character(1:n()))
@@ -104,41 +107,35 @@ grid_to_model <- test %>%
          glandsea = TRUE) %>%
   select(gridid, glat, glon, glandsea)
 
+example_winds <- calc_grid_winds(storm_data, grid_to_model)
+
+example_max_sust <- example_winds[["vmax_sust"]]
+example_surface_dir <- example_winds[["surface_wind_direction"]]
+example_surface_dir_specific <- example_surface_dir[example_time,]
+example_max_sust_specific <- example_max_sust[example_time,]
+
+wind_summary_example <- data.frame(example_max_sust_specific,
+                                   example_surface_dir_specific)
+
+example_plot <- right_join(rownames_to_column(wind_summary_example),
+                           grid_to_model, by = c("rowname" ="gridid"))
+
+
+practice <- example_plot[example_plot$rowname %in% test$gridid,]
+
  ggplot()+
   geom_sf(data = county_data)+
-  geom_sf(data = test)
+  geom_sf(data = test)+
+  geom_spoke(data = practice, aes(x = glon, y = glat,
+                                 angle = example_surface_dir_specific* pi / 180,
+                                 color = example_max_sust_specific,
+                                 radius = example_max_sust_specific/arrow_radius
+                                     ),
+               arrow = arrow(length = unit(.075, 'inches')),
+               show.legend = TRUE)+
+  scale_color_gradient(low='darkblue', high='red')+
+  ggtitle("Max Sustained Winds and Direction at", paste0(example_time))
+  #geom_point(data = storm_center, aes(x = tclon, y = tclat), color = "green")
 
-```
 
-grid_spacing <- 4000
-example_grid <- st_make_grid(example_county, square = TRUE, what = "centers",
-                        cellsize = c(grid_spacing, grid_spacing)) %>% 
-  st_sf() %>% 
-  mutate(gridid = as.character(1:n()))
-
-grid_to_model <- example_grid %>% 
-  st_transform(4269) %>% 
-  st_geometry() %>% 
-  unlist() %>% 
-  matrix(ncol = 2,byrow = TRUE) %>% 
-  as_tibble() %>% 
-  setNames(c("glon","glat")) %>% 
-  mutate(gridid = as.character(1:n()),
-         glandsea = TRUE) %>% 
-  select(gridid, glat, glon, glandsea)
-
-example_winds <- get_grid_winds(hurr_track = example_storm_track,
-                                grid_df = grid_to_model)
-
-example_grid <- example_grid %>% 
-  left_join(example_winds, by = "gridid")
-  
-#From Git  
-```{r}
-nc = read_sf(system.file("shape/nc.shp", package="sf"))
-g = st_make_grid(nc)
-plot(g)
-plot(st_geometry(nc), add = TRUE)
-# g[nc] selects cells that intersect with nc:
-plot(g[nc], col = '#ff000088', add = TRUE)
 ```
