@@ -18,69 +18,72 @@ library(stormwindmodel)
 library(tidyverse)
 library(ggplot2)
 library(sf)
-
-storm_data <- floyd_tracks
-grid_data <- county_points
 ```
 
 
 Use functions to pull storm data. In this case, winds
 ```{r, echo = FALSE, include = FALSE}
-wind_map_data <- calc_grid_winds(storm_data)
-wind_max_sust <- wind_map_data[["vmax_sust"]]
-wind_surface_dir <- wind_map_data[["surface_wind_direction"]]
-wind_surface_dir_specific <- wind_surface_dir["1999-09-15 17:00:00",]
-wind_max_sust_specific <- wind_max_sust["1999-09-15 17:00:00",]
-```
 
-Basic Plot -  max wind speed at each location based on get_grid_winds, which pulls max from cal_grid_winds2 matrix
-```{r}
-base_plot <- get_grid_winds(storm_data, grid_data)
-map_wind(base_plot)
 ```
 
 New Plot - take all points at a specific time and plot
 #grid from data, then set grid
 ```{r}
 
-county_data <- tigris:::counties(state = c("NC"), cb = T, class = "sf")
+storm_data <- floyd_tracks
+grid_data <- county_points
+arrow_color <- c("vmax_sust")
+arrow_direction <- c("surface_wind_direction")
+data_date <- c("1999-09-15 17:00:00")
+example_state <- c("NC")
+
+wind_map_data <- calc_grid_winds(storm_data)
+wind_max_sust <- wind_map_data[[arrow_color]]
+wind_surface_dir <- wind_map_data[[arrow_direction]]
+wind_surface_dir_specific <- wind_surface_dir[data_date,]
+wind_max_sust_specific <- wind_max_sust[data_date,]
+
+county_data <- tigris:::counties(state = example_state, cb = T, class = "sf")
 
 storm_center <- create_full_track(storm_data)
-storm_center <- storm_center[as.character(storm_center$date) == c("1999-09-15 17:00:00"),]
+storm_center <- storm_center[as.character(storm_center$date) == data_date,]
 
 wind_summary <- data.frame(wind_max_sust_specific, wind_surface_dir_specific)
 grid_data_sum <- grid_data[grid_data$gridid %in% rownames(wind_summary),]
 practice <- right_join(rownames_to_column(wind_summary), grid_data_sum, 
                        by = c("rowname" ="gridid"))
 
-#practice <- practice[practice$wind_max_sust_specific >0.5,]
-# 
-# #county_data <- county_data[county_data$GEOID %in% practice$rowname,]
 practice <- practice[practice$rowname %in% county_data$GEOID,]
 sf_plot <- sf:::st_as_sf(practice, coords = c("glon", "glat")) %>% 
    sf:::st_set_crs(4269)
 
 #merge counties w/ fibs
-
-#Code 2
 ggplot() + 
-  geom_sf(data = county_data) +
+  geom_sf(data = county_data, color = "black", fill = "lightgray") +
   geom_sf(data = sf_plot)+
   geom_spoke(data = practice, aes(x = glon, y = glat,
                                      angle = wind_surface_dir_specific* pi / 180,
                                      color = wind_max_sust_specific,
-                                     radius = wind_max_sust_specific/2
+                                     radius = wind_max_sust_specific/3
                                      ),
                arrow = arrow(length = unit(.075, 'inches')),
                show.legend = TRUE)+
   scale_color_gradient(low='darkblue', high='red')+
-  geom_point(data = storm_center, aes(x = tclon, y = tclat), color = "green")
+  geom_point(data = storm_center, aes(x = tclon, y = tclat, size = 3), 
+             color = "darkred")+
+  labs(x = "Longitude", y = "Latitude", size = "Storm Center")
   
 ```
 
 #using st_make_object to set grid first
 ```{r}
 arrow_radius <- 20
+
+arrow_direction <- c("surface_wind_direction")
+
+arrow_color <- c("vmax_sust")
+
+storm_data <- floyd_tracks
 
 example_state <- c("NC")
 
@@ -89,6 +92,12 @@ example_counties <- c("Columbus", "Brunswick", "New Hanover", "Pender", "Bladen"
 
 example_time <- "1999-09-15 17:00:00"
 
+graph_title <- c("Max Sustained Winds and Direction at")
+
+legend_title <- c('Max Sustained Winds in m/s')
+
+
+#Start of Code
 county_data <- tigris:::tracts(state = example_state, county = example_counties,
                                cb = T, class = "sf")
 
@@ -96,7 +105,9 @@ test <- sf::st_make_grid(county_data, square = TRUE, what = "centers")%>%
   st_sf() %>% 
   mutate(gridid = as.character(1:n()))
 
-grid_to_model <- test %>% 
+grid_points <- test[county_data,]
+
+grid_to_model <- grid_points %>% 
   st_transform(4269) %>%
   st_geometry() %>%
   unlist() %>%
@@ -109,8 +120,8 @@ grid_to_model <- test %>%
 
 example_winds <- calc_grid_winds(storm_data, grid_to_model)
 
-example_max_sust <- example_winds[["vmax_sust"]]
-example_surface_dir <- example_winds[["surface_wind_direction"]]
+example_max_sust <- example_winds[[arrow_color]]
+example_surface_dir <- example_winds[[arrow_direction]]
 example_surface_dir_specific <- example_surface_dir[example_time,]
 example_max_sust_specific <- example_max_sust[example_time,]
 
@@ -123,9 +134,11 @@ example_plot <- right_join(rownames_to_column(wind_summary_example),
 
 practice <- example_plot[example_plot$rowname %in% test$gridid,]
 
+
+
  ggplot()+
-  geom_sf(data = county_data)+
-  geom_sf(data = test)+
+  geom_sf(data = county_data, fill = "lightgray")+
+  geom_sf(data = grid_points, aes(color = practice$example_max_sust_specific))+
   geom_spoke(data = practice, aes(x = glon, y = glat,
                                  angle = example_surface_dir_specific* pi / 180,
                                  color = example_max_sust_specific,
@@ -134,8 +147,9 @@ practice <- example_plot[example_plot$rowname %in% test$gridid,]
                arrow = arrow(length = unit(.075, 'inches')),
                show.legend = TRUE)+
   scale_color_gradient(low='darkblue', high='red')+
-  ggtitle("Max Sustained Winds and Direction at", paste0(example_time))
+  ggtitle(paste0(graph_title), paste0(example_time))+
+  labs(x= "Longitude", y= "Latitude", color=paste0(legend_title))
   #geom_point(data = storm_center, aes(x = tclon, y = tclat), color = "green")
-
+ 
 
 ```
