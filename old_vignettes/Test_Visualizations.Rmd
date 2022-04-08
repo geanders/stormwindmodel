@@ -34,9 +34,13 @@ storm_data <- floyd_tracks
 grid_data <- county_points
 arrow_color <- c("vmax_sust")
 arrow_direction <- c("surface_wind_direction")
-data_date <- c("1999-09-15 17:00:00")
+arrow_radius <- 20
+data_date <- c("1999-09-16 07:00:00")
 example_state <- c("NC")
+graph_title <- c("Max Sustained Winds and Direction at")
+legend_title <- c('Max Sustained Winds in m/s')
 
+#Start of code
 wind_map_data <- calc_grid_winds(storm_data)
 wind_max_sust <- wind_map_data[[arrow_color]]
 wind_surface_dir <- wind_map_data[[arrow_direction]]
@@ -64,20 +68,22 @@ ggplot() +
   geom_spoke(data = practice, aes(x = glon, y = glat,
                                      angle = wind_surface_dir_specific* pi / 180,
                                      color = wind_max_sust_specific,
-                                     radius = wind_max_sust_specific/3
+                                     radius = wind_max_sust_specific/arrow_radius
                                      ),
                arrow = arrow(length = unit(.075, 'inches')),
                show.legend = TRUE)+
   scale_color_gradient(low='darkblue', high='red')+
-  geom_point(data = storm_center, aes(x = tclon, y = tclat, size = 3), 
-             color = "darkred")+
-  labs(x = "Longitude", y = "Latitude", size = "Storm Center")
+  geom_point(data = storm_center, aes(x = tclon, y = tclat, size = 2), 
+             color = "orange")+
+  labs(x = "Longitude", y = "Latitude", size = "Storm Center",
+       color=paste0(legend_title))+
+  ggtitle(paste0(graph_title), paste0(data_date))
   
 ```
 
 #using st_make_object to set grid first
 ```{r}
-arrow_radius <- 20
+arrow_radius <- 30
 
 arrow_direction <- c("surface_wind_direction")
 
@@ -90,16 +96,21 @@ example_state <- c("NC")
 example_counties <- c("Columbus", "Brunswick", "New Hanover", "Pender", "Bladen",
                       "Robeson", "Carteret", "Onslow", "Scotland")
 
-example_time <- "1999-09-15 17:00:00"
+example_time <- "1999-09-16 05:00:00"
 
 graph_title <- c("Max Sustained Winds and Direction at")
 
 legend_title <- c('Max Sustained Winds in m/s')
 
-
+county_data <- list()
 #Start of Code
-county_data <- tigris:::tracts(state = example_state, county = example_counties,
+for(i in 1:length(example_state)){
+vec <- tigris:::tracts(state = example_state[i], county = example_counties,
                                cb = T, class = "sf")
+ county_data[[i]] <- vec 
+}
+
+county_data <- do.call(rbind, county_data)
 
 test <- sf::st_make_grid(county_data, square = TRUE, what = "centers")%>% 
   st_sf() %>% 
@@ -134,7 +145,8 @@ example_plot <- right_join(rownames_to_column(wind_summary_example),
 
 practice <- example_plot[example_plot$rowname %in% test$gridid,]
 
-
+storm_center <- create_full_track(storm_data)
+storm_center <- storm_center[as.character(storm_center$date) == example_time,]
 
  ggplot()+
   geom_sf(data = county_data, fill = "lightgray")+
@@ -148,8 +160,9 @@ practice <- example_plot[example_plot$rowname %in% test$gridid,]
                show.legend = TRUE)+
   scale_color_gradient(low='darkblue', high='red')+
   ggtitle(paste0(graph_title), paste0(example_time))+
-  labs(x= "Longitude", y= "Latitude", color=paste0(legend_title))
-  #geom_point(data = storm_center, aes(x = tclon, y = tclat), color = "green")
+  labs(x= "Longitude", y= "Latitude", color=paste0(legend_title))+
+  geom_point(data = storm_center, aes(x = tclon, y = tclat), color = "orange",
+             size = 3)
  
 
 ```
