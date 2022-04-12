@@ -1,0 +1,290 @@
+---
+title: "modeling_outside_us"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Modeling winds outside the United States}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>", 
+  message = FALSE, 
+  warning = FALSE
+)
+```
+
+```{r setup}
+library(stormwindmodel)
+```
+
+If you don't have a geographic dataset with locations to model winds, you can create a
+gridded geographic dataset of the region of interest. 
+
+```{r fig.width = 8, fig.height = 4}
+library(rnaturalearth)
+library(sf)
+library(tidyverse)
+
+all_countries <-  ne_countries(scale = "medium", 
+                                  returnclass = "sf")
+near_landfall <- all_countries %>% 
+  st_make_valid() %>% 
+  st_crop(y = st_bbox(c(xmin = 107, xmax = 128, ymin = 17.5, ymax = 34)))
+
+a <- ggplot() + 
+  geom_sf(data = near_landfall) 
+
+grid_near_landfall <- near_landfall %>% 
+  st_make_grid(what = "polygons", square = FALSE, cellsize = 0.25) %>% 
+  st_sf() %>% 
+  mutate(gridid = as.character(1:n()))
+points_near_landfall <- near_landfall %>% 
+  st_make_grid(what = "centers", square = FALSE, cellsize = 0.25) %>% 
+  st_sf() %>% 
+  mutate(gridid = as.character(1:n()))
+
+b <- ggplot() + 
+  geom_sf(data = near_landfall) + 
+  geom_sf(data = grid_near_landfall, color = "red", fill = NA, alpha = 0.4) + 
+  geom_sf(data = points_near_landfall, color = "blue", fill = NA, alpha = 0.2, size = 0.5)
+
+gridExtra::grid.arrange(a, b, ncol = 2)
+```
+
+Next, you can use this to create a regular dataframe that you can input to the wind model. This 
+process includes extracting the geometry information (latitude and longitude) into separate
+columns. It also involves using the land/sea mask from the package to determine which points are
+over land and which are over water. You can convert this to a format that's ready to enter in the
+storm wind modeling function:
+
+```{r}
+points_to_model <- points_near_landfall %>% 
+  mutate(glon = sf::st_coordinates(.)[,1],
+         glat = sf::st_coordinates(.)[,2]) %>% 
+  st_drop_geometry() %>% 
+  mutate(gridid = gridid, 
+         glandsea = mapply(check_over_land, tclat = .$glat, tclon = .$glon))
+
+head(points_to_model)
+```
+
+You can re-join this dataframe with the spatial version and plot it to check that the land/sea
+mask did a reasonable job of capturing grid points that are over land versus over water:
+
+```{r fig.width = 6, fig.height = 5}
+points_near_landfall <- points_near_landfall %>%  
+  left_join(points_to_model, by = "gridid")
+
+ggplot() + 
+  geom_sf(data = all_countries, fill = "tan") + 
+  geom_sf(data = points_near_landfall, aes(color = glandsea), size = 0.8, alpha = 0.5) + 
+  scale_color_manual(values = c("lightblue", "darkgreen"), guide = "none") + 
+  coord_sf(xlim = c(107, 128), ylim = c(17.5, 34))
+```
+
+There is an example dataset in the `stormwindmodel` package that includes a storm that affected
+this area, Typhoon Saomai. The dataset is included in the format it would be in if you read in 
+directly from a CSV file from IBTrACS---the only changes are that (1) only a few of the columns
+have been selected and (2) the names have been changed from all uppercase to all lowercase. 
+
+Before you can input this to the wind model code, you'll need to make a few changes to the 
+dataset. First, the date is in a date-time format, and you'll need to change it to a character
+in the form of, for example, "200608040300" for August 4, 2006 at 3 AM Greenwich Mean Time (UTM). 
+You should name this column "date". Next, you'll need to convert the columns with latitude and 
+longitude to numeric data types and change these column names from "lat" to "latitude" and from 
+"lon" to "longitude" (one way you can do this is using `transmute`, which will only keep the 
+new columns). Finally, you need to convert the column with wind data (in US conventions of 
+[wind averaging period and height]) to a numeric data type and rename the column from 
+"usa_wind" to "wind". You can do all these steps with the following code: 
+
+```{r}
+data("saomai_tracks")
+
+saomai_to_model <- saomai_tracks %>% 
+  transmute(date = format(iso_time, format = "%Y%m%d%H%M"), 
+            latitude = as.numeric(lat), 
+            longitude = as.numeric(lon),
+            wind = as.numeric(usa_wind))
+```
+
+Now you have converted all the required data into the format that is needed to run the storm 
+wind code. If you are interested in getting just the maximum wind speeds at each grid point (that
+is, the maximum wind at that point over the full course of the storm), you can use the 
+`get_grid_winds` function to do that. First, you'll run the function using the dataset of 
+grid points that you created as the `grid_df` input and the track data for Typhoon Saomai as
+the `hurr_track` input: 
+
+```{r}
+grid_winds <- get_grid_winds(hurr_track = saomai_to_model,
+                             grid_df = points_to_model)
+
+head(grid_winds)
+```
+
+The output will have a row for every grid point, where the grid point IDs match those from 
+the grid point dataset you created (you can use this ID to link the data back to the spatial 
+data object, for example, so you can plot the winds). For each grid point, it gives the maximum 
+surface-level sustained windspeed over the course of the storm (`vmax_sust`), the maximum 
+gust (`vmax_gust`---note that this is obtained as a simple multiplicative factor of `vmax_sust`), 
+the duration of sustained and gust winds over 20 m/s (`sust_dur` and `gust_dur`, respectively; 
+note that if you want to change the threshold from 20 m/s to another value, you can do so with 
+the `sust_duration_cut` and `gust_duration_cut` parameters in `get_grid_winds`), and the date and
+time (given based on the Greenwich Mean Time [UTM] time zone) when the wind was at its 
+maximum at that grid point (typically, this will be around the time the storm was closest to 
+the grid point, but there may be some cases where it's not the closest time point---for example, 
+since the storm's wind often decays rapidly after landfall, a local wind may be highest while
+the storm is still over water, even if the storm later passes closer to the location).
+
+To plot these data, you can join them back with the spatial gridded dataframe, using the grid ID
+to match between the two datasets. This gets the data back into an `sf` object type, which makes
+it easy to map:
+
+```{r}
+modeled_near_landfall <- grid_near_landfall %>%  
+  left_join(grid_winds, by = "gridid")
+
+modeled_near_landfall %>% 
+  head()
+```
+
+```{r fig.width = 6, fig.height = 5}
+library(viridis)
+ggplot() + 
+  geom_sf(data = modeled_near_landfall, aes(color = vmax_sust, fill = vmax_sust)) + 
+  geom_sf(data = all_countries, fill = NA, color = "white") + 
+  scale_color_viridis(option = "B") + 
+  scale_fill_viridis(option = "B") +   
+  coord_sf(xlim = c(107, 128), ylim = c(17.5, 34))
+```
+
+You can zoom this map in by changing the ranges on the `coord_sf` layer, for example: 
+
+```{r fig.width = 6, fig.height = 5}
+ggplot() + 
+  geom_sf(data = modeled_near_landfall, aes(color = vmax_sust, fill = vmax_sust)) + 
+  geom_sf(data = all_countries, fill = NA, color = "white") + 
+  scale_color_viridis(option = "B") + 
+  scale_fill_viridis(option = "B") +   
+  coord_sf(xlim = c(116, 123), ylim = c(25, 30))
+```
+
+
+You likely will also want to add the storm track. You have all the information you need to do 
+that, since you have latitude and longitude of the storm track in the `saomai_to_model` object. 
+However, to add it to the map, you'll need to convert it to an sf object class by specifying which
+columns provide this information as well as giving an appropriate coordinate reference system 
+number, so that it can be projected correctly. 
+
+```{r fig.width = 6, fig.height = 5}
+saomai_sf_points <- saomai_to_model %>% 
+  st_as_sf(coords = c("longitude", "latitude"), crs = st_crs(modeled_near_landfall)) 
+saomai_sf_line <- saomai_sf_points %>%
+  summarise(do_union = FALSE) %>%
+  st_cast("LINESTRING")
+
+ggplot() + 
+  geom_sf(data = modeled_near_landfall, aes(color = vmax_sust, fill = vmax_sust)) + 
+  geom_sf(data = all_countries, fill = NA, color = "white") + 
+  geom_sf(data = saomai_sf_line, color = "green") + 
+  geom_sf(data = saomai_sf_points, color = "green") + 
+  scale_color_viridis(option = "B") + 
+  scale_fill_viridis(option = "B") +   
+  coord_sf(xlim = c(107, 128), ylim = c(17.5, 34))
+
+ggplot() + 
+  geom_sf(data = modeled_near_landfall, aes(color = vmax_sust, fill = vmax_sust)) + 
+  geom_sf(data = all_countries, fill = NA, color = "white") + 
+  geom_sf(data = saomai_sf_line, color = "green") + 
+  geom_sf(data = saomai_sf_points, color = "green") + 
+  scale_color_viridis(option = "B") + 
+  scale_fill_viridis(option = "B") +   
+  coord_sf(xlim = c(116, 123), ylim = c(25, 30))
+```
+
+Here is an example of the entire process for a second storm, Typhoon Mangkhut in 2018. Again, 
+there is an example dataset that comes with the `stormwindmodel` package with this storm's 
+tracks. For other storms, you would instead start form data downloaded from IBTrACS (for 
+example, one of their CSV-format datasets). The gridded dataset is cropped in this case to 
+focus on the area near the storm's landfall near Macau, Hong Kong, and Guangzhou. Since this
+area is geographically more focused, in this example we use a smaller size for spacing between 
+grid points.
+
+```{r fig.width = 6, fig.height = 5}
+data("mangkhut_tracks")
+
+all_countries <-  ne_countries(scale = "medium", 
+                                  returnclass = "sf")
+near_landfall <- all_countries %>% 
+  st_make_valid() %>% 
+  st_crop(y = st_bbox(c(xmin = 110, xmax = 117, ymin = 19, ymax = 25)))
+
+grid_near_landfall <- near_landfall %>% 
+  st_make_grid(what = "polygons", square = FALSE, cellsize = 0.1) %>% 
+  st_sf() %>% 
+  mutate(gridid = as.character(1:n()))
+points_near_landfall <- near_landfall %>% 
+  st_make_grid(what = "centers", square = FALSE, cellsize = 0.1) %>% 
+  st_sf() %>% 
+  mutate(gridid = as.character(1:n()))
+
+points_to_model <- points_near_landfall %>% 
+  mutate(glon = sf::st_coordinates(.)[,1],
+         glat = sf::st_coordinates(.)[,2]) %>% 
+  st_drop_geometry() %>% 
+  mutate(gridid = gridid, 
+         glandsea = mapply(check_over_land, tclat = .$glat, tclon = .$glon))
+
+points_near_landfall <- points_near_landfall %>%  
+  left_join(points_to_model, by = "gridid")
+
+ggplot() + 
+  geom_sf(data = near_landfall, fill = "tan") + 
+  geom_sf(data = points_near_landfall, aes(color = glandsea), size = 0.8, alpha = 0.5) + 
+  scale_color_manual(values = c("lightblue", "darkgreen"), guide = "none") + 
+  coord_sf(xlim = c(110, 117), ylim = c(19, 25))
+```
+
+In this case, you can see that there are a few areas where the land-sea mask has 
+assigned grid points incorrectly near coastlines. This is likely because of the resolution 
+of the land-sea mask available in the `stormwindmodel` package, which is constrained
+to be a reasonable size to fit in a package. If you would like a finer resolution when 
+determining whether a point is over land or sea, you can determine this for grid points 
+using your own land-sea mask, at a higher resolution for the area you're modeling. Conversely,
+if you are only modeling locations that are over land (for example, for a study of human 
+impacts from a storm), then you can assign all grid points to "TRUE" for the `glandsea` 
+column.
+
+```{r fig.width = 6, fig.height = 5}
+data("mangkhut_tracks")
+
+mangkhut_to_model <- mangkhut_tracks %>% 
+  transmute(date = format(iso_time, format = "%Y%m%d%H%M"), 
+            latitude = as.numeric(lat), 
+            longitude = as.numeric(lon),
+            wind = as.numeric(usa_wind))
+
+grid_winds <- get_grid_winds(hurr_track = mangkhut_to_model,
+                             grid_df = points_to_model)
+
+modeled_near_landfall <- grid_near_landfall %>%  
+  left_join(grid_winds, by = "gridid")
+
+mangkhut_sf_points <- mangkhut_to_model %>% 
+  st_as_sf(coords = c("longitude", "latitude"), crs = st_crs(modeled_near_landfall)) 
+mangkhut_sf_line <- mangkhut_sf_points %>%
+  summarise(do_union = FALSE) %>%
+  st_cast("LINESTRING")
+
+ggplot() + 
+  geom_sf(data = modeled_near_landfall, aes(color = vmax_sust, fill = vmax_sust)) + 
+  geom_sf(data = all_countries, fill = NA, color = "white") + 
+  geom_sf(data = mangkhut_sf_line, color = "green") + 
+  geom_sf(data = mangkhut_sf_points, color = "green") + 
+  scale_color_viridis(option = "B") + 
+  scale_fill_viridis(option = "B") +   
+  coord_sf(xlim = c(110, 117), ylim = c(19, 25))
+```
+
