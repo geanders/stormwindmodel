@@ -1,7 +1,5 @@
 ---
 title: "Details of `stormwindmodel` package"
-author: "G. Brooke Anderson, Andrea Schumacher, Seth Guikema, Joshua M. Ferreri, Steven Quiring"
-date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 bibliography: bibliography.bib
 vignette: >
