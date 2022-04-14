@@ -11,21 +11,21 @@ vignette: >
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(eval = FALSE)
+knitr::opts_chunk$set(echo = TRUE)
 ```
 
 
 ```{r message = FALSE, echo = FALSE}
-library(dplyr)
+library(tidyverse)
 ```
 
 ## Overview
 
-The `stormwindmodel` package was created to allow users to model wind speeds at grid points in the United States based on "best tracks" hurricane tracking data, using a model for wind speed developed by Willoughby and coauthors [-@willoughby2006parametric]. The package includes functions for interpolating hurricane tracks and for modeling and mapping wind speeds during the storm. It includes population mean center locations for all U.S. counties, which can be used to map winds by county; however, other grid point locations can also be input for modeling. Full details on how this model is fit are provided in the "Details" vignette of the `stormwindmodel` package.
+The `stormwindmodel` package was created to allow users to model wind speeds at grid points around the world based on "best tracks" hurricane tracking data, using a model for wind speed developed by Willoughby and coauthors [-@willoughby2006parametric]. The package includes functions for interpolating hurricane tracks and for modeling and mapping wind speeds during the storm. For the US, it includes population mean center locations for all counties, which can be used to map winds by county; however, other grid point locations can also be input for modeling, either to model at other resolutions in the US or to model in other locations around the world. Full details on how this model is fit are provided in the "Details" vignette of the `stormwindmodel` package.
 
 ## Package example data
 
-For examples, the package includes data on the tracks of Hurricane Floyd in 1999 and Hurricane Katrina in 2005. You can load these example best tracks data sets using: 
+For examples in this vignette, the package includes data on the tracks of Hurricane Floyd in 1999 and Hurricane Katrina in 2005 (other vignettes show examples from outside the US, including in Australia and China). You can load these example best tracks data sets using: 
 
 ```{r}
 library(stormwindmodel)
@@ -37,40 +37,36 @@ head(katrina_tracks)
 
 This example data includes the following columns: 
 
-- `date`: Date and time of the observation (in UTC)
+- `date`: Date and time of the observation (in the UTC time zone, which is usually used for best tracks data from sources like IBTrACS)
 - `latitude`, `longitude`: Location of the storm at that time
-- `wind`: Maximum wind speed at that time (knots)
+- `wind`: Maximum sustained wind speed at that time (in knots over a one-minute period at 10 meters above the surface; in IBTrACS data, wind measured with this averaging period is available in the column titled "USA_WIND")
 
-You can input other storm tracks into the wind modeling functions in the `stormwindmodel` package, but you must have your storm tracks in the same format as these example dataframes and with these columns names. If necessary, use `rename` from `dplyr` to rename columns and `convert_wind_speed` from `weathermetrics` to convert windspeed into knots.
+You can input other storm tracks into the wind modeling functions in the `stormwindmodel` package, but you must have your storm tracks in the same format as these example dataframes and with these columns names. If necessary, use `rename` from `dplyr` to rename columns and `convert_wind_speed` from `weathermetrics` to convert windspeed into knots. You should also ensure that you understand the time zone used for recording the data, and that the maximum sustained wind is recorded in knots, at 10 meters, based on a one-minute averaging period. If your wind speed data are based on a different averaging period, you may want to consider using data from IBTrACS as an alternative, since this database includes a column with winds converted to this averaging period. 
 
-The `stormwindmodel` package also includes a dataset with the location of the population mean center of each county in the eastern United States (`county_points`). This dataset can be used as the grid point inputs if you want to model storm-related winds for counties. These counties are listed by Federal Information Processing Standard (FIPS) number, which uniquely identifies each U.S. county. This dataset comes from the US Census [file of county population mean center locations](http://www2.census.gov/geo/docs/reference/cenpop2010/county/CenPop2010_Mean_CO.txt), as of the 2010 Census.
+The `stormwindmodel` package also includes a dataset with the location of the population mean center of each county in the eastern United States (`county_points`). This dataset can be used as the grid point inputs if you want to model storm-related winds for counties in the United States. These counties are listed by Federal Information Processing Standard (FIPS) number, which uniquely identifies each U.S. county. This dataset comes from the US Census [file of county population mean center locations](http://www2.census.gov/geo/docs/reference/cenpop2010/county/CenPop2010_Mean_CO.txt), as of the 2010 Census. This dataset also includes a column named `glandsea`, which gives a TRUE/FALSE value depending on whether that location is on land (`TRUE`) or over water (`FALSE`), which is required in the wind modeling process. In this case, since the points represent US counties, all values are set to `TRUE`. 
 
 ```{r}
 data(county_points)
 head(county_points)
 ```
 
-You can use a different dataset of grid points to model winds at other U.S. locations, including at evenly-spaced grid points. However, you will need to include these grid points in a dataframe with a similar format to the example `county_points` dataframe, with columns for each grid point id (`gridid`--- these IDs can be random but should be unique across grid points), and `glat` and `glon` for latitude and longitude of each grid point.
+You can use a different dataset of grid points to model winds at other U.S. locations, or at other locations in the world, including at evenly-spaced grid points. However, you will need to include these grid points in a dataframe with a similar format to the example `county_points` dataframe, with columns for each grid point id (`gridid`--- these IDs can be random but should be unique across grid points), and `glat` and `glon` for latitude and longitude of each grid point. You also need to include a column named `glandsea`, which specifies whether that
+grid point is over land or water. If you are only modeling locations over land (for example, a human impacts study would often only measure exposure at locations where people live, and so may only model points over land), then 
+you can set all values in this column to be `TRUE`. If you are modeling grid points, or a combination of points over land and over water, then you can use a landmask function that is included with the package to determine if each point is over land or water, based on its latitude and longitude. This alternative is covered in detail in a separate vignette. 
 
 ## Basic example
 
 The main function of this package is `get_grid_winds`. It inputs storm tracks for a tropical cyclone (`hurr_track`) and a dataframe with grid point locations (`grid_df`). It models winds during the tropical storm at each grid point and outputs summaries of wind during the storm at each grid point from the storm. The wind measurements generated for each grid point are: 
 
-- `vmax_gust`: Maximum 10-m 1-minute gust wind experienced at the grid point during the storm
 - `vmax_sust`: Maximum 10-m 1-minute sustained wind experienced at the grid point during the storm
-- `gust_dur`: Duration gust wind was at or above a specified speed (default is 20 m/s), in minutes
+- `vmax_gust`: Maximum 10-m 1-minute gust wind experienced at the grid point during the storm
 - `sust_dur`: Duration sustained wind was at or above a specified speed (default is 20 m/s), in minutes
+- `gust_dur`: Duration gust wind was at or above a specified speed (default is 20 m/s), in minutes
 
-This function can take a few minutes to run, especially if you are modeling winds at many locations.
+For example, to get modeled winds for Hurricane Floyd at U.S. county centers, you can run: 
 
-To get modeled winds for Hurricane Floyd at U.S. county centers, you can run: 
-
-```{r eval = FALSE, echo = c(1)}
+```{r}
 floyd_winds <- get_grid_winds(hurr_track = floyd_tracks, grid_df = county_points)
-save(floyd_winds, file = "data/floyd_winds.Rdata")
-```
-```{r echo = c(2:4)}
-load("data/floyd_winds.Rdata")
 floyd_winds %>%
   dplyr::select(gridid, vmax_gust, vmax_sust, gust_dur, sust_dur) %>%
   slice(1:6)
@@ -93,89 +89,71 @@ You can input the track for any Atlantic Basin tropical storm into `get_grid_win
     + `date`: A character vector with date and time (in UTC), expressed as YYYYMMDDHHMM. 
     + `latitude`: A numeric vector with latitude in decimal degrees.
     + `longitude`: A numeric vector with longitude in decimal degrees.
-    + `wind`: A numeric vector with maximum storm wind speed in knots
+    + `wind`: A numeric vector with maximum storm wind speed in knots, representing maximum 10-m 1-minute sustained wind
 
-For the grid point locations at which to model, you can input a dataframe with grid points anywhere in the eastern half of the United States. For example, you may want to map wind speeds for Hurricane Katrina by census tract in Orleans Parish, LA. The following code shows how a user could do that with the `stormwindmodel` package. 
+For the grid point locations at which to model, you can input a dataframe with grid points anywhere in the world. For example, you may want to map wind speeds for Hurricane Katrina by census tract in Orleans Parish, LA. The following code shows how a user could do that with the `stormwindmodel` package. Other vignettes with this package give examples of how to do this in places other than the United States. 
 
 First, the `tigris` package can be used to pull US Census tract shapefiles for a county. You can use the following code to pull these census tract file shapefiles for Orleans Parish in Louisiana: 
 
-```{r eval = FALSE, message = FALSE, warning = FALSE, results = "hide"}
+```{r results = "hide", message = FALSE, warning = FALSE}
 library(tigris)
-new_orleans <- tracts(state = "LA", county = c("Orleans"), 
-                      class = "sp") 
-save(new_orleans, file = "data/new_orleans.Rdata")
-```
-```{r, echo = FALSE}
-load("data/new_orleans.Rdata")
+new_orleans <- tracts(state = "LA", county = c("Orleans")) %>% 
+  mutate(glandsea = ALAND > AWATER)
 ```
 
-This shapefile gives the polygon for each census tract. You can use the `gCentroid` function from the `rgeos` package to determine the location of the center of each census tract: 
+This data includes columns with the area of land and area of water in each census tract, so we can use 
+that to create a `glandsea` column, using the rubric that the tract is overland if its land area is greater
+than its water area and over water if not. 
 
-```{r eval = FALSE, message = FALSE, echo = c(1, 2)}
-library(rgeos)
-new_orleans_tract_centers <- gCentroid(new_orleans, byid = TRUE)@coords
-save(new_orleans_tract_centers, file = "data/new_orleans_tract_centers.Rdata")
-```
-```{r echo = c(2)}
-load("data/new_orleans_tract_centers.Rdata")
+This shapefile gives the polygon for each census tract. You can use the `st_centroid` function from the `sf` package to determine the location of the center of each census tract: 
+
+```{r message = FALSE, warning = FALSE}
+library(sf)
+new_orleans_tract_centers <- st_centroid(new_orleans)
 head(new_orleans_tract_centers)
 ```
 
-With some cleaning, you can get this data to the format required for the `get_grid_winds` function. In particular, you should add the tract id from the original shapefiles as the grid id, as this will help you map the modeled wind results: 
+With some cleaning, you can get this data to the format required for the `get_grid_winds` function. In particular, you should add the geo id from the original shapefiles as the grid id, as this will help you map the modeled wind results. You can also extract the latitude and longitude from the geometry of the `sf` object and put them in separate columns, as needed for the wind modeling code: 
 
-```{r eval = FALSE, echo = c(1, 2, 3, 4, 5)}
-new_orleans_tract_centers2 <- new_orleans_tract_centers %>%
-  as_tibble() %>%
-  mutate(gridid = unique(new_orleans@data$TRACTCE)) %>%
-  dplyr::rename(glat = y, 
-                glon = x)
-save(new_orleans_tract_centers2, file = "data/new_orleans_tract_centers2.Rdata")
-```
-```{r echo = c(2)}
-load("data/new_orleans_tract_centers2.Rdata")
+```{r}
+new_orleans_tract_centers2 <- new_orleans_tract_centers %>% 
+  mutate(glon = unlist(map(.$geometry, 1)),
+         glat = unlist(map(.$geometry, 2))) %>% 
+  rename(gridid = GEOID) %>% 
+  st_drop_geometry() %>%
+  select(gridid, glat, glon, glandsea)
 head(new_orleans_tract_centers2)
 ```
 
-Here is a map of the census tracts, with the center point of each shown with a red dot (note that an area over water is also included-- this is included as one of the census tract shapefiles pulled by `tigris` for Orleans Parish):
+Here is a map of the census tracts, with the center point of each shown with a red dot (note that an area over water is also included---this is included as one of the census tract shapefiles pulled by `tigris` for Orleans Parish):
 
-```{r message = FALSE, warning = FALSE, fig.width = 7}
-library(sf)
-new_orleans <- new_orleans %>% 
-  st_as_sf()
-new_orleans_centers <- new_orleans_tract_centers2 %>% 
-  st_as_sf(coords = c("glon", "glat")) %>% 
-  st_set_crs(4269)
-
+```{r fig.width = 7}
 library(ggplot2)
 ggplot() + 
-  geom_sf(data = new_orleans) + 
-  geom_sf(data = new_orleans_centers, color = "red", size = 0.6)
+  geom_sf(data = new_orleans, aes(fill = glandsea)) + 
+  geom_sf(data = new_orleans_tract_centers, color = "red", size = 0.6) + 
+  scale_fill_manual(values = c("dodgerblue3", "bisque3"))
 ```
 
-Since the `new_orleans_tract_centers` is now in the appropriate format to use with the `stormwindmodel` functions, you can input it directly into `get_grid_winds` to model the winds from Hurricane Katrina at each census tract center: 
+Since the `new_orleans_tract_centers2` is now in the appropriate format to use with the `stormwindmodel` functions, you can input it directly into `get_grid_winds` to model the winds from Hurricane Katrina at each census tract center: 
 
-```{r eval = FALSE, echo = c(1:2)}
+```{r}
 new_orleans_tracts_katrina <- get_grid_winds(hurr_track = katrina_tracks, 
                                              grid_df = new_orleans_tract_centers2)
-save(new_orleans_tracts_katrina, file = "data/new_orleans_tracts_katrina.Rdata")
-```
-```{r echo = c(2)}
-load("data/new_orleans_tracts_katrina.Rdata")
 head(new_orleans_tracts_katrina)
 ```
 
-To plot these modeled winds, you can merge this modeled data back into the "sf" version of the census tract shapefile data, joining by census tract identification, and then add to the map. You can show wind speed in this map with color.
+To plot these modeled winds, you can merge this modeled data back into the "sf" version of the census tract shapefile data, joining by geo identification, and then add to the map. You can show wind speed in this map with color.
 
 ```{r}
 new_orleans <- new_orleans %>% 
-  left_join(new_orleans_tracts_katrina, by = c("TRACTCE" = "gridid"))
+  left_join(new_orleans_tracts_katrina, by = c("GEOID" = "gridid"))
 ```
 
 ```{r, fig.width = 7, message = FALSE, warning = FALSE}
 library(viridis)
 ggplot() + 
   geom_sf(data = new_orleans, aes(fill = vmax_sust)) + 
-  geom_sf(data = new_orleans_centers, color = "red", size = 0.6) + 
   scale_fill_viridis(name = "Maximum\nsustained\nwinds (m/s)")
 ```
 
@@ -225,7 +203,7 @@ map_wind(floyd_winds, value = "vmax_sust", wind_metric = "knots", break_point = 
 
 ## Tracks data
 
-You can get an R version of the hurricane best tracks data for Atlantic basin storms from 1988 to 2015 through the `hurricaneexposuredata` package (in development on GitHub). For more information, see [the GitHub repository for that package](https://github.com/geanders/hurricaneexposuredata).
+You can get an R version of the hurricane best tracks data for Atlantic basin storms from 1988 to 2018 through the `hurricaneexposuredata` package (in development on GitHub). For more information, see [the GitHub repository for that package](https://github.com/geanders/hurricaneexposuredata). You can also get best tracks data for tropical cyclones worldwide from IBTrACS. 
 
 # References
  
