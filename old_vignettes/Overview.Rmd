@@ -6,6 +6,8 @@ vignette: >
   %\VignetteIndexEntry{Using the stormwindmodel package}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
+pkgdown:
+  as_is: true
 ---
 
 ```{r setup, include=FALSE}
