@@ -11,7 +11,7 @@ pkgdown:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(eval = FALSE)
+knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r echo = FALSE, message = FALSE}
@@ -116,11 +116,11 @@ var_names <- dplyr::tibble(var = c("`vmax`",
                                         "$T_{sust}$",
                                         "$T_{gust}$",
                                         "$G_{3,60}$"),
-                               defn = c("Maximum 10-m 1-min sustained wind for the tropical cyclone",
+                               defn = c("Maximum 10-m 1-min sustained wind for the tropical cyclone (i.e., the storm-wide maximum",
                                         "Maximum 10-m 1-min sustained wind for the tropical cyclone with motion asymmetry removed",
                                         "Maximum gradient-level 1-min sustained wind for the tropical cyclone",
                                         "Tropical cyclone center position latitude",
-                                        "Tropical cyclone center position longitude (0 to 360)",
+                                        "Tropical cyclone center position longitude",
                                         "Radius of the earth",
                                         "Tropical cyclone forward speed",
                                         "Tropical cyclone forward speed, u-component",
@@ -296,18 +296,16 @@ location data remain within -180 to 180 for longitude:
 
 Next, this imputed track is input to a function that adds inputs and model parameters for each observation that are required for the model later used to estimate wind speed at each grid point [@willoughby2006parametric]. This process is done using the `add_wind_radii` function. For the Hurricane Floyd example, here is an example of running the code and the first three and last three line of output: 
 
-```{r eval = FALSE}
+```{r}
 library(dplyr)
 library(stormwindmodel)
 with_wind_radii <- stormwindmodel::add_wind_radii(full_track = full_track)
-save(with_wind_radii, file = "data/with_wind_radii.RData")
-load("data/with_wind_radii.RData")
-with_wind_radii %>% slice(c(1:3, (n()-3):n()))
+with_wind_radii %>% 
+  slice(c(1:3, (n()-3):n()))
 ```
 
 
 Here is an example of Hurricane Floyd tracks, with estimated $R_{max}$ and $V_{max,G}$ shown by point size and color, respectively:
-
 
 ```{r echo = FALSE, warning = FALSE, fig.align = "center", fig.width = 4, fig.height = 4, eval = FALSE}
 a + geom_point(data = with_wind_radii,
@@ -538,7 +536,7 @@ where:
 - $V_{max,G}$: Maximum gradient-level 1-min sustained wind (m / s)
 - $\phi$: Latitude, in decimal degrees
 
-```{r}
+```{r eval = FALSE}
 stormwindmodel::will10a
 ```
 
@@ -554,7 +552,7 @@ where:
 - $V_{max,G}$: Maximum gradient-level 1-min sustained wind (m / s)
 - $\phi$: Latitude, in decimal degrees
 
-```{r}
+```{r eval = FALSE}
 stormwindmodel::will10b
 ```
 
@@ -576,7 +574,7 @@ where:
 - $V_{max,G}$: Maximum gradient-level 1-min sustained wind (m / s)
 - $\phi$: Absolute value of latitude (degrees)
 
-```{r}
+```{r eval = FALSE}
 stormwindmodel::will10c
 ```
 
@@ -641,8 +639,12 @@ $$
 f'(\xi) = 5 * 126 \xi^4 - 6 * 420 \xi^5 + 7 * 540 \xi^6 - 8 * 315 \xi^7 + 9 * 70 \xi^8 
 $$
 
-```{r}
+```{r eval = FALSE}
 stormwindmodel::will3_right
+```
+
+```{r}
+
 stormwindmodel::will3_deriv_func
 stormwindmodel::solve_for_xi
 ```
@@ -657,7 +659,7 @@ $$
 
 For this function, the package code assumes that $R_2 - R_1$ (the width of the transition region) is 25 kilometers when $R_{max}$ is larger than 20 kilometers and 15 kilometers otherwise.
 
-```{r}
+```{r eval = FALSE}
 stormwindmodel::calc_R1
 ```
 
@@ -742,26 +744,26 @@ After calculating the grid wind time series for a grid point, you can input the 
 - `gust_dur`: Length of time, in minutes, that surface-level sustained winds were above a certain wind speed cutoff (e.g., 20 meters per second)
 - `sust_dur`: Length of time, in minutes, that surface-level gust winds were above a certain wind speed cutoff (e.g., 20 meters per second) 
 
-```{r}
+```{r eval = FALSE}
 stormwindmodel::summarize_grid_wind
 ```
 
 This function inputs the grid wind time series for a grid point and outputs the summary statistics for that grid point: 
 
-```{r}
+```{r eval = FALSE}
 summarize_grid_wind(grid_wind = grid_wind)
 ```
 
 If you want, you can change the wind speed cutoffs for the duration measurements: 
 
-```{r}
+```{r eval = FALSE}
 summarize_grid_wind(grid_wind = grid_wind, gust_duration_cut = 15, 
                     sust_duration_cut = 15)
 ```
 
 The function `calc_and_summarize_grid_wind` combines these two actions (this is mainly useful to have for the main wrapper function for the package): 
 
-```{r}
+```{r eval = FALSE}
 calc_and_summarize_grid_wind(grid_point = grid_point, 
                              with_wind_radii = with_wind_radii,
                              gust_duration_cut = 15, 
@@ -829,7 +831,7 @@ stormwindmodel:::will1
 
 which includes several helper functions: 
 
-```{r}
+```{r eval = FALSE}
 stormwindmodel::will1a
 stormwindmodel:::will4
 stormwindmodel::will2
@@ -860,9 +862,9 @@ Here is a reproduction of part of Figure 3 from Knaff et al. [-@knaff2011automat
 rf_example <- data.frame(r = 0:800,
                          rf = mapply(
                            stormwindmodel:::gradient_to_surface, 
-                           wind_gl_aa = 1, cdist = 0:800))
+                           wind_gl_aa = 1, cdist = rep(0:800, 2), glandsea = rep(c(TRUE, FALSE), each = 801)))
 ggplot(rf_example, aes(x = r, y = rf)) + 
-  geom_line() + 
+  geom_point() + 
   theme_classic() + 
   xlab("Radius (km)") + 
   ylab("Reduction factor") + 
@@ -932,7 +934,7 @@ $$
 Here is the function for this step:
 
 ```{r}
-add_inflow
+stormwindmodel:::add_inflow
 ```
 
 ### Add back in wind component from forward speed of storm
@@ -986,16 +988,10 @@ gustspeed = windspeed * 1.49
 
 There's a wrapper function called `get_grid_winds` that puts everything together. As inputs, it takes the storm tracks and the grid point locations. Here is what the start of that dataset looks like: 
 
-```{r, eval = FALSE}
+```{r}
 data("katrina_tracks")
 grid_winds_katrina <- get_grid_winds(hurr_track = katrina_tracks,
                                      grid_df = county_points)
-```
-
-
-```{r, eval = FALSE}
-save(grid_winds_katrina, file = "data/grid_winds_katrina.Rdata")
-load("data/grid_winds_katrina.Rdata")
 head(grid_winds_katrina)
 ```
 
@@ -1009,10 +1005,6 @@ stormwindmodel::get_grid_winds
 
 There is also a function to map county-level estimates. For this function to work, winds must be modeled at county centers, with FIPS codes used as the grid ids. Here's an example of calculating and mapping county winds for Katrina:
 
-```{r eval = FALSE}
-grid_winds_katrina <- get_grid_winds(hurr_track = katrina_tracks,
-                                     grid_df = county_points)
-```
 ```{r fig.width = 7, fig.height = 4, warning = FALSE, message = FALSE}
 katrina_winds <- map_wind(grid_winds_katrina, value = "vmax_gust") + 
   ggtitle("Maximum gust wind speeds")
