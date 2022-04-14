@@ -78,7 +78,7 @@ map_wind(floyd_winds)
 
 ## Further functionality
 
-### Options for modeling winds
+### Modeling winds at other grid points 
 
 You can input the track for any Atlantic Basin tropical storm into `get_grid_winds`, as long as you convert it to meet the following format requirements: 
 
@@ -123,7 +123,7 @@ new_orleans_tract_centers2 <- new_orleans_tract_centers %>%
 head(new_orleans_tract_centers2)
 ```
 
-Here is a map of the census tracts, with the center point of each shown with a red dot (note that an area over water is also included---this is included as one of the census tract shapefiles pulled by `tigris` for Orleans Parish):
+Here is a map of the census tracts, with the center point of each shown with a red dot:
 
 ```{r fig.width = 7}
 library(ggplot2)
@@ -155,18 +155,52 @@ ggplot() +
   scale_fill_viridis(name = "Maximum\nsustained\nwinds (m/s)")
 ```
 
-There are also functions in this package that you can use to create a time series of all modeled winds at a specific grid point throughout the storm. For example, here is the code to calculate modeled wind at the population mean center of Dare County, NC (FIPS: 37055) throughout Hurricane Floyd: 
+### Creating time series of winds
+
+So far, we've focused on functions that allow you to get an overall summary of how high winds were over
+the course of a storm at a certain location. There are also functions in the package that allow you 
+to extract more complex versions of the wind data, where there is an estimate for the winds at each 
+location at each time point along the storm's interpolated track (by default, every 15 minutes). 
+This can allow you to create time series of how winds evolved over the course of the storm at each 
+location you are modeling. 
+
+For example, you can use `calc_grid_winds` to calculate the full time series of winds during Hurricane
+Floyd at the US county centers in the eastern US: 
+
+```{r}
+data("floyd_tracks")
+data("county_points")
+
+floyd_timeseries_winds <- calc_grid_winds(hurr_track = floyd_tracks, 
+                                          grid_df = county_points)
+str(floyd_timeseries_winds)
+```
+
+This creates an array of three matrices, each with the same dimensions. There is
+one matrix each for maximum sustained winds at that time point in that location
+(`vmax_sust`), distance between the grid point and the storm's center at that
+time (`distance_from_storm`), and the surface wind direction (if the storm was
+within a certain distance of the storm, otherwise this value will be set as
+missing) (`surface_wind_direction`). For each of these matrices, the rownames give
+the date and time of the estimate and the column names give the grid ID (in this case, 
+the county FIPS code). Here's an example of a subset of the wind matrix for some
+counties in North Carolina around the time of highest winds in the state:
+
+```{r}
+floyd_timeseries_winds[["vmax_sust"]][830:840, 1400:1410]
+```
+
+You can extract from this dataset by timepoint, if you want to see a snapshot of
+modeled winds at a specific time, or extract by grid point, if you want to see
+how winds changed over the course of the storm at that time point. For example,
+here is the code to extract and show modeled wind at the population mean center
+of Dare County, NC (FIPS: 37055) throughout Hurricane Floyd:
 
 ```{r warning = FALSE, message = FALSE, fig.width = 6, fig.height = 2.5}
-dare_county <- county_points %>% # Get grid point information for Dare County
-  filter(gridid == "37055")
-
-with_wind_radii <- floyd_tracks %>%
-  create_full_track() %>% # Interpolate tracks to every 15 minutes
-  add_wind_radii()        # Calculate required inputs for Willoughby wind model
-
-dare_winds <- calc_grid_wind(grid_point = dare_county,          # Model winds at one grid point
-                             with_wind_radii = with_wind_radii)
+library(lubridate)
+dare_winds <- floyd_timeseries_winds[["vmax_sust"]][ , "37055"] %>% 
+  enframe(name = "date", value = "windspeed") %>% 
+  mutate(date = ymd_hms(date))
 
 ggplot(dare_winds, aes(x = date, y = windspeed)) + 
   geom_line() + 
@@ -174,7 +208,6 @@ ggplot(dare_winds, aes(x = date, y = windspeed)) +
   ylab("Modeled surface wind (m / s)") 
 ```
 
-For more details, see the "Details" vignette, which walks through all steps of the modeling process. 
 
 ### Options for mapping county-level winds
 
