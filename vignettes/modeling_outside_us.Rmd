@@ -5,6 +5,8 @@ vignette: >
   %\VignetteIndexEntry{Modeling winds outside the United States}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
+pkgdown:
+  as_is: true
 ---
 
 ```{r, include = FALSE}
