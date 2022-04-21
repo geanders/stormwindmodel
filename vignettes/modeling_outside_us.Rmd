@@ -1,5 +1,5 @@
 ---
-title: "modeling_outside_us"
+title: "Modeling storm winds outside the United States"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Modeling winds outside the United States}
@@ -22,10 +22,41 @@ knitr::opts_chunk$set(
 library(stormwindmodel)
 ```
 
-If you don't have a geographic dataset with locations to model winds, you can create a
-gridded geographic dataset of the region of interest. 
+In the main vignettes for this package, we focused on modeling wind speeds
+within counties in the Eastern half of the United States. However, you can also
+use the wind model to model in other parts of the world, or to model at
+different locations (rather than county centers) in the United States. This
+vignette walks through some examples of how you can use the package to model
+windspeeds any where.
 
-```{r fig.width = 8, fig.height = 4}
+## Creating a dataframe with grid points
+
+You may have a dataframe with the latitude and longitude of the points you want
+to model for a storm. For example, you may have a dataset with the location of
+cities where you want to model winds, or you may have a shapefile with the
+spatial information of another geography in your area of interest, which can be
+used as a starting point to determine centroids, which you can then model.
+However, if you do not have a starting dataset with locations to model, you can
+still use this package. In this case, you'll want to start by creating a grid of
+points at latitudes and longitudes that are evenly spaced across your area of
+interest. This section of this vignette will walk through how you can do that
+(if you already have your dataset of points to model to, you can skip this
+section).
+
+If you don't have a geographic dataset with locations to model winds, you can
+create a gridded geographic dataset of the region of interest. The `sf` package 
+has a function that can take an existing geographic R object and create a regularly-spaced
+grid over the area of that object. You can use this to create your grid. 
+
+First, to get the starting geographic R object, you can use the `rnaturalearth`
+package, which provides spatial data for countries and subcountry geographies
+around the world. You can use this to get the borders of countries worldwide,
+then crop this object to the latitude and longitude ranges that you are
+interested in. For example, the following code creates a cropped geographical R 
+object for the region from 107 to 128 degrees longitude and 17.5 to 34 degrees latitude, 
+focusing on an area affected by Typhoon Saomai in 2006:
+
+```{r fig.width = 6, fig.height = 5, message = FALSE, warning = FALSE}
 library(rnaturalearth)
 library(sf)
 library(tidyverse)
@@ -36,8 +67,27 @@ near_landfall <- all_countries %>%
   st_make_valid() %>% 
   st_crop(y = st_bbox(c(xmin = 107, xmax = 128, ymin = 17.5, ymax = 34)))
 
-a <- ggplot() + 
+ggplot() + 
   geom_sf(data = near_landfall) 
+```
+
+Next, you can use the `st_make_grid` function from the `sf` package to create
+new objects with a regular grid over this area. You can use this function to
+create two types of grids: centers---which will provide the point locations
+(latitude and longitude) at the center of each grid---or polygons---which will
+create geographic polygon shapes that cover the full grid. You will need the
+point locations to input to the model, but you may also want to create a polygon
+version to use to map the output later. Just make sure that, if you create both
+types of objects, you use the same resolution for each (`cellsize`) and you
+create a grid ID that aligns between the two datasets (which we do here with
+`gridid = as.character(1:n())`) so you can connect the modeled winds back to the
+polygon geographic data. Here is the code to create both types of objects (you can 
+choose to have the grid shapes either be squares (`square = TRUE`) or hexagons 
+(`square = FALSE`). We've used hexagons). The code creates a map showing both these 
+layers, with transparency for the fill in the polygons (`alpha = 0.4`) so you can see 
+all layers:
+
+```{r fig.width = 6, fig.height = 5}
 
 grid_near_landfall <- near_landfall %>% 
   st_make_grid(what = "polygons", square = FALSE, cellsize = 0.25) %>% 
@@ -48,24 +98,27 @@ points_near_landfall <- near_landfall %>%
   st_sf() %>% 
   mutate(gridid = as.character(1:n()))
 
-b <- ggplot() + 
+ggplot() + 
   geom_sf(data = near_landfall) + 
   geom_sf(data = grid_near_landfall, color = "red", fill = NA, alpha = 0.4) + 
   geom_sf(data = points_near_landfall, color = "blue", fill = NA, alpha = 0.2, size = 0.5)
-
-gridExtra::grid.arrange(a, b, ncol = 2)
 ```
 
-Next, you can use this to create a regular dataframe that you can input to the wind model. This 
-process includes extracting the geometry information (latitude and longitude) into separate
-columns. It also involves using the land/sea mask from the package to determine which points are
-over land and which are over water. You can convert this to a format that's ready to enter in the
-storm wind modeling function:
+Next, you can use the point location geographic object to create a regular
+dataframe that you can input to the wind model. This process includes extracting
+the geometry information (latitude and longitude) into separate columns, which
+you can do using the `st_coordinates` function from the `sf` package and then
+"dropping" the geographic information from the object using `st_drop_geometry`
+(this will change the object to a regular dataframe, rather than a spatial one).
+It also involves using the land/sea mask from the package to determine which
+points are over land and which are over water, which you can do using the
+`check_land_function` from the `stormwindmodel` package. You can convert this to
+a format that's ready to enter in the storm wind modeling function:
 
 ```{r}
 points_to_model <- points_near_landfall %>% 
-  mutate(glon = sf::st_coordinates(.)[,1],
-         glat = sf::st_coordinates(.)[,2]) %>% 
+  mutate(glon = st_coordinates(.)[,1],
+         glat = st_coordinates(.)[,2]) %>% 
   st_drop_geometry() %>% 
   mutate(gridid = gridid, 
          glandsea = mapply(check_over_land, tclat = .$glat, tclon = .$glon))
@@ -73,8 +126,9 @@ points_to_model <- points_near_landfall %>%
 head(points_to_model)
 ```
 
-You can re-join this dataframe with the spatial version and plot it to check that the land/sea
-mask did a reasonable job of capturing grid points that are over land versus over water:
+You can re-join this dataframe with the spatial version and plot it to check
+that the land/sea mask did a reasonable job of capturing grid points that are
+over land versus over water:
 
 ```{r fig.width = 6, fig.height = 5}
 points_near_landfall <- points_near_landfall %>%  
@@ -87,20 +141,40 @@ ggplot() +
   coord_sf(xlim = c(107, 128), ylim = c(17.5, 34))
 ```
 
-There is an example dataset in the `stormwindmodel` package that includes a storm that affected
-this area, Typhoon Saomai. The dataset is included in the format it would be in if you read in 
-directly from a CSV file from IBTrACS---the only changes are that (1) only a few of the columns
-have been selected and (2) the names have been changed from all uppercase to all lowercase. 
+If you would like a better resolution of land / sea than is provided by this
+landmask, you can use your own landmask dataset, with a high resolution focused 
+on your area of interest, to create the `glandsea` column that you need in the grid
+points dataset. Alternatively, if you are only modeling locaitons that are over 
+land (e.g., only modeling at city centers), you could set this column to always
+have the value `TRUE`. 
 
-Before you can input this to the wind model code, you'll need to make a few changes to the 
-dataset. First, the date is in a date-time format, and you'll need to change it to a character
-in the form of, for example, "200608040300" for August 4, 2006 at 3 AM Greenwich Mean Time (UTM). 
-You should name this column "date". Next, you'll need to convert the columns with latitude and 
-longitude to numeric data types and change these column names from "lat" to "latitude" and from 
-"lon" to "longitude" (one way you can do this is using `transmute`, which will only keep the 
-new columns). Finally, you need to convert the column with wind data (in US conventions of 
-[wind averaging period and height]) to a numeric data type and rename the column from 
-"usa_wind" to "wind". You can do all these steps with the following code: 
+## Preparing storm tracks data for wind model function
+
+The next step is to collect data on the central track and wind speeds of the
+storm that you would like to model. This data is available for storms worldwide
+from IBTrACS, so we are using that source as an example here. You will need to
+reformat the data some to prepare it to serve as input to the wind modeling
+functions in this package.
+
+There is an example dataset in the `stormwindmodel` package that includes a
+storm, Typhoon Saomai, that affected the area that we developed an example grid
+for in the last section. The dataset is included in the format it would be in if
+you read in directly from a CSV file from IBTrACS---the only changes are that
+(1) only a few of the columns have been selected, rather than all the columns
+that are available in the IBTrACS data, and (2) the column names have been
+changed from all uppercase to all lowercase.
+
+Before you can input this to the wind model code, you'll need to make a few
+changes to the dataset. First, the date is in a date-time format, and you'll
+need to change it to a character in the form of, for example, "200608040300" for
+August 4, 2006 at 3 AM Greenwich Mean Time (UTM). You should name this column
+"date". Next, you'll need to convert the columns with latitude and longitude to
+numeric data types and change these column names from "lat" to "latitude" and
+from "lon" to "longitude" (one way you can do this is using `transmute`, which
+will only keep the new columns). Finally, you need to convert the column with
+wind data (in US conventions of [wind averaging period and height]) to a numeric
+data type and rename the column from "usa_wind" to "wind". You can do all these
+steps with the following code:
 
 ```{r}
 data("saomai_tracks")
@@ -173,7 +247,6 @@ ggplot() +
   coord_sf(xlim = c(116, 123), ylim = c(25, 30))
 ```
 
-
 You likely will also want to add the storm track. You have all the information you need to do 
 that, since you have latitude and longitude of the storm track in the `saomai_to_model` object. 
 However, to add it to the map, you'll need to convert it to an sf object class by specifying which
@@ -205,6 +278,8 @@ ggplot() +
   scale_fill_viridis(option = "B") +   
   coord_sf(xlim = c(116, 123), ylim = c(25, 30))
 ```
+
+## Another example, from start to finish
 
 Here is an example of the entire process for a second storm, Typhoon Mangkhut in 2018. Again, 
 there is an example dataset that comes with the `stormwindmodel` package with this storm's 
