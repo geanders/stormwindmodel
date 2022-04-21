@@ -35,7 +35,7 @@ grid_data <- county_points
 arrow_color <- c("vmax_sust")
 arrow_direction <- c("surface_wind_direction")
 arrow_radius <- 20
-data_date <- c("1999-09-16 07:00:00")
+data_date <- c("1999-09-16 05:00:00")
 example_state <- c("NC")
 graph_title <- c("Max Sustained Winds and Direction at")
 legend_title <- c('Max Sustained Winds in m/s')
@@ -83,7 +83,7 @@ ggplot() +
 
 #using st_make_object to set grid first
 ```{r}
-arrow_radius <- 30
+arrow_radius <- 0.25
 
 arrow_direction <- c("surface_wind_direction")
 
@@ -112,24 +112,29 @@ vec <- tigris:::tracts(state = example_state[i], county = example_counties,
 
 county_data <- do.call(rbind, county_data)
 
-test <- sf::st_make_grid(county_data, square = TRUE, what = "centers")%>% 
+grid_test <- sf::st_make_grid(county_data, square = FALSE, what = "polygons", 
+                         cellsize = 0.1)%>% 
   st_sf() %>% 
   mutate(gridid = as.character(1:n()))
 
-grid_points <- test[county_data,]
+data_test <- sf::st_centroid(grid_test)
 
-grid_to_model <- grid_points %>% 
-  st_transform(4269) %>%
-  st_geometry() %>%
-  unlist() %>%
-  matrix(ncol = 2,byrow = TRUE) %>%
-  as_tibble() %>%
-  setNames(c("glon","glat")) %>%
-  mutate(gridid = as.character(1:n()),
-         glandsea = TRUE) %>%
+data_test2 <- data_test%>% 
+  mutate(glon = unlist(map(.$geometry, 1)),
+         glat = unlist(map(.$geometry, 2))) %>% 
+  st_drop_geometry() %>%
+  mutate(gridid = gridid,
+         glandsea = mapply(check_over_land, tclat = .$glat, tclon = .$glon)) %>% 
   select(gridid, glat, glon, glandsea)
 
-example_winds <- calc_grid_winds(storm_data, grid_to_model)
+
+data_test <- data_test %>% 
+  left_join(data_test2, by = "gridid")
+
+grid_points <- grid_test[county_data,]
+data_test <- data_test[data_test$gridid %in% grid_points$gridid,]
+
+example_winds <- calc_grid_winds(storm_data, data_test)
 
 example_max_sust <- example_winds[[arrow_color]]
 example_surface_dir <- example_winds[[arrow_direction]]
@@ -140,27 +145,39 @@ wind_summary_example <- data.frame(example_max_sust_specific,
                                    example_surface_dir_specific)
 
 example_plot <- right_join(rownames_to_column(wind_summary_example),
-                           grid_to_model, by = c("rowname" ="gridid"))
+                           data_test, by = c("rowname" ="gridid"))
 
 
-practice <- example_plot[example_plot$rowname %in% test$gridid,]
+practice <- right_join(grid_points, example_plot, by = c("gridid" = "rowname"))
+
 
 storm_center <- create_full_track(storm_data)
 storm_center <- storm_center[as.character(storm_center$date) == example_time,]
 
+# ggplot()+
+#    geom_sf(data = grid_points, fill = "tan", alpha = 0.5)+
+#    geom_sf(data = data_test, color = "blue", alpha = 0.5)+
+  # geom_sf(data = county_data, fill = NA, color = "black")+
+ # geom_point(data = grid_to_model, aes(x= glon, y=glat))
+
+
  ggplot()+
-  geom_sf(data = county_data, fill = "lightgray")+
-  geom_sf(data = grid_points, aes(color = practice$example_max_sust_specific))+
+  geom_sf(data = practice,
+          aes(fill = example_max_sust_specific),
+          color = NA)+
+  geom_sf(data = county_data, fill = NA, color = "lightgrey", alpha  = 0.3)+
+  
   geom_spoke(data = practice, aes(x = glon, y = glat,
                                  angle = example_surface_dir_specific* pi / 180,
                                  color = example_max_sust_specific,
-                                 radius = example_max_sust_specific/arrow_radius
-                                     ),
+                                 radius = arrow_radius
+                                     ), #color = "slateblue",
                arrow = arrow(length = unit(.075, 'inches')),
-               show.legend = TRUE)+
-  scale_color_gradient(low='darkblue', high='red')+
+               show.legend = FALSE)+
+  scale_fill_gradient(low='darkblue', high='red')+
+  scale_color_gradient(low = 'slateblue', high = 'tomato')+
   ggtitle(paste0(graph_title), paste0(example_time))+
-  labs(x= "Longitude", y= "Latitude", color=paste0(legend_title))+
+  labs(x= "Longitude", y= "Latitude", fill=paste0(legend_title))+
   geom_point(data = storm_center, aes(x = tclon, y = tclat), color = "orange",
              size = 3)
  
