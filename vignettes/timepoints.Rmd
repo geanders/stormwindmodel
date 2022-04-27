@@ -1,0 +1,139 @@
+---
+title: "Extracting snapshots of the wind field at different times"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Extracting snapshots of the wind field at different times}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup, message = FALSE, warning = FALSE}
+library(stormwindmodel)
+library(rnaturalearth)
+library(sf)
+library(tidyverse)
+library(lubridate)
+library(viridis)
+```
+
+In the other vignettes, we have focused on how to create summaries of how severe the peak
+winds or wind gusts were at any point over the course of a storm for a certain location. 
+In the course of modeling these storm-long values, the model estimates winds at a number
+of time points over the course of the storm. This vignette describes how you can extract
+and use those values to look at snapshots of the modeled wind field at specific times
+during the storm. 
+
+This example will use the Typhoon Mangkhut from 2018. The tracks for this storm are included
+as an example dataset in this package. We have described how to set up these data for the 
+model, as well as how to create a set of grid points to model to, in another vignette for
+this package ("Modeling winds outside the United States"). We have repeated the code here, 
+but please check the other vignette for more details on the process: 
+
+```{r}
+data("mangkhut_tracks")
+
+all_countries <-  ne_countries(scale = "medium", 
+                                  returnclass = "sf")
+near_landfall <- all_countries %>% 
+  st_make_valid() %>% 
+  st_crop(y = st_bbox(c(xmin = 110, xmax = 117, ymin = 19, ymax = 25)))
+
+grid_near_landfall <- near_landfall %>% 
+  st_make_grid(what = "polygons", square = FALSE, cellsize = 0.1) %>% 
+  st_sf() %>% 
+  mutate(gridid = as.character(1:n()))
+points_near_landfall <- near_landfall %>% 
+  st_make_grid(what = "centers", square = FALSE, cellsize = 0.1) %>% 
+  st_sf() %>% 
+  mutate(gridid = as.character(1:n()))
+
+points_to_model <- points_near_landfall %>% 
+  mutate(glon = sf::st_coordinates(.)[,1],
+         glat = sf::st_coordinates(.)[,2]) %>% 
+  st_drop_geometry() %>% 
+  mutate(gridid = gridid, 
+         glandsea = mapply(check_over_land, tclat = .$glat, tclon = .$glon))
+
+mangkhut_to_model <- mangkhut_tracks %>% 
+  transmute(date = format(iso_time, format = "%Y%m%d%H%M"), 
+            latitude = as.numeric(lat), 
+            longitude = as.numeric(lon),
+            wind = as.numeric(usa_wind))
+```
+
+Next, we can use these inputs to model the wind field during the storm. To generate output
+that includes the values for each of the timepoints that were modeled, you can use the 
+`...` function from the package: 
+
+```{r}
+mangkhut_winds <- calc_grid_winds(hurr_track = mangkhut_to_model, 
+                                  grid_df = points_to_model)
+```
+
+The output from this function is a list, each of which contains a matrix. 
+The modeled winds are included in the element of the list named `vmax_sust`. 
+Here is a section pulled from the middle of this matrix: 
+
+```{r}
+mangkhut_winds$vmax_sust[900:910, 2500:2505]
+```
+
+You can see that each row gives data for a specific time, while each column gives
+data for a specific grid point. 
+
+You can use this matrix in a couple of ways. First, if you'd like to get a time series
+of the modeled winds at a certain location over the course of a storm, you can do 
+that. For example, we could create the time series of modeled winds in Hong Kong for
+this storm. The latitude and longitude of Hong Kong are 22.32 degrees North and 114.17
+degrees East. 
+
+```{r}
+points_to_model %>% 
+  mutate(dist_hk_lat = abs(glat - 22.32), 
+         dist_hk_lon = abs(glon - 114.17)) %>% 
+  filter((dist_hk_lat + dist_hk_lon) == 
+           min(dist_hk_lat + dist_hk_lon))
+points_to_model %>% 
+  filter(gridid == "2995")
+```
+
+```{r}
+hk_winds <- mangkhut_winds$vmax_sust[ , "2995"] %>% 
+  enframe(name = "date", value = "vmax_sust") %>% 
+  mutate(date = ymd_hms(date))
+hk_winds
+```
+
+```{r fig.width = 8, fig.height = 4}
+ggplot(hk_winds, aes(x = date, y = vmax_sust)) + 
+  geom_point()
+```
+
+
+```{r fig.width = 8, fig.height = 4}
+mangkhut_timepoint <- mangkhut_winds$vmax_sust[rownames(mangkhut_winds$vmax_sust) %in%
+                                                 c("2018-09-15 21:00:00", 
+                                                   "2018-09-16 05:00:00", 
+                                                   "2018-09-16 14:00:00"), ] %>% 
+  as.data.frame() %>% 
+  rownames_to_column(var = "date") %>% 
+  mutate(date = ymd_hms(date)) %>% 
+  pivot_longer(-date, names_to = "gridid", values_to = "vmax_sust")
+
+spatial_mangkhut_tp <- grid_near_landfall %>% 
+  left_join(mangkhut_timepoint, by = "gridid")
+
+ggplot() + 
+  geom_sf(data = near_landfall) + 
+  geom_sf(data = spatial_mangkhut_tp, aes(fill = vmax_sust), color = NA) + 
+  scale_fill_viridis(direction = -1, option = "B") + 
+  facet_wrap(~ format(date, "%Y-%m-%d %H:%M"))
+```
+
