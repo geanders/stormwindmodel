@@ -59,6 +59,7 @@ Imports:
     rlang (>= 0.4.10),
     Rcpp,
     stringr (>= 1.4.0),
+    tibble,
     tidyr (>= 1.1.2),
     weathermetrics (>= 1.2.2)
 LazyData: TRUE
