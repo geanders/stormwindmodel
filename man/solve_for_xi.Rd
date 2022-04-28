@@ -12,7 +12,7 @@ solve_for_xi(xi0 = 0.5, eq3_right, eps = 0.001, itmax = 100)
 \item{eq3_right}{A numerical value with the right-hand side of Willoughby
 et al. (2006), Eqn. 3, the dual-exponential version. This value is
 calculated at each storm observation point using the
-\code{\link{will3_right}} function.}
+\code{will3_right} function, defined in C++ code for this package.}
 
 \item{eps}{The convergence threshold for determining if the algorithm has
 converged.}

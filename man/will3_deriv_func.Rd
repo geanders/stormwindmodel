@@ -13,7 +13,7 @@ Eqn. 2}
 \item{eq3_right}{A numerical value with the right-hand side of Willoughby
 et al. (2006), Eqn. 3, the dual-exponential version. This value is
 calculated at each storm observation point using the
-\code{\link{will3_right}} function.}
+\code{will3_right} function, defined in C++ code for this package.}
 }
 \value{
 A numeric vector of length two. The first value is the calculated

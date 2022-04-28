@@ -20,6 +20,13 @@ names for each of these must be \code{date}, \code{latitude},
 \code{longitude}, and \code{wind}. See the example \code{\link{floyd_tracks}}
 dataset for an example of the required format.}
 
+\item{grid_df}{A dataframe of locations at which to calculate wind characteristics.
+This dataframe must include columns for latitude and longitude for each
+point, and these columns must be named \code{glat} and \code{glon}.
+The latitudes and longitudes should be in decimal degrees, with longitudes
+being entered in degrees East. Therefore Western hemisphere (so, almost all
+those for Atlantic basin storms) should be expressed as negative values.}
+
 \item{tint}{Interval (in hours) to which to interpolate the tracks. The
 default is 0.25 (i.e., 15 minutes).}
 

@@ -182,6 +182,14 @@ calc_grid_wind <- function(grid_point = stormwindmodel::county_points[1, ],
 #'    The latitudes and longitudes should be in decimal degrees, with longitudes
 #'    being entered in degrees East. Therefore Western hemisphere (so, almost all
 #'    those for Atlantic basin storms) should be expressed as negative values.
+#' @param gust_duration_cut The wind speed, in meters per second, to use as a
+#'    cutoff point for determining the duration of gust winds. The function
+#'    will calculate the minutes during the storm when surface-level gust winds
+#'    were above this speed at the location
+#' @param sust_duration_cut The wind speed, in meters per second, to use as a
+#'    cutoff point for determining the duration of gust winds. The function
+#'    will calculate the minutes during the storm when surface-level gust winds
+#'    were above this speed at the location.
 #'
 #' @return The dataframe of locations input, with the following columns of wind
 #' characteristics added for each location:
@@ -246,6 +254,7 @@ get_grid_winds <- function(hurr_track = stormwindmodel::floyd_tracks,
 #'
 #' @inheritParams create_full_track
 #' @inheritParams calc_grid_wind
+#' @inheritParams get_grid_winds
 #'
 #' @return An array with three elements, the first with modeled wind speeds, the
 #'   second with distance of the storm from the location, at the third with the
@@ -310,15 +319,9 @@ calc_grid_winds <- function(hurr_track = stormwindmodel::floyd_tracks,
 #'
 #' @param grid_winds A matrix where each column is a time series of modeled wind speeds at
 #'    a location, as created by \code{\link{calc_grid_winds}}.
-#' @param gust_duration_cut The wind speed, in meters per second, to use as a
-#'    cutoff point for determining the duration of gust winds. The function
-#'    will calculate the minutes during the storm when surface-level gust winds
-#'    were above this speed at the location.
-#' @param sust_duration_cut The wind speed, in meters per second, to use as a
-#'    cutoff point for determining the duration of gust winds. The function
-#'    will calculate the minutes during the storm when surface-level gust winds
-#'    were above this speed at the location.
+#'
 #' @inheritParams create_full_track
+#' @inheritParams get_grid_winds
 #'
 #' @importFrom rlang .data
 #'

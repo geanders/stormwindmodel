@@ -18,7 +18,7 @@ a location, as created by \code{\link{calc_grid_winds}}.}
 \item{gust_duration_cut}{The wind speed, in meters per second, to use as a
 cutoff point for determining the duration of gust winds. The function
 will calculate the minutes during the storm when surface-level gust winds
-were above this speed at the location.}
+were above this speed at the location}
 
 \item{sust_duration_cut}{The wind speed, in meters per second, to use as a
 cutoff point for determining the duration of gust winds. The function
