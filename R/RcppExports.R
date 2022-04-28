@@ -392,6 +392,14 @@ apply_interp <- function(new_x, x, y, y2d) {
     .Call(`_stormwindmodel_apply_interp`, new_x, x, y, y2d)
 }
 
+#' Perform spline interpolation
+#'
+#' @param x A numeric vector with independent values of the original function.
+#' @param y A numeric vector with dependent values of the original function.
+#' @param new_x A numeric vector with the values of x at which you want to interpolate v
+#'          values of y.
+#' @return A numeric vector with the interpolated values of y at the \code{new_x} values.
+#'
 #' @export
 interpolate_spline <- function(x, y, new_x) {
     .Call(`_stormwindmodel_interpolate_spline`, x, y, new_x)
