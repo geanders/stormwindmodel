@@ -117,8 +117,8 @@ With some cleaning, you can get this data to the format required for the `get_gr
 
 ```{r}
 new_orleans_tract_centers2 <- new_orleans_tract_centers %>% 
-  mutate(glon = unlist(map(.$geometry, 1)),
-         glat = unlist(map(.$geometry, 2))) %>% 
+  mutate(glon = unlist(purrr::map(.$geometry, 1)),
+         glat = unlist(purrr::map(.$geometry, 2))) %>% 
   rename(gridid = GEOID) %>% 
   st_drop_geometry() %>%
   select(gridid, glat, glon, glandsea)
