@@ -32,6 +32,16 @@ those for Atlantic basin storms) should be expressed as negative values.}
 \item{tint}{Interval (in hours) to which to interpolate the tracks. The
 default is 0.25 (i.e., 15 minutes).}
 
+\item{gust_duration_cut}{The wind speed, in meters per second, to use as a
+cutoff point for determining the duration of gust winds. The function
+will calculate the minutes during the storm when surface-level gust winds
+were above this speed at the location}
+
+\item{sust_duration_cut}{The wind speed, in meters per second, to use as a
+cutoff point for determining the duration of gust winds. The function
+will calculate the minutes during the storm when surface-level gust winds
+were above this speed at the location.}
+
 \item{max_dist}{A numeric value giving (in kilometers) the maximum distance
 from the storm's center to model storm-associated winds. Any value beyond
 this distance will be automatically set to 0 m / s for storm-associated winds.
