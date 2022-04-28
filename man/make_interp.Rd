@@ -6,6 +6,12 @@
 \usage{
 make_interp(x, y)
 }
+\arguments{
+\item{x}{A numeric vector with the x values of the original function.}
+
+\item{y}{A numeric vector with the y values of the original function. This should
+be the same length as x.}
+}
 \description{
 Make interp
 }

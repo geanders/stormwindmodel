@@ -199,6 +199,9 @@ bench::mark(approx(x_test, y_test, new_x_test, method = "linear")$y,
 */
 
 //' Make interp
+//' @param x A numeric vector with the x values of the original function.
+//' @param y A numeric vector with the y values of the original function. This should
+//'   be the same length as x.
 //' @export
 // [[Rcpp::export]]
 NumericVector make_interp(NumericVector x, NumericVector y) {

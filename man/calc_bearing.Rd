@@ -6,6 +6,21 @@
 \usage{
 calc_bearing(tclat_1, tclon_1, tclat_2, tclon_2)
 }
+\arguments{
+\item{tclat_1}{A numeric vector giving latitude of the first location
+(degrees)}
+
+\item{tclon_1}{A numeric vector giving longitude of the first location
+(degrees). This value should be expressed as a positive value for Western
+hemisphere longitudes.}
+
+\item{tclat_2}{A numeric vector giving latitude of the second location
+(degrees)}
+
+\item{tclon_2}{A numeric vector giving longitude of the second location
+(degrees). This value should be expressed as a positive value for Western
+hemisphere longitudes.}
+}
 \value{
 A numeric vector giving the direction of the second location from the first location,
    in degrees. A direction of 0 degrees indicates the second location is

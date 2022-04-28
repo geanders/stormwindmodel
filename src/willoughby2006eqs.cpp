@@ -97,7 +97,7 @@ NumericVector calc_R1(NumericVector Rmax, NumericVector xi) {
 //' implements Willoughby et al. (2006), Equation 7a.
 //'
 //' @param tclat Numeric vector of the value of latitude, in degrees.
-//' @inheritParams will1a
+//' @param vmax_gl Maximum gradient-level 1-min sustained wind for the tropical cyclone
 //'
 //' @details This function fits the following equation:
 //' \deqn{R_{max} = 46.4 e^{- 0.0155 V_{max,G} + 0.0169\phi}}{

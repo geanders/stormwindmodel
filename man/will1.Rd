@@ -22,6 +22,10 @@ km from the storm center)}
 \item{vmax_gl}{A numeric value with the maximum gradient level 1-minute
 sustained wind, in (m/s)}
 
+\item{n}{A numeric value giving the power by which the wind is assumed to
+increase with radius within the center of the storm (i.e., from the center
+to the radius of maximum wind)}
+
 \item{A}{A numeric value that is a parameter between 0 and 1 for the Willoughby
 model}
 

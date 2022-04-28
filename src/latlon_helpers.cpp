@@ -120,7 +120,16 @@ stormwindmodel:::latlon_to_km(c(45, 43), c(-80, -81), c(48, 49), c(-82, -80))
 //'
 //' @param time_1 A date-time vector giving the time of the first observation.
 //' @param time_2 A date-time vector giving the time of the second observation.
-//' @inheritParams latlon_to_km
+//' @param tclat_1 A numeric vector giving latitude of the first location
+//'    (degrees)
+//' @param tclon_1 A numeric vector giving longitude of the first location
+//'    (degrees). This value should be expressed as a positive value for Western
+//'    hemisphere longitudes.
+//' @param tclat_2 A numeric vector giving latitude of the second location
+//'    (degrees)
+//' @param tclon_2 A numeric vector giving longitude of the second location
+//'    (degrees). This value should be expressed as a positive value for Western
+//'    hemisphere longitudes.
 //'
 //' @return A numeric vector with the average forward speed of the storm between
 //'    the two observations, in meters per second.
@@ -156,7 +165,16 @@ stormwindmodel:::calc_forward_speed(c(24, 24.3),
 //' the first location, based on latitude and longitude coordinates for both
 //' locations.
 //'
-//' @inheritParams latlon_to_km
+//' @param tclat_1 A numeric vector giving latitude of the first location
+//'    (degrees)
+//' @param tclon_1 A numeric vector giving longitude of the first location
+//'    (degrees). This value should be expressed as a positive value for Western
+//'    hemisphere longitudes.
+//' @param tclat_2 A numeric vector giving latitude of the second location
+//'    (degrees)
+//' @param tclon_2 A numeric vector giving longitude of the second location
+//'    (degrees). This value should be expressed as a positive value for Western
+//'    hemisphere longitudes.
 //'
 //' @return A numeric vector giving the direction of the second location from the first location,
 //'    in degrees. A direction of 0 degrees indicates the second location is
