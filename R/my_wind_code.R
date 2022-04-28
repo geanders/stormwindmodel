@@ -285,7 +285,7 @@ calc_grid_winds <- function(hurr_track = stormwindmodel::floyd_tracks,
   full_track <- create_full_track(hurr_track = hurr_track, tint = tint)
   with_wind_radii <- add_wind_radii(full_track = full_track)
 
-  grid_winds <- stormwindmodel:::calc_grid_winds_cpp(glat = grid_df$glat, glon = grid_df$glon,
+  grid_winds <- calc_grid_winds_cpp(glat = grid_df$glat, glon = grid_df$glon,
                                     glandsea = grid_df$glandsea, max_dist =  max_dist,
                                     tclat = with_wind_radii$tclat, tclon = with_wind_radii$tclon,
                                     Rmax = with_wind_radii$Rmax, R1 = with_wind_radii$R1,
