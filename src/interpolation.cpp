@@ -156,6 +156,8 @@ bench::mark(find_x_section(new_x = new_value, x = existing_values))
 //'   be the same length as x.
 //' @return A numeric vector with the interpolated values of y at each of the new
 //'   x values provided by the new_x input.
+//' @name interpolate_line
+//'
 //' @export
 // [[Rcpp::export]]
 NumericVector interpolate_line(NumericVector x, NumericVector y, NumericVector new_x) {
@@ -199,9 +201,7 @@ bench::mark(approx(x_test, y_test, new_x_test, method = "linear")$y,
 */
 
 //' Make interp
-//' @param x A numeric vector with the x values of the original function.
-//' @param y A numeric vector with the y values of the original function. This should
-//'   be the same length as x.
+//' @inheritParams interpolate_line
 //' @export
 // [[Rcpp::export]]
 NumericVector make_interp(NumericVector x, NumericVector y) {

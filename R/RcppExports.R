@@ -380,15 +380,15 @@ find_x_section <- function(new_x, x) {
 #'   be the same length as x.
 #' @return A numeric vector with the interpolated values of y at each of the new
 #'   x values provided by the new_x input.
+#' @name interpolate_line
+#'
 #' @export
 interpolate_line <- function(x, y, new_x) {
     .Call(`_stormwindmodel_interpolate_line`, x, y, new_x)
 }
 
 #' Make interp
-#' @param x A numeric vector with the x values of the original function.
-#' @param y A numeric vector with the y values of the original function. This should
-#'   be the same length as x.
+#' @inheritParams interpolate_line
 #' @export
 make_interp <- function(x, y) {
     .Call(`_stormwindmodel_make_interp`, x, y)
