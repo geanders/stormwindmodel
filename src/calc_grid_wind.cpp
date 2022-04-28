@@ -334,6 +334,9 @@ df %>%
 //' @param X1 A numeric value that is a parameter for the Willoughby model
 //' @param X2 A numeric value as a parameter for the Willoughby model, set to 25
 //'   (Willoughby, Darling, and Rahn 2006)
+//' @param n A numeric value giving the power by which the wind is assumed to
+//'   increase with radius within the center of the storm (i.e., from the center
+//'   to the radius of maximum wind)
 //'
 //' @return Returns a numeric vector with gradient wind speed at a radius of
 //'    \eqn{r} from the storm's center, in meters per second.

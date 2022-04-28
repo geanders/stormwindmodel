@@ -123,6 +123,9 @@ will2 <- function(r, R1, R2) {
 #' @param X1 A numeric value that is a parameter for the Willoughby model
 #' @param X2 A numeric value as a parameter for the Willoughby model, set to 25
 #'   (Willoughby, Darling, and Rahn 2006)
+#' @param n A numeric value giving the power by which the wind is assumed to
+#'   increase with radius within the center of the storm (i.e., from the center
+#'   to the radius of maximum wind)
 #'
 #' @return Returns a numeric vector with gradient wind speed at a radius of
 #'    \eqn{r} from the storm's center, in meters per second.
@@ -383,6 +386,9 @@ interpolate_line <- function(x, y, new_x) {
 }
 
 #' Make interp
+#' @param x A numeric vector with the x values of the original function.
+#' @param y A numeric vector with the y values of the original function. This should
+#'   be the same length as x.
 #' @export
 make_interp <- function(x, y) {
     .Call(`_stormwindmodel_make_interp`, x, y)
@@ -477,7 +483,16 @@ latlon_to_km <- function(tclat_1, tclon_1, tclat_2, tclon_2, Rearth = 6378.14) {
 #'
 #' @param time_1 A date-time vector giving the time of the first observation.
 #' @param time_2 A date-time vector giving the time of the second observation.
-#' @inheritParams latlon_to_km
+#' @param tclat_1 A numeric vector giving latitude of the first location
+#'    (degrees)
+#' @param tclon_1 A numeric vector giving longitude of the first location
+#'    (degrees). This value should be expressed as a positive value for Western
+#'    hemisphere longitudes.
+#' @param tclat_2 A numeric vector giving latitude of the second location
+#'    (degrees)
+#' @param tclon_2 A numeric vector giving longitude of the second location
+#'    (degrees). This value should be expressed as a positive value for Western
+#'    hemisphere longitudes.
 #'
 #' @return A numeric vector with the average forward speed of the storm between
 #'    the two observations, in meters per second.
@@ -493,7 +508,16 @@ calc_forward_speed <- function(tclat_1, tclon_1, time_1, tclat_2, tclon_2, time_
 #' the first location, based on latitude and longitude coordinates for both
 #' locations.
 #'
-#' @inheritParams latlon_to_km
+#' @param tclat_1 A numeric vector giving latitude of the first location
+#'    (degrees)
+#' @param tclon_1 A numeric vector giving longitude of the first location
+#'    (degrees). This value should be expressed as a positive value for Western
+#'    hemisphere longitudes.
+#' @param tclat_2 A numeric vector giving latitude of the second location
+#'    (degrees)
+#' @param tclon_2 A numeric vector giving longitude of the second location
+#'    (degrees). This value should be expressed as a positive value for Western
+#'    hemisphere longitudes.
 #'
 #' @return A numeric vector giving the direction of the second location from the first location,
 #'    in degrees. A direction of 0 degrees indicates the second location is
@@ -706,7 +730,7 @@ calc_R1 <- function(Rmax, xi) {
 #' implements Willoughby et al. (2006), Equation 7a.
 #'
 #' @param tclat Numeric vector of the value of latitude, in degrees.
-#' @inheritParams will1a
+#' @param vmax_gl Maximum gradient-level 1-min sustained wind for the tropical cyclone
 #'
 #' @details This function fits the following equation:
 #' \deqn{R_{max} = 46.4 e^{- 0.0155 V_{max,G} + 0.0169\phi}}{

@@ -7,6 +7,8 @@
 will7a(vmax_gl, tclat)
 }
 \arguments{
+\item{vmax_gl}{Maximum gradient-level 1-min sustained wind for the tropical cyclone}
+
 \item{tclat}{Numeric vector of the value of latitude, in degrees.}
 }
 \value{
