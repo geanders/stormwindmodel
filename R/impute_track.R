@@ -72,7 +72,7 @@ create_full_track <- function(hurr_track = stormwindmodel::floyd_tracks,
   # range).
   if(diff(range(hurr_track$tclon)) > 300){
     hurr_track <- hurr_track %>%
-      dplyr::mutate(tclon = ifelse(tclon > 0, tclon, tclon + 360))
+      dplyr::mutate(tclon = ifelse(.data$tclon > 0, .data$tclon, .data$tclon + 360))
   }
 
   full_track <- hurr_track %>%
@@ -102,7 +102,7 @@ create_full_track <- function(hurr_track = stormwindmodel::floyd_tracks,
     dplyr::select(.data$date, .data$tclat, .data$tclon, .data$vmax) %>%
     tidyr::unnest(.data$date:.data$vmax) %>%
     # Make sure that longitude is between -180 and 180
-    dplyr::mutate(tclon = ((tclon + 180) %% 360) - 180)
+    dplyr::mutate(tclon = ((.data$tclon + 180) %% 360) - 180)
 
   return(full_track)
 }

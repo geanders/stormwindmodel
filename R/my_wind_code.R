@@ -33,6 +33,8 @@
 #'        the Willoughby wind model}
 #'    }
 #'
+#' @importFrom rlang .data
+#'
 #' @references
 #'
 #' Willoughby HE, Darling RWR, and Rahn ME. 2006. Parametric representation
@@ -61,8 +63,8 @@ add_wind_radii <- function(full_track = create_full_track()){
                                                tclon_1 = .data$tclon,
                                                tclat_2 = dplyr::lead(.data$tclat),
                                                tclon_2 = dplyr::lead(.data$tclon)),
-                        tcspd_u = tcspd * cos(degrees_to_radians(.data$tcdir)),
-                        tcspd_v = tcspd * sin(degrees_to_radians(.data$tcdir)),
+                        tcspd_u = .data$tcspd * cos(degrees_to_radians(.data$tcdir)),
+                        tcspd_v = .data$tcspd * sin(degrees_to_radians(.data$tcdir)),
                         vmax_sfc_sym = remove_forward_speed(vmax = .data$vmax,
                                                               tcspd = .data$tcspd),
                         over_land = mapply(check_over_land,
@@ -81,8 +83,9 @@ add_wind_radii <- function(full_track = create_full_track()){
                         R1 = calc_R1(.data$Rmax, .data$xi),
                         R2 = ifelse(.data$Rmax > 20, .data$R1 + 25, .data$R1 + 15)
                         ) %>%
-          dplyr::select(c(date, tclat, tclon, tcdir, tcspd_u, tcspd_v,
-                          vmax_gl, Rmax, X1, n, A, R1, R2))
+          dplyr::select(c(.data$date, .data$tclat, .data$tclon, .data$tcdir, .data$tcspd_u,
+                          .data$tcspd_v, .data$vmax_gl, .data$Rmax, .data$X1, .data$n,
+                          .data$A, .data$R1, .data$R2))
         return(with_wind_radii)
 }
 
@@ -142,7 +145,7 @@ calc_grid_wind <- function(grid_point = stormwindmodel::county_points[1, ],
                            with_wind_radii = add_wind_radii(),
                            max_dist = 2222.4){   # 2222.4 km equals 1200 n. miles
 
-  grid_calc <- stormwindmodel:::calc_grid_winds_cpp(glat = grid_point$glat, glon = grid_point$glon,
+  grid_calc <- calc_grid_winds_cpp(glat = grid_point$glat, glon = grid_point$glon,
                                                    glandsea = grid_point$glandsea, max_dist = max_dist,
                                                    tclat = with_wind_radii$tclat, tclon = with_wind_radii$tclon,
                                                    Rmax = with_wind_radii$Rmax, R1 = with_wind_radii$R2,
@@ -151,7 +154,7 @@ calc_grid_wind <- function(grid_point = stormwindmodel::county_points[1, ],
                                                    X1 = with_wind_radii$X1, tcspd_u = with_wind_radii$tcspd_u,
                                                    tcspd_v = with_wind_radii$tcspd_v)
 
-  grid_wind <- tibble(date = with_wind_radii$date,
+  grid_wind <- tibble::tibble(date = with_wind_radii$date,
                       windspeed = grid_calc[["vmax_sust"]][ , 1],
                       dist_from_storm = grid_calc[["distance_from_storm"]][ , 1],
                       surface_wind_direction = grid_calc[["surface_wind_direction"]][ , 1])
@@ -291,7 +294,7 @@ calc_grid_winds <- function(hurr_track = stormwindmodel::floyd_tracks,
   full_track <- create_full_track(hurr_track = hurr_track, tint = tint)
   with_wind_radii <- add_wind_radii(full_track = full_track)
 
-  grid_winds <- stormwindmodel:::calc_grid_winds_cpp(glat = grid_df$glat, glon = grid_df$glon,
+  grid_winds <- calc_grid_winds_cpp(glat = grid_df$glat, glon = grid_df$glon,
                                     glandsea = grid_df$glandsea, max_dist =  max_dist,
                                     tclat = with_wind_radii$tclat, tclon = with_wind_radii$tclon,
                                     Rmax = with_wind_radii$Rmax, R1 = with_wind_radii$R1,
@@ -319,6 +322,8 @@ calc_grid_winds <- function(hurr_track = stormwindmodel::floyd_tracks,
 #'
 #' @inheritParams create_full_track
 #' @inheritParams get_grid_winds
+#'
+#' @importFrom rlang .data
 #'
 #' @return Returns a dataframe with wind characteristics for each
 #'    location. The wind characteristics given are:
@@ -351,15 +356,15 @@ summarize_grid_winds <- function(grid_winds,
     60 * tint * sum(wind > gust_duration_cut, na.rm = TRUE)
   }
 
-  grid_wind_summary <- dplyr::tibble(gridid = colnames(grid_winds),
+  grid_wind_summary <- tibble::tibble(gridid = colnames(grid_winds),
                                      date_time_max_wind = rownames(grid_winds)[apply(grid_winds, MARGIN = 2, FUN = which.max)],
                                      vmax_sust = apply(grid_winds, MARGIN = 2, FUN = max, na.rm = TRUE),
-                                     vmax_gust = vmax_sust * 1.49,
+                                     vmax_gust = .data$vmax_sust * 1.49,
                                      sust_dur = apply(grid_winds, MARGIN = 2, FUN = calc_sust_dur),
                                      gust_dur = apply(grid_winds, MARGIN = 2, FUN = calc_gust_dur)
                                      ) %>%
-    mutate(date_time_max_wind = ifelse(vmax_sust == 0, NA, date_time_max_wind),
-           date_time_max_wind = lubridate::ymd_hms(date_time_max_wind))
+    dplyr::mutate(date_time_max_wind = ifelse(.data$vmax_sust == 0, NA, .data$date_time_max_wind),
+           date_time_max_wind = lubridate::ymd_hms(.data$date_time_max_wind))
 
   return(grid_wind_summary)
 }
