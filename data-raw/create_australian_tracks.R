@@ -6,6 +6,11 @@ australian_tracks <- read_csv("data-raw/ibtracs.since1980.list.v04r00.csv") %>%
            (NAME == "GEORGE" & SEASON == 2007) |
            ((NAME == "LARRY" & SEASON == 2006))) %>%
   rename_all(str_to_lower) %>%
-  select(name, season, iso_time, lat, lon, usa_wind, usa_rmw, bom_wind)
+  select(name, season, iso_time, lat, lon, usa_wind, usa_rmw, bom_wind) %>%
+  mutate(lat = as.numeric(lat),
+         lon = as.numeric(lon),
+         usa_wind = as.numeric(usa_wind),
+         usa_rmw = as.numeric(usa_rmw),
+         bom_wind = as.numeric(bom_wind))
 
 use_data(australian_tracks, overwrite = TRUE)
