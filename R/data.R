@@ -44,6 +44,84 @@
 #' \url{http://rammb.cira.colostate.edu/research/tropical_cyclones/tc_extended_best_track_dataset/}
 "katrina_tracks"
 
+#' Typhoon Saomai tracks data
+#'
+#' A dataframe containing tracking data for Typhoon Saomai in
+#' 2006. This dataframe is included for use as an example storm
+#' tracks dataframe in the package documentation. This data originally
+#' came from the International Best Track Archive for Climate Stewardship (IBTrACS):
+#' \url{https://www.ncdc.noaa.gov/ibtracs/}
+#'
+#' @format A dataframe with 67 rows and 5 variables:
+#' \describe{
+#'     \item{iso_time}{A date-time value giving the time of the observation (in UTC)}
+#'     \item{lat}{A numeric vector giving the storm's latitude at that
+#'                     observation time}
+#'     \item{lon}{A numeric vector giving the storm's longitude at that
+#'                     observation time}
+#'     \item{usa_wind}{A numeric vector giving the estimated maximum sustained
+#'                 wind of that storm at that observation time, in knots}
+#'     \item{usa_rmw}{A numeric vector giving the estimated radius to maximum wind, in
+#'                 nautical miles.}
+#' }
+#'
+#' @source
+#' \url{https://www.ncei.noaa.gov/products/international-best-track-archive?name=sources}
+"saomai_tracks"
+
+#' Typhoon Mangkhut tracks data
+#'
+#' A dataframe containing tracking data for Typhoon Mangkhut in
+#' 2018. This dataframe is included for use as an example storm
+#' tracks dataframe in the package documentation. This data originally
+#' came from the International Best Track Archive for Climate Stewardship (IBTrACS):
+#' \url{https://www.ncdc.noaa.gov/ibtracs/}
+#'
+#' @format A dataframe with 99 rows and 5 variables:
+#' \describe{
+#'     \item{iso_time}{A date-time value giving the time of the observation (in UTC)}
+#'     \item{lat}{A numeric vector giving the storm's latitude at that
+#'                     observation time}
+#'     \item{lon}{A numeric vector giving the storm's longitude at that
+#'                     observation time}
+#'     \item{usa_wind}{A numeric vector giving the estimated maximum sustained
+#'                 wind of that storm at that observation time, in knots}
+#'     \item{usa_rmw}{A numeric vector giving the estimated radius to maximum wind, in
+#'                 nautical miles.}
+#' }
+#'
+#' @source
+#' \url{https://www.ncei.noaa.gov/products/international-best-track-archive?name=sources}
+"mangkhut_tracks"
+
+#' A few Australian storm tracks datasets
+#'
+#' A dataframe containing tracking data for three cyclones in
+#' Australia (Larry in 2006, George in 2007, Yasi in 2011, and Marcia in 2015). This dataframe is
+#' included for use as example storm
+#' tracks dataframes in the package documentation. This data originally
+#' came from the International Best Track Archive for Climate Stewardship (IBTrACS):
+#' \url{https://www.ncdc.noaa.gov/ibtracs/}
+#'
+#' @format A dataframe with 99 rows and 5 variables:
+#' \describe{
+#'     \item{iso_time}{A date-time value giving the time of the observation (in UTC)}
+#'     \item{lat}{A numeric vector giving the storm's latitude at that
+#'                     observation time}
+#'     \item{lon}{A numeric vector giving the storm's longitude at that
+#'                     observation time}
+#'     \item{usa_wind}{A numeric vector giving the estimated maximum sustained
+#'                 wind of that storm at that observation time, in knots}
+#'     \item{usa_rmw}{A numeric vector giving the estimated radius to maximum wind, in
+#'                 nautical miles.}
+#'     \item{bom_wind}{A numeric value giving the estimate maximum mean wind around the
+#'                 cyclone, based on data from the Australian Tropical Cyclone Warning Centres.}
+#' }
+#'
+#' @source
+#' \url{https://www.ncei.noaa.gov/products/international-best-track-archive?name=sources}
+"australian_tracks"
+
 #' Land-sea mask
 #'
 #' A dataframe with gridded locations worldwide indicating
