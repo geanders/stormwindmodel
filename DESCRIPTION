@@ -73,7 +73,7 @@ Suggests:
     mapproj (>= 1.2.7),
     purrr (>= 0.3.4),
     rmarkdown (>= 2.7.0),
-    rnaturalearth(),
+    rnaturalearth,
     sf (>= 0.9.7),
     sp (>= 1.4.5), 
     tidyverse,
