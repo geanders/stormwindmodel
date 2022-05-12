@@ -60,9 +60,8 @@ comes with the package can be used as the \code{grid_point} input.
 \note{
 This function can take a few minutes to run, depending on the number of locations
 that are being modeled.
-}
-\examples{
-\dontrun{
+
+
 library(tibble)
 library(ggplot2)
 library(lubridate)
@@ -72,10 +71,8 @@ data("county_points")
 floyd_winds <- calc_grid_winds(hurr_track = floyd_tracks, grid_df = county_points)
 
 dare_county_fips <- "37055"
-dare_floyd_winds <- floyd_winds[["vmax_sust"]][ , dare_county_fips] \%>\%
+dare_floyd_winds <- floyd_winds[["vmax_sust"]][ , dare_county_fips] %>%
   enframe(name = "timepoint", value = "sustained_wind")
 ggplot(dare_floyd_winds, aes(x = ymd_hms(timepoint), y = sustained_wind)) +
   geom_line()
-}
-
 }

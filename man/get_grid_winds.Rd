@@ -78,13 +78,10 @@ comes with the package can be used as the \code{grid_point} input.
 \note{
 This function can take a few minutes to run, depending on the number
 of locations that are being modeled.
-}
-\examples{
-\dontrun{
+
+
 data("floyd_tracks")
 data("county_points")
 grid_winds <- get_grid_winds(hurr_track = floyd_tracks,
                              grid_df = county_points)
-}
-
 }

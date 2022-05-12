@@ -43,12 +43,12 @@ tracks.These inputs and parameters are later used to model wind speed
 at each grid point for every observation.
 }
 \examples{
-\dontrun{
+
 data("floyd_tracks")
 full_track <- create_full_track(hurr_track = floyd_tracks)
 with_wind_radii <- add_wind_radii(full_track = full_track)
 head(with_wind_radii)
-}
+
 
 }
 \references{

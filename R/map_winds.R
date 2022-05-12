@@ -25,7 +25,7 @@
 #'    States.
 #'
 #' @examples
-#' \dontrun{
+#'
 #' data("katrina_tracks")
 #' data("county_points")
 #' grid_winds_katrina <- get_grid_winds(hurr_track = katrina_tracks,
@@ -34,7 +34,7 @@
 #' map_wind(grid_winds_katrina, wind_metric = "knots")
 #' map_wind(grid_winds_katrina, value = "vmax_gust")
 #' map_wind(grid_winds_katrina, break_point = 20)
-#' }
+#'
 #'
 #' @importFrom dplyr %>%
 #'
@@ -159,7 +159,7 @@ map_wind <- function(grid_winds, value = "vmax_sust", break_point = NULL,
 #'
 #' @export
 #'
-#' @examples \dontrun{
+#' @examples
 #' library(ggplot2)
 #' data("county_points")
 #' data("floyd_tracks")
@@ -169,7 +169,7 @@ map_wind <- function(grid_winds, value = "vmax_sust", break_point = NULL,
 #'                       wind_metric = "knots") +
 #'              ggtitle("Maximum sustained wind speeds")
 #' add_storm_track(floyd_tracks, plot_object = floyd_map)
-#' }
+#'
 #'
 #' @importFrom dplyr %>%
 #' @export

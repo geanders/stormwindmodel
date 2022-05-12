@@ -42,12 +42,12 @@
 #' continuous profiles. Monthly Weather Review 134(4):1102-1120.
 #'
 #' @examples
-#' \dontrun{
+#'
 #' data("floyd_tracks")
 #' full_track <- create_full_track(hurr_track = floyd_tracks)
 #' with_wind_radii <- add_wind_radii(full_track = full_track)
 #' head(with_wind_radii)
-#' }
+#'
 #'
 #' @export
 add_wind_radii <- function(full_track = create_full_track()){
@@ -115,7 +115,7 @@ add_wind_radii <- function(full_track = create_full_track()){
 #'    wind direction will not be calculated and instead will have a missing (\code{NA})
 #'    value.
 #'
-#' @examples \dontrun{
+#'
 #' data("floyd_tracks")
 #' data("county_points")
 #' full_track <- create_full_track(hurr_track = floyd_tracks)
@@ -123,7 +123,7 @@ add_wind_radii <- function(full_track = create_full_track()){
 #' wind_grid <- calc_grid_wind(grid_point = county_points[county_points$gridid == "37055", ],
 #'                             with_wind_radii = with_wind_radii)
 #' head(wind_grid)
-#' }
+#'
 #'
 #' @references
 #'
@@ -212,12 +212,12 @@ calc_grid_wind <- function(grid_point = stormwindmodel::county_points[1, ],
 #' This function can take a few minutes to run, depending on the number
 #' of locations that are being modeled.
 #'
-#' @examples \dontrun{
+#'
 #' data("floyd_tracks")
 #' data("county_points")
 #' grid_winds <- get_grid_winds(hurr_track = floyd_tracks,
 #'                              grid_df = county_points)
-#' }
+#'
 #'
 #' @export
 get_grid_winds <- function(hurr_track = stormwindmodel::floyd_tracks,
@@ -269,7 +269,7 @@ get_grid_winds <- function(hurr_track = stormwindmodel::floyd_tracks,
 #' This function can take a few minutes to run, depending on the number of locations
 #' that are being modeled.
 #'
-#' @examples \dontrun{
+#'
 #' library(tibble)
 #' library(ggplot2)
 #' library(lubridate)
@@ -283,7 +283,7 @@ get_grid_winds <- function(hurr_track = stormwindmodel::floyd_tracks,
 #'   enframe(name = "timepoint", value = "sustained_wind")
 #' ggplot(dare_floyd_winds, aes(x = ymd_hms(timepoint), y = sustained_wind)) +
 #'   geom_line()
-#' }
+#'
 #'
 #' @export
 calc_grid_winds <- function(hurr_track = stormwindmodel::floyd_tracks,

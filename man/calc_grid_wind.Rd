@@ -33,14 +33,8 @@ A dataframe with date (\code{date}) and modeled wind speed
    was further than the specified \code{max_dist} from the location, then surface
    wind direction will not be calculated and instead will have a missing (\code{NA})
    value.
-}
-\description{
-Uses the Willoughby wind model (Willoughby et al. 2006) to calculate wind
-speed at a grid point location. This function calculates a wind time series at
-just one location.
-}
-\examples{
-\dontrun{
+
+
 data("floyd_tracks")
 data("county_points")
 full_track <- create_full_track(hurr_track = floyd_tracks)
@@ -49,7 +43,10 @@ wind_grid <- calc_grid_wind(grid_point = county_points[county_points$gridid == "
                             with_wind_radii = with_wind_radii)
 head(wind_grid)
 }
-
+\description{
+Uses the Willoughby wind model (Willoughby et al. 2006) to calculate wind
+speed at a grid point location. This function calculates a wind time series at
+just one location.
 }
 \references{
 Knaff JA, DeMaria M, Molenar DA, Sampson CR, and Seybold MG. 2011. An

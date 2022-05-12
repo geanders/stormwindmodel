@@ -41,7 +41,6 @@ Plot the tracks of a selected tropical storm to a map of modeled wind
 speed.
 }
 \examples{
-\dontrun{
 library(ggplot2)
 data("county_points")
 data("floyd_tracks")
@@ -51,6 +50,6 @@ floyd_map <- map_wind(grid_winds_floyd, value = "vmax_sust",
                       wind_metric = "knots") +
              ggtitle("Maximum sustained wind speeds")
 add_storm_track(floyd_tracks, plot_object = floyd_map)
-}
+
 
 }
