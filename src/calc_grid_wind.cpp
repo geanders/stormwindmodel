@@ -1312,8 +1312,10 @@ tibble(cdist = rep(0:50, 2),
 //'    Engineering 30(4):553-578.
 //'
 // [[Rcpp::export]]
-double add_forward_speed(double wind_sfc_sym, double tcspd_u, double tcspd_v, double swd,
+NumericVector add_forward_speed(double wind_sfc_sym, double tcspd_u, double tcspd_v, double swd,
                          double cdist, double Rmax) {
+  NumericVector windspeed_and_direction(2);
+
   // Calculate u- and v-components of surface wind speed
   double wind_sfc_sym_u = wind_sfc_sym * cos((swd * M_PI / 180.0));
   double wind_sfc_sym_v = wind_sfc_sym * sin((swd * M_PI / 180.0));
@@ -1327,7 +1329,10 @@ double add_forward_speed(double wind_sfc_sym, double tcspd_u, double tcspd_v, do
   double wind_sfc_v = wind_sfc_sym_v + correction_factor * tcspd_v;
   double windspeed = sqrt(pow(wind_sfc_u, 2.0) + pow(wind_sfc_v, 2.0));
 
-  return windspeed;
+  windspeed_and_direction[0] = windspeed;
+  windspeed_and_direction[1] = 90.0;
+
+  return windspeed_and_direction;
 }
 
 context("Check that C++ add_forward_speed function works correctly") {
@@ -1342,7 +1347,7 @@ context("Check that C++ add_forward_speed function works correctly") {
     double estimated_windspeed = add_forward_speed(symmetrical_surface_wind,
                                                    forward_speed_u, forward_speed_v,
                                                    surface_wind_direction,
-                                                   r_to_model, r_to_max_wind);
+                                                   r_to_model, r_to_max_wind)[0];
 
     expect_true(round(estimated_windspeed) == 42);
   }
@@ -1358,7 +1363,7 @@ context("Check that C++ add_forward_speed function works correctly") {
     double estimated_windspeed = add_forward_speed(symmetrical_surface_wind,
                                                    forward_speed_u, forward_speed_v,
                                                    surface_wind_direction,
-                                                   r_to_model, r_to_max_wind);
+                                                   r_to_model, r_to_max_wind)[0];
 
     expect_true(round(estimated_windspeed) == 38);
   }
@@ -1374,7 +1379,7 @@ context("Check that C++ add_forward_speed function works correctly") {
     double estimated_windspeed = add_forward_speed(symmetrical_surface_wind,
                                                    forward_speed_u, forward_speed_v,
                                                    surface_wind_direction,
-                                                   r_to_model, r_to_max_wind);
+                                                   r_to_model, r_to_max_wind)[0];
 
     expect_true(round(estimated_windspeed) == 59);
   }
@@ -1390,7 +1395,7 @@ context("Check that C++ add_forward_speed function works correctly") {
     double estimated_windspeed = add_forward_speed(symmetrical_surface_wind,
                                                    forward_speed_u, forward_speed_v,
                                                    surface_wind_direction,
-                                                   r_to_model, r_to_max_wind);
+                                                   r_to_model, r_to_max_wind)[0];
 
     expect_true(round(estimated_windspeed) == 52);
   }
@@ -1406,7 +1411,7 @@ context("Check that C++ add_forward_speed function works correctly") {
     double estimated_windspeed = add_forward_speed(symmetrical_surface_wind,
                                                    forward_speed_u, forward_speed_v,
                                                    surface_wind_direction,
-                                                   r_to_model, r_to_max_wind);
+                                                   r_to_model, r_to_max_wind)[0];
 
     expect_true(round(estimated_windspeed) == 10);
   }
@@ -1422,7 +1427,7 @@ context("Check that C++ add_forward_speed function works correctly") {
     double estimated_windspeed = add_forward_speed(symmetrical_surface_wind,
                                                    forward_speed_u, forward_speed_v,
                                                    surface_wind_direction,
-                                                   r_to_model, r_to_max_wind);
+                                                   r_to_model, r_to_max_wind)[0];
 
     expect_true(round(estimated_windspeed) == 7);
   }
@@ -1438,7 +1443,7 @@ context("Check that C++ add_forward_speed function works correctly") {
     double estimated_windspeed = add_forward_speed(symmetrical_surface_wind,
                                                    forward_speed_u, forward_speed_v,
                                                    surface_wind_direction,
-                                                   r_to_model, r_to_max_wind);
+                                                   r_to_model, r_to_max_wind)[0];
 
     expect_true(round(estimated_windspeed) == 38);
   }
@@ -1454,7 +1459,7 @@ context("Check that C++ add_forward_speed function works correctly") {
     double estimated_windspeed = add_forward_speed(symmetrical_surface_wind,
                                                    forward_speed_u, forward_speed_v,
                                                    surface_wind_direction,
-                                                   r_to_model, r_to_max_wind);
+                                                   r_to_model, r_to_max_wind)[0];
 
     expect_true(round(estimated_windspeed) == 42);
   }
@@ -1470,7 +1475,7 @@ context("Check that C++ add_forward_speed function works correctly") {
     double estimated_windspeed = add_forward_speed(symmetrical_surface_wind,
                                                    forward_speed_u, forward_speed_v,
                                                    surface_wind_direction,
-                                                   r_to_model, r_to_max_wind);
+                                                   r_to_model, r_to_max_wind)[0];
 
     expect_true(round(estimated_windspeed) == 51);
   }
@@ -1486,7 +1491,7 @@ context("Check that C++ add_forward_speed function works correctly") {
     double estimated_windspeed = add_forward_speed(symmetrical_surface_wind,
                                                    forward_speed_u, forward_speed_v,
                                                    surface_wind_direction,
-                                                   r_to_model, r_to_max_wind);
+                                                   r_to_model, r_to_max_wind)[0];
 
     expect_true(round(estimated_windspeed) == 59);
   }
@@ -1502,7 +1507,7 @@ context("Check that C++ add_forward_speed function works correctly") {
     double estimated_windspeed = add_forward_speed(symmetrical_surface_wind,
                                                    forward_speed_u, forward_speed_v,
                                                    surface_wind_direction,
-                                                   r_to_model, r_to_max_wind);
+                                                   r_to_model, r_to_max_wind)[0];
 
     expect_true(round(estimated_windspeed) == 6);
   }
@@ -1518,7 +1523,7 @@ context("Check that C++ add_forward_speed function works correctly") {
     double estimated_windspeed = add_forward_speed(symmetrical_surface_wind,
                                                    forward_speed_u, forward_speed_v,
                                                    surface_wind_direction,
-                                                   r_to_model, r_to_max_wind);
+                                                   r_to_model, r_to_max_wind)[0];
 
     expect_true(round(estimated_windspeed) == 10);
   }
@@ -1537,6 +1542,7 @@ List calc_grid_winds_cpp(NumericVector glat, NumericVector glon, LogicalVector g
   int size_lat_lon = tclat.size();
   int size_glat_glon = glat.size();
   double cdist, wind_gl_aa, gwd, wind_sfc_sym, swd;
+  NumericVector windspeed_and_direction(2);
   NumericMatrix windspeed(size_lat_lon, size_glat_glon);
   NumericMatrix distance_from_storm(size_lat_lon, size_glat_glon);
   NumericMatrix surface_wind_direction(size_lat_lon, size_glat_glon);
@@ -1565,9 +1571,10 @@ List calc_grid_winds_cpp(NumericVector glat, NumericVector glon, LogicalVector g
         wind_sfc_sym = gradient_to_surface(wind_gl_aa, cdist, glandsea[j]);
         // Add inflow
         swd = add_inflow(gwd, cdist, Rmax[i], tclat[i], glandsea[j]);
-        surface_wind_direction(i, j) = swd;
         // Add forward speed of storm
-        windspeed(i, j) = add_forward_speed(wind_sfc_sym, tcspd_u[i], tcspd_v[i], swd, cdist, Rmax[i]);
+        windspeed_and_direction = add_forward_speed(wind_sfc_sym, tcspd_u[i], tcspd_v[i], swd, cdist, Rmax[i]);
+        windspeed(i, j) = windspeed_and_direction[0];
+        surface_wind_direction(i, j) = windspeed_and_direction[1];
       }
     }
   }

@@ -114,7 +114,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // add_forward_speed
-double add_forward_speed(double wind_sfc_sym, double tcspd_u, double tcspd_v, double swd, double cdist, double Rmax);
+NumericVector add_forward_speed(double wind_sfc_sym, double tcspd_u, double tcspd_v, double swd, double cdist, double Rmax);
 RcppExport SEXP _stormwindmodel_add_forward_speed(SEXP wind_sfc_symSEXP, SEXP tcspd_uSEXP, SEXP tcspd_vSEXP, SEXP swdSEXP, SEXP cdistSEXP, SEXP RmaxSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
