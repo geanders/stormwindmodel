@@ -1328,9 +1328,14 @@ NumericVector add_forward_speed(double wind_sfc_sym, double tcspd_u, double tcsp
   double wind_sfc_u = wind_sfc_sym_u + correction_factor * tcspd_u;
   double wind_sfc_v = wind_sfc_sym_v + correction_factor * tcspd_v;
   double windspeed = sqrt(pow(wind_sfc_u, 2.0) + pow(wind_sfc_v, 2.0));
+  double wind_direction = atan2(wind_sfc_v, wind_sfc_u);
+  // Convert wind direction from radians to degrees
+  wind_direction = wind_direction * 180.0 / M_PI;
+  // Make sure the wind direction is between 0 and 360
+  wind_direction = fmod(wind_direction + 360.0, 360.0);
 
   windspeed_and_direction[0] = windspeed;
-  windspeed_and_direction[1] = 90.0;
+  windspeed_and_direction[1] = wind_direction;
 
   return windspeed_and_direction;
 }
