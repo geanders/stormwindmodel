@@ -1,0 +1,310 @@
+---
+title: "Modeling windspeed and direction at a single location"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Modeling windspeed and direction at a single location}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup, message = FALSE}
+library(stormwindmodel)
+library(tidyverse)
+```
+
+This example focuses on how to model wind from a tropical cyclone at a 
+single location, when the focus may be on a detailed description of the evolution
+of wind speed and direction at that location over the course of the storm. 
+
+As an example, we'll focus on a site in the Bermudas when it was hit by
+Hurricane Dorian in 2019. We are modeling the winds at a location on Grand Abaco
+Island (latitude: 26.45, longitude: -77.05). Since this location is very
+low-lying, we've modeled it as being over water rather than over land (`glandsea
+= FALSE`). We need to create a dataframe for this grid point, even though it 
+will only be one row long (since there's only one location), because the 
+storm modeling function is expecting a dataframe as the input for the location(s)
+at which to model.
+
+```{r}
+location_to_model <- tibble(gridid = "Bermuda site, Grand Abaco Island", 
+                            glat = 26.45, 
+                            glon = -77.05, 
+                            glandsea = FALSE)
+location_to_model
+```
+Next, we need to get the track data for Hurricane Dorian. We have extracted that
+tracking information from the IBTrACs dataset and saved it in a form in the
+`stormwindmodel` package that is ready to use in the wind modeling function. 
+You can load and use the data using the call: 
+
+```{r}
+data("dorian_tracks")
+
+head(dorian_tracks)
+```
+
+At this point, we can map both the tracks of Dorian and the location where we'd
+like to model the storm winds over the course of Dorian: 
+
+```{r fig.width = 6, fig.height = 5, message = FALSE}
+library(rnaturalearth)
+library(sf)
+
+# Create a map of land borders in the area
+all_countries <-  ne_countries(scale = "medium", 
+                                  returnclass = "sf")
+near_landfall <- all_countries %>% 
+  st_make_valid() %>% 
+  st_crop(y = st_bbox(c(xmin = -82, xmax = -70, ymin = 20, ymax = 30)))
+
+dorian_sf_points <- dorian_tracks %>% 
+  st_as_sf(coords = c("longitude", "latitude"), crs = st_crs(near_landfall)) 
+dorian_sf_line <- dorian_sf_points %>%
+  summarise(do_union = FALSE) %>%
+  st_cast("LINESTRING")
+
+location_to_model_sf <- location_to_model %>% 
+  st_as_sf(coords = c("glon", "glat"), crs = st_crs(near_landfall)) 
+
+ggplot() + 
+  geom_sf(data = near_landfall) + 
+  geom_sf(data = dorian_sf_line, color = "red") + 
+  geom_sf(data = dorian_sf_points, color = "darkred", size = 0.8) + 
+  geom_sf(data = location_to_model_sf, color = "yellow") + 
+  theme(panel.background = element_rect(fill = "lightblue"))  + 
+  coord_sf(xlim = c(-82, -70), ylim = c(20, 30))
+```
+
+Here's another version, zoomed in to the study location and the color of 
+points along the storm track used to show the storm's central maximum sustained 
+wind at that time: 
+
+```{r fig.width = 6, fig.height = 5}
+library(viridis)
+ggplot() + 
+  geom_sf(data = near_landfall) + 
+  geom_sf(data = dorian_sf_line, color = "red") + 
+  geom_sf(data = dorian_sf_points, aes(color = wind)) + 
+  geom_sf(data = location_to_model_sf, color = "yellow", size = 3) + 
+  theme(panel.background = element_rect(fill = "lightblue"))  + 
+  coord_sf(xlim = c(-79, -76.5), ylim = c(25.8, 27.2)) + 
+  scale_color_viridis(option = "A", direction = -1)
+```
+
+Next, we can run the wind modeling function: 
+
+```{r fig.width = 8, fig.height = 4}
+dorian_modeled <- calc_grid_winds(hurr_track = dorian_tracks, 
+                                 grid_df = location_to_model)
+
+str(dorian_modeled)
+
+library(lubridate)
+dorian_modeled %>% 
+  pluck("vmax_sust") %>% 
+  as.data.frame() %>% 
+  rownames_to_column(var = "date") %>%
+  rename(peak_wind = `Bermuda site, Grand Abaco Island`) %>% 
+  mutate(date = ymd_hms(date)) %>% 
+  ggplot(aes(x = date, y = peak_wind)) + 
+  geom_line() + 
+  ylab("Modeled maximum sustained winds\nat study location (m/s)")
+```
+
+```{r fig.width = 6, fig.height = 5}
+dorian_modeled %>% 
+  pluck("vmax_sust") %>% 
+  as.data.frame() %>% 
+  rownames_to_column(var = "date") %>%
+  rename(peak_wind = `Bermuda site, Grand Abaco Island`) %>% 
+  mutate(date = ymd_hms(date)) %>% 
+  ggplot(aes(x = date, y = peak_wind)) + 
+  geom_line() + 
+  xlim(ymd_hms(c("2019-09-01 00:00:00", "2019-09-02 12:00:00"))) + 
+  ylab("Modeled maximum sustained winds\nat study location (m/s)")
+```
+
+```{r fig.width = 6, fig.height = 5}
+dorian_modeled %>% 
+  pluck("surface_wind_direction") %>% 
+  as.data.frame() %>% 
+  rownames_to_column(var = "date") %>%
+  rename(swd = `Bermuda site, Grand Abaco Island`) %>% 
+  mutate(date = ymd_hms(date)) %>% 
+  ggplot(aes(x = date, y = swd)) + 
+  geom_line() + 
+  xlim(ymd_hms(c("2019-09-01 00:00:00", "2019-09-02 12:00:00"))) + 
+  ylab("Surface wind direction (in polar conventions)")
+```
+
+```{r}
+dorian_modeled %>% 
+  pluck("surface_wind_direction") %>% 
+  as.data.frame() %>% 
+  rownames_to_column(var = "date") %>%
+  rename(swd = `Bermuda site, Grand Abaco Island`) %>% 
+  mutate(date = ymd_hms(date)) %>% 
+  filter(date %in% c(ymd_h("2019-09-01 14"), 
+                     ymd_h("2019-09-01 15"),
+                     ymd_h("2019-09-01 20"), 
+                     ymd_h("2019-09-01 21")))
+```
+
+Next, we can map the modeled surface wind direction at regular intervals as
+the storm passed it. For example, we could plot this every hour as the storm 
+passed over the location.
+
+```{r fig.height = 7, fig.width = 8}
+modeled_wind_direction <- dorian_modeled %>% 
+  pluck("surface_wind_direction") %>% 
+  as.data.frame() %>% 
+  rownames_to_column(var = "date") %>%
+  rename(swd = `Bermuda site, Grand Abaco Island`) %>% 
+  mutate(date = ymd_hms(date)) %>% 
+  filter(date %in% c(ymd_h("2019-09-01 14"),
+                     ymd_h("2019-09-01 15"),
+                     ymd_h("2019-09-01 16"),
+                     ymd_h("2019-09-01 17"),
+                     ymd_h("2019-09-01 18"),
+                     ymd_h("2019-09-01 19"),
+                     ymd_h("2019-09-01 20"),
+                     ymd_h("2019-09-01 21"))) %>% 
+  mutate(glat = location_to_model$glat, 
+         glon = location_to_model$glon,
+          mag = 1) 
+
+
+modeled_wind_direction_sf <- dorian_modeled %>% 
+  pluck("surface_wind_direction") %>% 
+  as.data.frame() %>% 
+  rownames_to_column(var = "date") %>%
+  rename(swd = `Bermuda site, Grand Abaco Island`) %>% 
+  mutate(date = ymd_hms(date)) %>% 
+  filter(date %in% c(ymd_h("2019-09-01 14"),
+                     ymd_h("2019-09-01 15"),
+                     ymd_h("2019-09-01 16"),
+                     ymd_h("2019-09-01 17"),
+                     ymd_h("2019-09-01 18"),
+                     ymd_h("2019-09-01 19"),
+                     ymd_h("2019-09-01 20"), 
+                     ymd_h("2019-09-01 21"))) %>% 
+  mutate(glat = location_to_model$glat, 
+         glon = location_to_model$glon) %>% 
+  st_as_sf(coords = c("glon", "glat"), crs = st_crs(near_landfall)) 
+
+
+library("metR")
+ggplot() + 
+  geom_sf(data = near_landfall) + 
+  geom_sf(data = dorian_sf_line) + 
+  geom_arrow(data = modeled_wind_direction %>% 
+            filter(date == ymd_h("2019-09-01 20")), 
+            aes(x = glon, y = glat, angle = swd, mag = mag), 
+            color = "red", 
+            direction = "ccw") + 
+  theme(panel.background = element_rect(fill = "lightblue"))  + 
+  coord_sf(xlim = c(-79, -76.5), ylim = c(25.8, 27.2)) + 
+  scale_color_viridis(option = "A", direction = -1)
+```
+
+
+Make a grid with points throughout the area near landfall: 
+
+```{r fig.height = 7, fig.width = 8}
+near_lf_grid <- expand_grid(glon = seq(-79.0, -76.5, by = 0.1), 
+                            glat = seq(25.5, 27.5, by = 0.1)) %>% 
+  mutate(gridid = as.character(1:n()), 
+         glandsea = FALSE)
+
+ggplot() + 
+  geom_sf(data = near_landfall) + 
+  geom_point(data = near_lf_grid, aes(x = glon, y = glat), color = "yellow") + 
+  theme(panel.background = element_rect(fill = "lightblue"))  + 
+  coord_sf(xlim = c(-79, -76.5), ylim = c(25.5, 27.5))
+```
+
+```{r fig.height = 7, fig.width = 8}
+dorian_modeled_2 <- calc_grid_winds(hurr_track = dorian_tracks, 
+                                    grid_df = near_lf_grid)
+
+modeled_wind_direction_2 <- dorian_modeled_2 %>% 
+  pluck("surface_wind_direction") %>% 
+  as.data.frame() %>% 
+  rownames_to_column(var = "date") %>%
+  mutate(date = ymd_hms(date)) %>% 
+  filter(date %in% c(ymd_h("2019-09-01 14"),
+                     ymd_h("2019-09-01 15"),
+                     ymd_h("2019-09-01 16"),
+                     ymd_h("2019-09-01 17"),
+                     ymd_h("2019-09-01 18"),
+                     ymd_h("2019-09-01 19"),
+                     ymd_h("2019-09-01 20"),
+                     ymd_h("2019-09-01 21"))) %>% 
+  pivot_longer(-date, names_to = "gridid", values_to = "swd") %>% 
+  left_join(near_lf_grid, by = "gridid") %>% 
+  mutate(mag = 0.2)
+
+dorian_tracks_2 <- dorian_tracks %>% 
+  mutate(date = ymd_hm(date)) 
+
+dorian_tracks_3 <- dorian_tracks %>% 
+  mutate(date = ymd_hm(date)) %>% 
+  filter(date <= ymd_h("2019-09-01 15"))
+
+ggplot() + 
+  geom_sf(data = near_landfall) + 
+  geom_path(data = dorian_tracks_2, aes(x = longitude, y = latitude), 
+            color = "gray") + 
+  geom_path(data = dorian_tracks_3, aes(x = longitude, y = latitude), 
+            color = "red") + 
+  geom_arrow(data = filter(modeled_wind_direction_2, 
+                           date == ymd_h("2019-09-01 15")), 
+            aes(x = glon, y = glat, angle = swd, mag = mag), 
+            direction = "ccw",
+            color = "yellow") + 
+  geom_point(data = near_lf_grid, aes(x = glon, y = glat), size = 0.5) + 
+  geom_arrow(data = modeled_wind_direction %>% 
+            filter(date == ymd_h("2019-09-01 15")), 
+            aes(x = glon, y = glat, angle = swd, mag = mag), 
+            color = "blue", 
+            direction = "ccw") +
+  geom_point(data = modeled_wind_direction %>% 
+            filter(date == ymd_h("2019-09-01 15")), 
+            aes(x = glon, y = glat), size = 0.5) + 
+  theme(panel.background = element_rect(fill = "lightblue"))  + 
+  coord_sf(xlim = c(-79, -76.5), ylim = c(25.5, 27.5)) + 
+  scale_mag(max_size = 0.5)
+
+dorian_tracks_3 <- dorian_tracks %>% 
+  mutate(date = ymd_hm(date)) %>% 
+  filter(date <= ymd_h("2019-09-01 21"))
+
+ggplot() + 
+  geom_sf(data = near_landfall) + 
+  geom_path(data = dorian_tracks_2, aes(x = longitude, y = latitude), 
+            color = "gray") + 
+  geom_path(data = dorian_tracks_3, aes(x = longitude, y = latitude), 
+            color = "red") + 
+  geom_arrow(data = filter(modeled_wind_direction_2, 
+                           date == ymd_h("2019-09-01 21")), 
+            aes(x = glon, y = glat, angle = swd, mag = mag), 
+            direction = "ccw",
+            color = "yellow") + 
+  geom_point(data = near_lf_grid, aes(x = glon, y = glat), size = 0.5) + 
+  geom_arrow(data = modeled_wind_direction %>% 
+            filter(date == ymd_h("2019-09-01 21")), 
+            aes(x = glon, y = glat, angle = swd, mag = mag), 
+            color = "blue", 
+            direction = "ccw") +
+  theme(panel.background = element_rect(fill = "lightblue"))  + 
+  coord_sf(xlim = c(-79, -76.5), ylim = c(25.5, 27.5)) + 
+  scale_mag(max_size = 0.5)
+```
+
