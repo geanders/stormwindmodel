@@ -303,11 +303,11 @@ calc_grid_winds <- function(hurr_track = stormwindmodel::floyd_tracks,
                                     tcspd_u = with_wind_radii$tcspd_u, tcspd_v = with_wind_radii$tcspd_v)
 
   colnames(grid_winds[[1]]) <- as.character(grid_df$gridid)
-  rownames(grid_winds[[1]]) <- as.character(with_wind_radii$date)
+  rownames(grid_winds[[1]]) <- format(with_wind_radii$date, "%Y-%m-%d %H:%M:%S")
   colnames(grid_winds[[2]]) <- as.character(grid_df$gridid)
-  rownames(grid_winds[[2]]) <- as.character(with_wind_radii$date)
+  rownames(grid_winds[[2]]) <- format(with_wind_radii$date, "%Y-%m-%d %H:%M:%S")
   colnames(grid_winds[[3]]) <- as.character(grid_df$gridid)
-  rownames(grid_winds[[3]]) <- as.character(with_wind_radii$date)
+  rownames(grid_winds[[3]]) <- format(with_wind_radii$date, "%Y-%m-%d %H:%M:%S")
 
   return(grid_winds)
 }
