@@ -353,7 +353,7 @@ summarize_grid_winds <- function(grid_winds,
   }
 
   calc_gust_dur <- function(wind){
-    60 * tint * sum(wind > gust_duration_cut, na.rm = TRUE)
+    60 * tint * sum((wind * 1.49) > gust_duration_cut, na.rm = TRUE)
   }
 
   grid_wind_summary <- tibble::tibble(gridid = colnames(grid_winds),
